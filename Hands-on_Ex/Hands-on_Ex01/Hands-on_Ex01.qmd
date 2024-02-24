@@ -1,0 +1,469 @@
+---
+title: "Hands-on Exercise 1"
+subtitle: "Layered Grammar of Graphics"
+date: "8 January 2024"
+date-modified: "last-modified"
+execute: 
+  eval: true
+  echo: true
+  warning: false
+---
+
+# 1. Getting Started
+
+## 1.1 Install and launch R packages
+
+The code chunk below uses p_load() of pacman package to check if tidyverse packages are installed in the computer. If they are, then they will be launched into R.
+
+```{r}
+pacman::p_load(tidyverse)
+```
+
+## 1.2 Importing the data
+
+-   The code chunk below imports *exam_data.csv* into R environment by using [*read_csv()*](https://readr.tidyverse.org/reference/read_delim.html) function of [**readr**](https://readr.tidyverse.org/) package.
+
+-   **readr** is one of the tidyverse package.
+
+```{r}
+exam_data <- read_csv("data/Exam_data.csv")
+```
+
+::: callout-note
+## Note
+
+-   Year end examination grades of a cohort of primary 3 students from a local school.
+
+-   There are a total of seven attributes. Four of them are categorical data type and the other three are in continuous data type.
+
+    -   The categorical attributes are: ID, CLASS, GENDER and RACE.
+
+    -   The continuous attributes are: MATHS, ENGLISH and SCIENCE.
+:::
+
+# 2. Plotting a simple bar chart
+
+::: callout-tip
+Use **#\| eval: false** to hide chart (and show code).
+
+Use **#\| echo: false** to show chart (and hide code).
+:::
+
+```{r}
+ggplot(data = exam_data,
+       aes(x = RACE)) +
+  geom_bar()
+```
+
+# 3. Practice Time
+
+## 3.1 R Graphics VS ggplot
+
+::: panel-tabset
+### R Graphics
+
+```{r}
+hist(exam_data$MATHS)
+```
+
+### ggplot2
+
+```{r}
+ggplot(data=exam_data, aes(x = MATHS)) +
+  geom_histogram(bins=10, 
+                 boundary = 100,
+                 color="black", 
+                 fill="grey") +
+  ggtitle("Distribution of Maths scores")
+```
+:::
+
+## 3.2 Exploring Geometric Objects
+
+::: panel-tabset
+### geom_bar
+
+```{r}
+ggplot(data=exam_data, 
+       aes(x=RACE)) +
+  geom_bar()
+```
+
+### geom_dotplot
+
+```{r}
+ggplot(data=exam_data, 
+       aes(x = MATHS)) +
+  geom_dotplot(dotsize = 0.5)
+```
+
+### geom_histogram
+
+```{r}
+ggplot(data=exam_data, 
+       aes(x = MATHS)) +
+  geom_histogram()
+```
+
+### geom_density
+
+[`geom-density()`](https://ggplot2.tidyverse.org/reference/geom_density.html) computes and plots [kernel density estimate](https://en.wikipedia.org/wiki/Kernel_density_estimation), which is a smoothed version of the histogram. A useful alternative to the histogram for continuous data that comes from an underlying smooth distribution.
+
+```{r}
+ggplot(data=exam_data, 
+       aes(x = MATHS)) +
+  geom_density()
+```
+
+### geom_boxplot
+
+```{r}
+ggplot(data=exam_data, 
+       aes(y = MATHS,       
+           x= GENDER)) +    
+  geom_boxplot()
+```
+
+### geom_violin
+
+[`geom_violin`](https://ggplot2.tidyverse.org/reference/geom_violin.html) is designed for creating violin plot and is a useful way of comparing multiple data distributions (as the plots are placed side-by-side to each other). With ordinary density curves, it would be difficult to compare multiple distributions (at once) because the lines visually interfere with each other.
+
+```{r}
+ggplot(data=exam_data, 
+       aes(y = MATHS, 
+           x= GENDER)) +
+  geom_violin()
+```
+
+### geom_point
+
+[geom_point()](https://ggplot2.tidyverse.org/reference/geom_point.html) is especially useful for creating scatterplot.
+
+```{r}
+ggplot(data=exam_data, 
+       aes(x= MATHS, 
+           y=ENGLISH)) +
+  geom_point()
+```
+
+### geom objects combined
+
+```{r}
+ggplot(data=exam_data, 
+       aes(y = MATHS, 
+           x= GENDER)) +
+  geom_boxplot() +                    
+  geom_point(position="jitter", 
+             size = 0.5)
+```
+:::
+
+::: callout-warning
+Y-scale in geom_dotplot might be misleading.
+:::
+
+## 3.3 Modifying Geometric Objects
+
+::: panel-tabset
+### geom()
+
+Use geom() function to change the following:
+
+-   *bins* argument is used to change the number of bins to 20,
+
+-   *fill* argument is used to shade the histogram with #D1F2EB color, and
+
+-   *color* argument is used to change the outline colour of the bars in grey30
+
+```{r}
+ggplot(data=exam_data, 
+       aes(x= MATHS)) +
+  geom_histogram(bins=20,            
+                 color="grey30",      
+                 fill="#D1F2EB")
+```
+
+### aes()
+
+Use sub-group of aesthetic() - *aes()* to change the interior colour of histogram (i.e. fill).
+
+```{r}
+ggplot(data=exam_data, 
+       aes(x= MATHS, 
+           fill = GENDER)) +
+  geom_histogram(bins=20, 
+                 color="grey30")
+```
+:::
+
+::: panel-tabset
+### add lines with geom_vline or geom_hline
+
+Use geom() function to change the following:
+
+-   `geom_vline` is used to add vertical lines such as mean and median
+
+-   `geom_hline` is used to add horizontal lines such as mean and median
+
+```{r}
+ggplot(data=exam_data,
+       aes(x=MATHS)) + 
+    geom_histogram(bins=20, 
+                   color="grey30", 
+                   fill="#D1F2EB") +
+    labs(x = "Math Score",
+         y = "No. of Pupils",
+         title = "Distribution of Math Scores") + 
+    geom_vline(aes(xintercept=median(exam_data$MATHS, na.rm=T)),
+               color="grey30", linewidth=1, linetype="dashed") + 
+    geom_vline(aes(xintercept=mean(exam_data$MATHS, na.rm=T)),
+               colour="red", linewidth=1, linetype="dashed")
+```
+
+### add ablines with geom_vline & geom_hline
+
+Use geom() function to change the following:
+
+-   `geom_vline` is used to add vertical lines
+
+-   `geom_hline` is used to add horizontal lines
+
+```{r}
+p <- ggplot(data=exam_data, 
+       aes(x= MATHS, y=ENGLISH)) +
+  geom_point() +
+  coord_cartesian(xlim=c(0,100),
+                  ylim=c(0,100)) +
+  geom_vline(aes(xintercept=50),
+               color="grey", linewidth=0.8, linetype="dashed") + 
+  geom_hline(aes(yintercept=50),
+               color="grey", linewidth=0.8, linetype="dashed") +
+  labs(x = "Math Score",
+       y = "English Score",
+       title = "Correlation between English and Math Scores")
+
+p
+```
+
+### add shapes with annotate()
+
+Use geom() function to change the following:
+
+-   `annotate` can be used as an alternative that can reduce the code length
+
+```{r}
+# Add rectangles
+p + annotate("rect", xmin=c(0,75), xmax=c(25,100), ymin=c(20,50) , ymax=c(55,100), alpha=0.2, color="blue", fill="blue")
+
+# Add segments
+p + annotate("segment", x = 0, xend = 100, y = 25, yend = 50, colour = "purple", size=3, alpha=0.6)
+
+# Add arrow
+p + annotate("segment", x = 0, xend = 100, y = 25, yend = 50, colour = "pink", size=3, alpha=0.6, arrow=arrow())
+
+```
+:::
+
+## 3.4 Working with stat
+
+The [Statistics functions](https://ggplot2.tidyverse.org/reference/#stats) statistically transform data, usually as some form of summary. For example:
+
+-   frequency of values of a variable (bar graph)
+
+    -   a mean
+
+    -   a confidence limit
+
+-   There are two ways to use these functions:
+
+    -   add a `stat_()` function and override the default geom, or
+
+    -   add a `geom_()` function and override the default stat.
+
+::: panel-tabset
+## stat()
+
+```{r}
+ggplot(data=exam_data, 
+       aes(y = MATHS, x= GENDER)) +
+  geom_boxplot()
+```
+
+## stat_summary()
+
+The code chunk below adds mean values by using [`stat_summary()`](https://ggplot2.tidyverse.org/reference/stat_summary.html) function and overriding the default geom.
+
+```{r}
+ggplot(data=exam_data, 
+       aes(y = MATHS, x= GENDER)) +
+  geom_boxplot() +
+  stat_summary(geom = "point",       
+               fun.y="mean",         
+               colour ="red",        
+               size=4)
+```
+
+## geom()
+
+The code chunk below adding mean values by using `geom_()` function and overriding the default stat.
+
+```{r}
+ggplot(data=exam_data, 
+       aes(y = MATHS, x= GENDER)) +
+  geom_boxplot() +
+  geom_point(stat="summary",        
+             fun.y="mean",           
+             colour ="red",          
+             size=4)          
+```
+:::
+
+## Adding best fit curve on scatterplot
+
+The interpretability of this graph can be improved by adding a best fit curve. [`geom_smooth()`](https://ggplot2.tidyverse.org/reference/geom_smooth.html) is used to plot a best fit curve on the scatterplot.
+
+```{r}
+ggplot(data=exam_data, 
+       aes(x= MATHS, y=ENGLISH)) +
+  geom_point() +
+  geom_smooth(size=0.5)
+```
+
+## 3.5 Working with facet
+
+Facetting generates small multiples (sometimes also called trellis plot), each displaying a different subset of the data.
+
+::: panel-tabset
+## facet_wrap()
+
+[`facet_wrap`](https://ggplot2.tidyverse.org/reference/facet_wrap.html) wraps a 1d sequence of panels into 2d. This is generally a better use of screen space than facet_grid because most displays are roughly rectangular.
+
+Example 1 Plotting trellis boxplot using *facet_wrap()* by GENDER
+
+```{r}
+ggplot(data = exam_data,
+       aes(x = CLASS,
+           y = MATHS)) +
+  geom_boxplot() +
+  facet_wrap(~ GENDER)
+
+```
+
+## facet_grid
+
+[`facet_grid()`](https://ggplot2.tidyverse.org/reference/facet_grid.html) forms a matrix of panels defined by row and column faceting variables. It is most useful when you have two discrete variables, and all combinations of the variables exist in the data.
+
+Example 2 Plotting trellis boxplot using *facet_grid()* by GENDER
+
+```{r}
+ggplot(data = exam_data,
+       aes(x = CLASS,
+           y = MATHS)) +
+  geom_boxplot() +
+  facet_grid(~GENDER)
+```
+
+Example 3 Plotting trellis boxplot using *facet_grid()* by GENDER (stacked horizontal)
+
+```{r}
+ggplot(data = exam_data,
+       aes(x = CLASS,
+           y = MATHS)) +
+  geom_boxplot() +
+  facet_grid(GENDER ~ .)
+```
+:::
+
+## 3.6 Working with coordinates
+
+The *Coordinates* functions map the position of objects onto the plane of the plot. There are a number of different possible coordinate systems to use, they are:
+
+```         
+-   [`coord_cartesian()`](https://ggplot2.tidyverse.org/reference/coord_cartesian.html): the default cartesian coordinate systems, where you specify x and y values (e.g. allows you to zoom in or out). 
+-   [`coord_flip()`](https://ggplot2.tidyverse.org/reference/coord_flip.html): a cartesian system with the x and y flipped. 
+-   [`coord_fixed()`](https://ggplot2.tidyverse.org/reference/coord_fixed.html): a cartesian system with a "fixed" aspect ratio (e.g. 1.78 for a "widescreen" plot). 
+-   [`coord_quickmap()`](https://ggplot2.tidyverse.org/reference/coord_map.h
+```
+
+::: panel-tabset
+## default
+
+```{r}
+ggplot(data=exam_data, 
+       aes(x=RACE)) +
+  geom_bar()
+```
+
+## coord_flip()
+
+The code chunk below flips the horizontal bar chart into vertical bar chart by using `coord_flip()`.
+
+```{r}
+ggplot(data=exam_data, 
+       aes(x=RACE)) +
+  geom_bar() +
+  coord_flip()
+```
+
+## coord_cartesian()
+
+The code chunk below fixed both the y-axis and x-axis range from 0-100.
+
+```{r}
+ggplot(data=exam_data, 
+       aes(x= MATHS, y=ENGLISH)) +
+  geom_point() +
+  geom_smooth(method=lm, 
+              size=0.5) +  
+  coord_cartesian(xlim=c(0,100),
+                  ylim=c(0,100))
+```
+:::
+
+## 3.7 Working with theme
+
+::: panel-tabset
+## theme_gray()
+
+```{r}
+ggplot(data=exam_data, 
+       aes(x=RACE)) +
+  geom_bar() +
+  coord_flip() +
+  theme_gray()
+```
+
+## theme_bw()
+
+```{r}
+ggplot(data=exam_data, 
+       aes(x=RACE)) +
+  geom_bar() +
+  coord_flip() +
+  theme_bw()
+```
+
+## theme_classic()
+
+```{r}
+ggplot(data=exam_data, 
+       aes(x=RACE)) +
+  geom_bar() +
+  coord_flip() +
+  theme_classic()
+```
+
+## theme_minimal()
+
+```{r}
+ggplot(data=exam_data, 
+       aes(x=RACE)) +
+  geom_bar() +
+  coord_flip() +
+  theme_minimal()
+```
+:::
+
+# 4. References
+
+-   [**1  A Layered Grammar of Graphics: ggplot2 methods**](https://r4va.netlify.app/chap01)

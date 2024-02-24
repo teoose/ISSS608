@@ -1,0 +1,282 @@
+---
+title: "Hands-on Exercise 4 - Part 2"
+subtitle: "Visual Statistical Analysis"
+date: "11 January 2024"
+date-modified: "last-modified"
+execute: 
+  eval: true
+  echo: true
+  warning: false
+---
+
+# 1. Getting Started: Visual Statistical Analysis with ggstatsplot
+
+This hands-on exercise 4 is split into four segments:
+
+1.  Visualising Distribution
+
+2.  Visual Statistical Analysis
+
+3.  Visualising Uncertainty
+
+4.  Building Funnel Plot with R
+
+::: callout-note
+## Visual Statistical Analysis with ggstatsplot
+
+-   [**ggstatsplot**](https://indrajeetpatil.github.io/ggstatsplot/) is an extension of [ggplot2](https://ggplot2.tidyverse.org/) package for creating graphics with details from statistical tests included in the information-rich plots themselves.
+
+    -   To provide alternative statistical inference methods by default.
+
+    -   To follow best practices for statistical reporting. For all statistical tests reported in the plots, the default template abides by the [APA](https://my.ilstu.edu/~jhkahn/apastats.html) gold standard for statistical reporting. For example, here are results from a robust t-test:
+:::
+
+## 1.1 Install and launch R packages
+
+For the purpose of this exercise, the following R packages will be used, they are:
+
+-   **tidyverse**, a family of R packages for data MATHS process,
+
+-   **ggstatsplot**, a ggplot2 extension specially designed for creating statistical graphics.
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show code"
+pacman::p_load(ggstatsplot, tidyverse)
+```
+
+## 1.2 Importing the data
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show code"
+exam <- read_csv("data/Exam_data.csv")
+```
+
+## 1.3 Overview of the data
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show code"
+summary(exam)
+```
+
+# 2. Visual Statistical Analysis with ggstatsplot
+
+::: panel-tabset
+### \[One-sample test: gghistostats()\]
+
+Default information: - statistical details - Bayes Factor - sample sizes - distribution summary. gghistostats() is used to to build an visual of one-sample test on English scores.
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show code"
+set.seed(1234)
+
+gghistostats(
+  data = exam,
+  x = ENGLISH,
+  type = "bayes",
+  test.value = 60,
+  xlab = "English scores"
+)
+```
+
+### \[Two-sample mean test: ggbetweenstats()\]
+
+Default information: - statistical details - Bayes Factor - sample sizes - distribution summary. `ggbetweenstats()` is used to build a visual for two-sample mean test of Maths scores by gender.
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show code"
+ggbetweenstats(
+  data = exam,
+  x = GENDER, 
+  y = MATHS,
+  type = "np",
+  messages = FALSE
+)
+```
+
+### \[Oneway ANOVA Test: ggbetweenstats()\]
+
+`ggbetweenstats()` is used to build a visual for One-way ANOVA test on English score by race.
+
+“ns” → only non-significant
+
+“s” → only significant
+
+“all” → everything
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show code"
+ggbetweenstats(
+  data = exam,
+  x = RACE, 
+  y = ENGLISH,
+  type = "p",
+  mean.ci = TRUE, 
+  pairwise.comparisons = TRUE, 
+  pairwise.display = "s",
+  p.adjust.method = "fdr",
+  messages = FALSE
+)
+```
+
+### \[Significant Test of Correlation: ggscatterstats()\]
+
+`ggscatterstats()` is used to build a visual for Significant Test of Correlation between Maths scores and English scores.
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show code"
+ggscatterstats(
+  data = exam,
+  x = MATHS,
+  y = ENGLISH,
+  marginal = FALSE,
+  )
+```
+
+### \[Significant Test of Association (Depedence) : ggbarstats()\]
+
+In the code chunk below, the Maths scores is binned into a 4-class variable by using `cut()` and `ggbarstats()` is used to build a visual for Significant Test of Association.
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show code"
+exam1 <- exam %>% 
+  mutate(MATHS_bins = 
+           cut(MATHS, 
+               breaks = c(0,60,75,85,100))
+)
+
+ggbarstats(exam1, 
+           x = MATHS_bins, 
+           y = GENDER)
+```
+:::
+
+# 3. Getting Started: Visualising Models
+
+::: callout-note
+## Case Study: Toyota Corolla
+
+To build a model to discover factors affecting prices of used-cars by taking into consideration a set of explanatory variables.
+:::
+
+## 3.1 Install and launch R packages
+
+```{r}
+#| code-fold: true}
+#| code-summary: "Show code" 
+pacman::p_load(readxl, performance, parameters, see)
+```
+
+## 3.2 Importing the data
+
+For the purpose of this exercise, `ToyotaCorolla.xls` workbook will be imported into R.
+
+Notice that the output object `car_resale` is a tibble data frame.
+
+```{r}
+#| code-fold: true 
+#| code-summary: "Show code" 
+car_resale <- read_xls("data/ToyotaCorolla.xls", 
+                       "data")
+car_resale
+```
+
+## 3.3 Overview of the data
+
+```{r}
+#| code-fold: true 
+#| code-summary: "Show code" 
+summary(car_resale)
+```
+
+# 4. Visualising Models
+
+## **4.1 Multiple Regression Model using lm()**
+
+The code chunk below is used to calibrate a multiple linear regression model by using `lm()` of Base Stats of R.
+
+```{r}
+model <- lm(Price ~ Age_08_04 + Mfg_Year + KM + 
+              Weight + Guarantee_Period, data = car_resale)
+model
+```
+
+## **4.2 Model Diagnostic**
+
+::: panel-tabset
+## Check for multicolinearity
+
+In the code chunk, *`check_collinearity()`* of **performance** package.
+
+```{r}
+check_collinearity(model)
+```
+
+```{r}
+check_c <- check_collinearity(model)
+plot(check_c)
+```
+
+## Check normality assumption
+
+In the code chunk, *`check_normality()`* of **performance** package.
+
+```{r}
+model1 <- lm(Price ~ Age_08_04 + KM + 
+              Weight + Guarantee_Period, data = car_resale)
+```
+
+```{r}
+check_n <- check_normality(model1)
+```
+
+```{r}
+plot(check_n)
+```
+
+## Check model for homogeneity of variances
+
+In the code chunk, *check_heteroscedasticity()* of **performance** package.
+
+```{r}
+check_h <- check_heteroscedasticity(model1)
+```
+
+```{r}
+plot(check_h)
+```
+
+## Complete check
+
+Perform the complete by using *`check_model()`*.
+
+```{r}
+check_model(model1)
+```
+:::
+
+## 4.3 **Visualising Regression Parameters**
+
+In the code below, `plot()` of see package and parameters() of parameters package is used to visualise the parameters of a regression model.
+
+```{r}
+plot(parameters(model1))
+```
+
+In the code below, *`ggcoefstats()`* of ggstatsplot package to visualise the parameters of a regression model.
+
+```{r}
+ggcoefstats(model1, 
+            output = "plot")
+```
+
+# 5. References
+
+[10  Visual Statistical Analysis](https://r4va.netlify.app/chap10)

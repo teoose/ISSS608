@@ -1,0 +1,40 @@
+/*-- scss:defaults --*/
+$pale-blue: #f0f6fb;
+$pale-pink: #fefcfc;
+$pale-green: #f9faf9;
+$pale-orange: #fef8f0;
+$navbar-bg: #A9BA9D;
+$link-color: #29AB87;
+
+
+/*-- scss:rules --*/
+
+$callout-background-color-note: $pale-blue;
+$callout-background-color-tip: $pale-green;
+$callout-background-color-caution: $pale-orange;
+$callout-background-color-important: $pale-pink;
+
+$callout-border-left-color-note: $pale-blue;
+$callout-border-left-color-tip: $pale-green;
+$callout-border-left-color-caution: $pale-orange;
+$callout-border-left-color-important: $pale-pink;
+
+.callout-note {
+    background-color: $callout-background-color-note;
+    border-left-color: $callout-border-left-color-note;
+ }
+ 
+.callout-tip {
+    background-color:$callout-background-color-tip;
+    border-left-color: $callout-border-left-color-tip;
+ }
+ 
+ .callout-caution {
+    background-color: $callout-background-color-caution;
+    border-left-color: $callout-border-left-color-caution;
+ }
+ 
+.callout-important {
+    background-color: $callout-background-color-important;
+    border-left-color: $callout-border-left-color-important;
+ }
