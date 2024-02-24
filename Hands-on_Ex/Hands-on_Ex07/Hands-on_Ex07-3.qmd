@@ -3,11 +3,16 @@ title: "Hands-on Exercise 7-3"
 subtitle: "Analytical Mapping"
 date: "22 February 2024"
 date-modified: "last-modified"
+author: "Teo Suan Ern"
 execute: 
   eval: true
   echo: true
+  freeze: true
   warning: false
+  message: false
 ---
+
+*Note: Last modified to include author’s details.*
 
 # 1. Getting Started
 
