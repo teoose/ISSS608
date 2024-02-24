@@ -3,13 +3,16 @@ title: "Hands-on Exercise 3"
 subtitle: "Programming Data Visualisation with R (Interactive vs Animated)"
 date: "11 January 2024"
 date-modified: "last-modified"
+author: "Teo Suan Ern"
 execute: 
   eval: true
   echo: true
+  freeze: true
   warning: false
+  message: false
 ---
 
-*Note: Last-modified during in-class exercise 4 on Section 2.1.1 Tooltip effect with tooltip aesthetic.*
+*Note: First modified during in-class exercise 4 on Section 2.1.1 Tooltip effect with tooltip aesthetic. Last modified to include author’s details.*
 
 # 1. Getting Started
 
