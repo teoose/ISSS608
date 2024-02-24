@@ -3,11 +3,16 @@ title: "Hands-on Exercise 4 - Part 1"
 subtitle: "Visualising Distribution"
 date: "11 January 2024"
 date-modified: "last-modified"
+author: "Teo Suan Ern"
 execute: 
   eval: true
   echo: true
+  freeze: true
   warning: false
+  message: false
 ---
+
+*Note: Last modified to include author’s details.*
 
 # 1. Getting Started
 

@@ -6,6 +6,7 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
+<meta name="author" content="Teo Suan Ern">
 <meta name="dcterms.date" content="2024-01-11">
 
 <title>TSE:ISSS608 - Hands-on Exercise 4 - Part 2</title>
@@ -74,6 +75,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/quarto-contrib/fontawesome6-0.1.0/all.css" rel="stylesheet">
+<link href="../../site_libs/quarto-contrib/fontawesome6-0.1.0/latex-fontsize.css" rel="stylesheet">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -119,7 +122,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
             <ul class="navbar-nav navbar-nav-scroll me-auto">
   <li class="nav-item dropdown ">
     <a class="nav-link dropdown-toggle" href="#" id="nav-menu-fa-highlighter--hands-on-exercises" role="button" data-bs-toggle="dropdown" aria-expanded="false" rel="" target="">
- <span class="menu-text"> Hands-on Exercises</span>
+ <span class="menu-text"><i class="fa-solid fa-highlighter" aria-label="highlighter"></i> Hands-on Exercises</span>
     </a>
     <ul class="dropdown-menu" aria-labelledby="nav-menu-fa-highlighter--hands-on-exercises">    
         <li>
@@ -187,7 +190,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
  <span class="dropdown-text">[7.3] Analytical Mapping</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../../Hands-on_Ex/Hands-on_Ex08/Hands-on.html" rel="" target="">
+    <a class="dropdown-item" href="../../Hands-on_Ex/Hands-on_Ex08/Hands-on_Ex08.html" rel="" target="">
  <span class="dropdown-text">[8] Modelling, Visualising and Analysing Network Data with R</span></a>
   </li>  
         <li>
@@ -202,7 +205,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </li>
   <li class="nav-item dropdown ">
     <a class="nav-link dropdown-toggle" href="#" id="nav-menu-fa-school--in-class-exercises" role="button" data-bs-toggle="dropdown" aria-expanded="false" rel="" target="">
- <span class="menu-text"> In-class Exercises</span>
+ <span class="menu-text"><i class="fa-solid fa-school" aria-label="school"></i> In-class Exercises</span>
     </a>
     <ul class="dropdown-menu" aria-labelledby="nav-menu-fa-school--in-class-exercises">    
         <li>
@@ -225,7 +228,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </li>
   <li class="nav-item dropdown ">
     <a class="nav-link dropdown-toggle" href="#" id="nav-menu-fa-laptop-code--take-home-exercises" role="button" data-bs-toggle="dropdown" aria-expanded="false" rel="" target="">
- <span class="menu-text"> Take-home Exercises</span>
+ <span class="menu-text"><i class="fa-solid fa-laptop-code" aria-label="laptop-code"></i> Take-home Exercises</span>
     </a>
     <ul class="dropdown-menu" aria-labelledby="nav-menu-fa-laptop-code--take-home-exercises">    
         <li>
@@ -244,23 +247,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </li>
   <li class="nav-item dropdown ">
     <a class="nav-link dropdown-toggle" href="#" id="nav-menu-fa-r--shiny" role="button" data-bs-toggle="dropdown" aria-expanded="false" rel="" target="">
- <span class="menu-text"> Shiny</span>
+ <span class="menu-text"><i class="fa-solid fa-r" aria-label="r"></i> Shiny</span>
     </a>
     <ul class="dropdown-menu" aria-labelledby="nav-menu-fa-r--shiny">    
         <li>
-    <a class="dropdown-item" href="../../Shiny/Shiny.html" rel="" target="">
+    <a class="dropdown-item" href="https://isss608-vaa-suanern.shinyapps.io/prototype/" rel="" target="">
  <span class="dropdown-text">R Shiny Basic</span></a>
-  </li>  
-    </ul>
-  </li>
-  <li class="nav-item dropdown ">
-    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-fa-users-line--project" role="button" data-bs-toggle="dropdown" aria-expanded="false" rel="" target="">
- <span class="menu-text"> Project</span>
-    </a>
-    <ul class="dropdown-menu" aria-labelledby="nav-menu-fa-users-line--project">    
-        <li>
-    <a class="dropdown-item" href="../../Project/Project.html" rel="" target="">
- <span class="dropdown-text">In progress</span></a>
   </li>  
     </ul>
   </li>
@@ -319,6 +311,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <div class="quarto-title-meta">
 
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Teo Suan Ern </p>
+          </div>
+  </div>
     
     <div>
     <div class="quarto-title-meta-heading">Published</div>
@@ -330,7 +328,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">Modified</div>
     <div class="quarto-title-meta-contents">
-      <p class="date-modified">January 15, 2024</p>
+      <p class="date-modified">February 24, 2024</p>
     </div>
   </div>
     
@@ -339,6 +337,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 </header>
 
+<p><em>Note: Last modified to include author’s details.</em></p>
 <section id="getting-started-visual-statistical-analysis-with-ggstatsplot" class="level1">
 <h1>1. Getting Started: Visual Statistical Analysis with ggstatsplot</h1>
 <p>This hands-on exercise 4 is split into four segments:</p>

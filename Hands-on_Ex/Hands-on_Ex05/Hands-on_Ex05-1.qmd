@@ -3,11 +3,16 @@ title: "Visual Creating Ternary Plot with R"
 subtitle: "Visual Correlation Analysis"
 date: "7 February 2024"
 date-modified: "last-modified"
+author: "Teo Suan Ern"
 execute: 
   eval: true
   echo: true
+  freeze: true
   warning: false
+  message: false
 ---
+
+*Note: Last modified to include author’s details.*
 
 # 1. Getting Started
 
