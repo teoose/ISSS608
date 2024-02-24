@@ -1,6 +1,6 @@
 ---
 title: "Take-home Exercise 2"
-sub-title: "DataVis Makeover"
+subtitle: "DataVis Makeover"
 date: "24 January 2024"
 date-modified: "last-modified"
 author: "Teo Suan Ern"
@@ -1994,7 +1994,7 @@ b3
 Below is a summary table of the peer's original visuals and the visual makeover designs suggested after examining their clarity and aesthetics elements.
 
 |          |                                           Original Visual                                           |                            Suggested Sketch                            |                                           Visual Makeover                                           |
-|:--------------|:--------------------:|:-------------:|:--------------------:|
+|:----------------|:------------------:|:---------------:|:------------------:|
 | Visual 1 | ![Sketch by: TSE (2024)](images/OD1.png){style="border: 0.5px solid gray" width="180" height="130"} | ![Sketch by: TSE (2024)](images/sketch1.png){width="191" height="130"} |       ![Sketch by: TSE (2024)](images/AD1.png){style="border: 0.5px solid gray" width="181"}        |
 | Visual 2 | ![Sketch by: TSE (2024)](images/OD2.png){style="border: 0.5px solid gray" width="180" height="130"} |       ![Sketch by: TSE (2024)](images/sketch2.png){width="191"}        |       ![Sketch by: TSE (2024)](images/AD2.png){style="border: 0.5px solid gray" width="181"}        |
 | Visual 3 | ![Sketch by: TSE (2024)](images/OD3.png){style="border: 0.5px solid gray" width="180" height="130"} | ![Sketch by: TSE (2024)](images/sketch3.png){width="191" height="130"} | ![Sketch by: TSE (2024)](images/AD3.png){style="border: 0.5px solid gray" width="181" height="130"} |

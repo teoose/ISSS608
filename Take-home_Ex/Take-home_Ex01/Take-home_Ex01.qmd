@@ -1,6 +1,6 @@
 ---
 title: "Take-home Exercise 1"
-sub-title: "Creating data visualisation beyond default"
+subtitle: "Creating data visualisation beyond default"
 date: "17 January 2024"
 date-modified: "last-modified"
 author: "Teo Suan Ern"

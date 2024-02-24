@@ -1,5 +1,6 @@
 ---
-title: "In-class Exercise 3: "
+title: "In-class Exercise 3"
+subtitle: "Exploring Tableau & Graph Critique"
 date: "27 January 2024"
 date-modified: "last-modified"
 author: "Teo Suan Ern"

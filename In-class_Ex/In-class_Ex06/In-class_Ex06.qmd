@@ -1,5 +1,6 @@
 ---
-title: "In-class Exercise 6: Time on the Horizon: ggHoriPlot methods"
+title: "In-class Exercise 6"
+subtitle: "Time on the Horizon: ggHoriPlot methods"
 author: "Teo Suan Ern"
 date: "24 January 2024"
 date-modified: "last-modified"
