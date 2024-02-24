@@ -3,12 +3,17 @@ title: "Take-home Exercise 1"
 sub-title: "Creating data visualisation beyond default"
 date: "17 January 2024"
 date-modified: "last-modified"
+author: "Teo Suan Ern"
 execute: 
   eval: true
   echo: true
+  freeze: true
   warning: false
+  message: false
   editor: visual
 ---
+
+*Note: Last modified to include author's details.*
 
 # 1. Overview
 

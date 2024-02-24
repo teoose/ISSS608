@@ -3,12 +3,17 @@ title: "Take-home Exercise 3"
 subtitle: "Be Weatherwise or Otherwise"
 date: "15 February 2024"
 date-modified: "last-modified"
+author: "Teo Suan Ern"
 execute: 
   eval: true
   echo: true
+  freeze: true
   warning: false
+  message: false
   editor: visual
 ---
+
+*Note: Last modified to include author's details.*
 
 # 1. Overview
 
@@ -684,9 +689,7 @@ a <- ggpairs(corr,
              upper = list(continuous = "density", combo = wrap("box_no_facet", alpha = 0.4)),
              lower = list(continuous = "points", combo = wrap("dot_no_facet", alpha = 0.4)))
       
-ggplotly(a) + 
-  scale_fill_manual(values = c("#a2798f", "#d6c7c7", "#8caba8",
-                               "#ddadad", "#9fb9bf"), name = "Year")
+ggplotly(a)
 ```
 
 ::: {.callout-tip icon="false"}
@@ -1466,7 +1469,6 @@ ggplotly(d)
 
 -   Year 1983 has observed relatively peak probability distribution of temperature changes, and this could be due to the baseline reference being 1 January 1983.
 :::
-
 
 ## Interactive Error Bars
 
