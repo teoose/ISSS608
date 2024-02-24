@@ -6,4 +6,5 @@
 .quarto
 
 data/
+_extensions/
 /.quarto/
