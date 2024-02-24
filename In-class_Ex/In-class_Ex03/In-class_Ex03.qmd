@@ -1,0 +1,55 @@
+---
+title: "In-class Exercise 3: "
+date: "27 January 2024"
+date-modified: "last-modified"
+execute: 
+  eval: true
+  echo: true
+  warning: false
+  editor: visual
+---
+
+In-class exercise 3 comprised of two parts:
+
+1.  Continuation of Tableau practice (from in-class exercise 2), and
+2.  Critique Figure 5
+
+# Exploring Tableau
+
+Two datasets are used for the Tableau exercise: Superstore and Exam data. Click on the links to view from Tableau Public.
+
+1.  [Building a Tableau Dashboard (Superstore Sales & Profit Report)](https://public.tableau.com/app/profile/suan.ern.teo/viz/SuperstoreSalesandProfitReport_17063372303430/Dashboard1){target="_blank"}
+2.  [Creating a Tableau Story (Superstore Sales & Profit Report)](https://public.tableau.com/app/profile/suan.ern.teo/viz/SuperstoreSalesandProfitStory/SuperstoreSalesProfitStory){target="_blank"}
+3.  [Building a Tableau Dashboard (Maths vs English)](https://public.tableau.com/app/profile/suan.ern.teo/viz/MathsvsEnglishScatterplotwithMarginalPlot/Dashboard1){target="_blank"}
+
+# Critique Figure 5
+
+Figure 5 below was retrieved from [State of the Industry Survey](https://www.datavisualizationsociety.org/survey?utm_source=newsletter-mailchimp&utm_medium=email&utm_campaign=SOTI_report_2023&utm_id=SOTI_report_2023&utm_source=DVS+members&utm_campaign=42b99e3ee9-EMAIL_CAMPAIGN_2024_01_25_07_58&utm_medium=email&utm_term=0_-42b99e3ee9-%5BLIST_EMAIL_ID%5D&mc_cid=42b99e3ee9&mc_eid=f5082edeae){target="_blank"}.
+
+![](images/Figure%205.png){fig-align="left" width="60%"}
+
+**Figure 5 seems to fall under "Quadrant 4 - Confusing but Beautiful"**
+
+#### Some Quick Observations
+
+The figure contains two different charts. Top: Dual pie chart. Bottom: Bar chart
+
+##### {{< fa thumbs-up >}} Areas done well
+
+-   In terms of **Aesthetic**
+
+    -   Colours used is clear and distinct, and able to distinguish the different employment types.
+
+##### {{< fa wand-sparkles >}} Room for further improvement
+
+-   In terms of **Clarity**
+
+    -   Absence of chart title, value labels, proper annotations
+    -   Legends were not placed next to (beside) the respective charts, which would not be easy for readers to interpret and understand.
+    -   Employment categories could be confusing (e.g. "Employee", "Employee + Other role(s)", "Employee AND Freelance").
+
+-   In terms of **Aesthetic**
+
+    -   The two charts were placed too close to one another without proper demarcation. This could cause misinterpretation of the two separate charts as one chart.
+
+    -   Fill colour for missing values (skipped question) used was white (which could be easily mistaken as white space). Also, missing values could be filtered off for better analysis results.

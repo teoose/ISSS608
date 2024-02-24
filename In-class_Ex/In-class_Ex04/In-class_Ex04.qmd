@@ -1,0 +1,125 @@
+---
+title: "In-class Exercise 4"
+subtitle: "Exploring Interactivity"
+date: "3 February 2024"
+date-modified: "last-modified"
+execute: 
+  eval: true
+  echo: true
+  warning: false
+---
+
+Note: In-class Exercise 4 is an exploratory extension from Hands-on Exercise 3 to include interactivity element (tool-tip) to existing scatter plots.
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show code"
+pacman::p_load(ggiraph, plotly, 
+               patchwork, DT, tidyverse,
+               readxl, gifski, gapminder,
+               plotly, gganimate)
+```
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show code"
+exam_data <- read_csv("data/Exam_data.csv")
+```
+
+## Tooltip effects
+
+
+### [Default] Hover effect
+
+Code chunk below shows the second interactive feature of ggiraph, namely `data_id`. Elements associated with a *data_id* (i.e **CLASS**) will be highlighted upon mouse over. Note that the default value of the hover css is *hover_css = “fill:orange;”*.
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show code"
+
+exam_data$tooltip <- c(paste0(     
+  "Name = ", exam_data$ID,         
+  "\n Class = ", exam_data$CLASS)) 
+
+p <- ggplot(data=exam_data, 
+       aes(x = MATHS)) +
+  geom_dotplot_interactive(           
+    aes(data_id = CLASS, tooltip = exam_data$tooltip),             
+    stackgroups = TRUE,               
+    binwidth = 1,                        
+    method = "histodot") +               
+  scale_y_continuous(NULL,               
+                     breaks = NULL)
+girafe(                                  
+  ggobj = p,                             
+  width_svg = 6,                         
+  height_svg = 6*0.618                      
+)
+```
+
+### [Styling] Hover effect
+
+Code chunk below shows the second interactive feature of ggiraph, namely `data_id`. Elements associated with a *data_id* (i.e **CLASS**) will be highlighted upon mouse over. Style tooltip by including `opts_hover()`.
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show code"
+
+exam_data$tooltip <- c(paste0(     
+  "Name = ", exam_data$ID,         
+  "\n Class = ", exam_data$CLASS)) 
+  
+p <- ggplot(data=exam_data, 
+       aes(x = MATHS)) +
+  geom_dotplot_interactive(              
+    aes(data_id = CLASS, tooltip = exam_data$tooltip),              
+    stackgroups = TRUE,                  
+    binwidth = 1,                        
+    method = "histodot") +               
+  scale_y_continuous(NULL,               
+                     breaks = NULL)
+girafe(                                  
+  ggobj = p,                             
+  width_svg = 6,                         
+  height_svg = 6*0.618,
+  options = list(                        
+    opts_hover(css = "fill: #202020;"),  
+    opts_hover_inv(css = "opacity:0.2;") 
+  )                                        
+)
+```
+
+### Tooltip-cum-Hover effect
+
+Elements associated with a data_id (i.e CLASS) will be highlighted upon mouse over. At the same time, the tooltip will show the CLASS.
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show code"
+
+exam_data$tooltip <- c(paste0(     
+  "Name = ", exam_data$ID,         
+  "\n Class = ", exam_data$CLASS)) 
+
+p <- ggplot(data=exam_data, 
+       aes(x = MATHS)) +
+  geom_dotplot_interactive(              
+    aes(tooltip = exam_data$tooltip, 
+        data_id = CLASS),              
+    stackgroups = TRUE,                  
+    binwidth = 1,                        
+    method = "histodot") +               
+  scale_y_continuous(NULL,               
+                     breaks = NULL)
+girafe(                                  
+  ggobj = p,                             
+  width_svg = 6,                         
+  height_svg = 6*0.618,
+  options = list(                        
+    opts_hover(css = "fill: #202020;"),  
+    opts_hover_inv(css = "opacity:0.2;") 
+  )                                        
+) 
+```
+
+

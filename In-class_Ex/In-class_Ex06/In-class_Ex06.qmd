@@ -1,0 +1,97 @@
+---
+title: "In-class Exercise 6: Time on the Horizon: ggHoriPlot methods"
+author: "Teo Suan Ern"
+date: "24 January 2024"
+date-modified: "last-modified"
+execute: 
+  eval: true
+  echo: true
+  freeze: true
+  warning: false
+  message: false
+  editor: visual
+---
+
+# 1. Getting Started
+
+## Loading R packages
+
+The code chunk used is as follows:
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show code"
+pacman::p_load(ggHoriPlot, ggthemes, tidyverse, RColorBrewer)
+```
+
+## Importing data
+
+This in-class exercise uses dataset - [Average Retail Prices Of Selected Consumer Items](https://tablebuilder.singstat.gov.sg/table/TS/M212891).
+
+Use the code chunk below to import the AVERP.csv file into R environment.
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show code"
+averp <- read_csv("data/AVERP.csv") %>%
+  mutate(`Date` = dmy(`Date`)) # mutate date (from initial character format)
+```
+
+# 2. Plot horizon graph
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show code"
+averp %>% 
+  filter(Date >= "2018-01-01") %>%
+  ggplot() +
+  geom_line(aes(x=Date, 
+                y=Values, fill=`Consumer Items`)) +
+  theme_minimal() +
+  theme(panel.spacing.y=unit(0, "lines"), strip.text.y = element_text(
+    size = 5, angle = 0, hjust = 0),
+    legend.position = 'none',
+    axis.text.y = element_blank(),
+    axis.text.x = element_text(size=7),
+    axis.title.y = element_blank(),
+    axis.title.x = element_blank(),
+    axis.ticks.y = element_blank(),
+    panel.border = element_blank()
+    ) +
+    scale_x_date(expand=c(0,0), date_breaks = "3 month", date_labels = "%b%y") +
+  ggtitle('Average Retail Prices of Selected Consumer Items (Jan 2018 to Dec 2022)')
+
+
+```
+
+```{r}
+#| fig-width: 12
+#| fig-height: 10
+#| code-fold: true
+#| code-summary: "Show code"
+averp %>% 
+  filter(Date >= "2018-01-01") %>%
+  ggplot() +
+  geom_horizon(aes(x = Date, y=Values), 
+               origin = "midpoint", 
+               horizonscale = 6)+
+  facet_grid(`Consumer Items`~.) +
+    theme_few() +
+  scale_fill_hcl(palette = 'RdBu') +
+  theme(panel.spacing.y=unit(0, "lines"), strip.text.y = element_text(
+    size = 5, angle = 0, hjust = 0),
+    legend.position = 'none',
+    axis.text.y = element_blank(),
+    axis.text.x = element_text(size=7),
+    axis.title.y = element_blank(),
+    axis.title.x = element_blank(),
+    axis.ticks.y = element_blank(),
+    panel.border = element_blank()
+    ) +
+    scale_x_date(expand=c(0,0), date_breaks = "3 month", date_labels = "%b%y") +
+  ggtitle('Average Retail Prices of Selected Consumer Items (Jan 2018 to Dec 2022)')
+```
+
+# Reference
+
+[20  Time on the Horizon: ggHoriPlot methods](https://r4va.netlify.app/chap20)

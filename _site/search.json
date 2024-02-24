@@ -12,5 +12,68 @@
     "title": "About",
     "section": "",
     "text": "About this site\n\n1 + 1\n\n[1] 2\n\n\n\n\n\n Back to top"
+  },
+  {
+    "objectID": "In-class_Ex/In-class_Ex01/In-class_Ex01.html",
+    "href": "In-class_Ex/In-class_Ex01/In-class_Ex01.html",
+    "title": "In-class Exercise 1: Now You See It!",
+    "section": "",
+    "text": "In this hands-on exercise, two R packages will be used. They are:\n\ntidyverse, and\nhaven.\n\nThe code chunk used is as follows:\n\npacman::p_load(tidyverse, haven)"
+  },
+  {
+    "objectID": "In-class_Ex/In-class_Ex01/In-class_Ex01.html#loading-r-packages",
+    "href": "In-class_Ex/In-class_Ex01/In-class_Ex01.html#loading-r-packages",
+    "title": "In-class Exercise 1: Now You See It!",
+    "section": "",
+    "text": "In this hands-on exercise, two R packages will be used. They are:\n\ntidyverse, and\nhaven.\n\nThe code chunk used is as follows:\n\npacman::p_load(tidyverse, haven)"
+  },
+  {
+    "objectID": "In-class_Ex/In-class_Ex01/In-class_Ex01.html#importing-pisa-data",
+    "href": "In-class_Ex/In-class_Ex01/In-class_Ex01.html#importing-pisa-data",
+    "title": "In-class Exercise 1: Now You See It!",
+    "section": "Importing PISA data",
+    "text": "Importing PISA data\nThe code chunk below uses read_sas() of haven to import PISA data into R environment.\n\nstu_qqq &lt;- \n  read_sas(\"data/cy08msp_stu_qqq.sas7bdat\")\n\n\nstu_qqq_SG &lt;- stu_qqq %&gt;%\n  filter(CNT == \"SGP\")\n\n\nwrite_rds(stu_qqq_SG,\n          \"data/stu_qqq_SG.rds\")\n\n\nstu_qqq_SG &lt;- \n  read_rds(\"data/stu_qqq_SG.rds\")"
+  },
+  {
+    "objectID": "In-class_Ex/In-class_Ex06/In-class_Ex06.html",
+    "href": "In-class_Ex/In-class_Ex06/In-class_Ex06.html",
+    "title": "In-class Exercise 6: Time on the Horizon: ggHoriPlot methods",
+    "section": "",
+    "text": "The code chunk used is as follows:\n\n\nShow code\npacman::p_load(ggHoriPlot, ggthemes, tidyverse, RColorBrewer)\n\n\n\n\n\nThis in-class exercise uses dataset - Average Retail Prices Of Selected Consumer Items.\nUse the code chunk below to import the AVERP.csv file into R environment.\n\n\nShow code\naverp &lt;- read_csv(\"data/AVERP.csv\") %&gt;%\n  mutate(`Date` = dmy(`Date`)) # mutate date (from initial character format)"
+  },
+  {
+    "objectID": "In-class_Ex/In-class_Ex06/In-class_Ex06.html#loading-r-packages",
+    "href": "In-class_Ex/In-class_Ex06/In-class_Ex06.html#loading-r-packages",
+    "title": "In-class Exercise 6: Time on the Horizon: ggHoriPlot methods",
+    "section": "",
+    "text": "The code chunk used is as follows:\n\n\nShow code\npacman::p_load(ggHoriPlot, ggthemes, tidyverse, RColorBrewer)"
+  },
+  {
+    "objectID": "In-class_Ex/In-class_Ex06/In-class_Ex06.html#importing-data",
+    "href": "In-class_Ex/In-class_Ex06/In-class_Ex06.html#importing-data",
+    "title": "In-class Exercise 6: Time on the Horizon: ggHoriPlot methods",
+    "section": "",
+    "text": "This in-class exercise uses dataset - Average Retail Prices Of Selected Consumer Items.\nUse the code chunk below to import the AVERP.csv file into R environment.\n\n\nShow code\naverp &lt;- read_csv(\"data/AVERP.csv\") %&gt;%\n  mutate(`Date` = dmy(`Date`)) # mutate date (from initial character format)"
+  },
+  {
+    "objectID": "In-class_Ex/In-class_Ex03/In-class_Ex03.html",
+    "href": "In-class_Ex/In-class_Ex03/In-class_Ex03.html",
+    "title": "In-class Exercise 3:",
+    "section": "",
+    "text": "In-class exercise 3 comprised of two parts:\n\nContinuation of Tableau practice (from in-class exercise 2), and\nCritique Figure 5\n\n\nExploring Tableau\nTwo datasets are used for the Tableau exercise: Superstore and Exam data. Click on the links to view from Tableau Public.\n\nBuilding a Tableau Dashboard (Superstore Sales & Profit Report)\nCreating a Tableau Story (Superstore Sales & Profit Report)\nBuilding a Tableau Dashboard (Maths vs English)\n\n\n\nCritique Figure 5\nFigure 5 below was retrieved from State of the Industry Survey.\n\n\n\n\n\nFigure 5 seems to fall under “Quadrant 4 - Confusing but Beautiful”\n\nSome Quick Observations\nThe figure contains two different charts. Top: Dual pie chart. Bottom: Bar chart\n\n Areas done well\n\nIn terms of Aesthetic\n\nColours used is clear and distinct, and able to distinguish the different employment types.\n\n\n\n\n Room for further improvement\n\nIn terms of Clarity\n\nAbsence of chart title, value labels, proper annotations\nLegends were not placed next to (beside) the respective charts, which would not be easy for readers to interpret and understand.\nEmployment categories could be confusing (e.g. “Employee”, “Employee + Other role(s)”, “Employee AND Freelance”).\n\nIn terms of Aesthetic\n\nThe two charts were placed too close to one another without proper demarcation. This could cause misinterpretation of the two separate charts as one chart.\nFill colour for missing values (skipped question) used was white (which could be easily mistaken as white space). Also, missing values could be filtered off for better analysis results.\n\n\n\n\n\n\n\n\n Back to top"
+  },
+  {
+    "objectID": "In-class_Ex/In-class_Ex04/In-class_Ex04.html",
+    "href": "In-class_Ex/In-class_Ex04/In-class_Ex04.html",
+    "title": "In-class Exercise 4",
+    "section": "",
+    "text": "Note: In-class Exercise 4 is an exploratory extension from Hands-on Exercise 3 to include interactivity element (tool-tip) to existing scatter plots.\nShow code\npacman::p_load(ggiraph, plotly, \n               patchwork, DT, tidyverse,\n               readxl, gifski, gapminder,\n               plotly, gganimate)\nShow code\nexam_data &lt;- read_csv(\"data/Exam_data.csv\")"
+  },
+  {
+    "objectID": "In-class_Ex/In-class_Ex04/In-class_Ex04.html#tooltip-effects",
+    "href": "In-class_Ex/In-class_Ex04/In-class_Ex04.html#tooltip-effects",
+    "title": "In-class Exercise 4",
+    "section": "Tooltip effects",
+    "text": "Tooltip effects\n\n[Default] Hover effect\nCode chunk below shows the second interactive feature of ggiraph, namely data_id. Elements associated with a data_id (i.e CLASS) will be highlighted upon mouse over. Note that the default value of the hover css is hover_css = “fill:orange;”.\n\n\nShow code\nexam_data$tooltip &lt;- c(paste0(     \n  \"Name = \", exam_data$ID,         \n  \"\\n Class = \", exam_data$CLASS)) \n\np &lt;- ggplot(data=exam_data, \n       aes(x = MATHS)) +\n  geom_dotplot_interactive(           \n    aes(data_id = CLASS, tooltip = exam_data$tooltip),             \n    stackgroups = TRUE,               \n    binwidth = 1,                        \n    method = \"histodot\") +               \n  scale_y_continuous(NULL,               \n                     breaks = NULL)\ngirafe(                                  \n  ggobj = p,                             \n  width_svg = 6,                         \n  height_svg = 6*0.618                      \n)\n\n\n\n\n\n\n\n\n[Styling] Hover effect\nCode chunk below shows the second interactive feature of ggiraph, namely data_id. Elements associated with a data_id (i.e CLASS) will be highlighted upon mouse over. Style tooltip by including opts_hover().\n\n\nShow code\nexam_data$tooltip &lt;- c(paste0(     \n  \"Name = \", exam_data$ID,         \n  \"\\n Class = \", exam_data$CLASS)) \n  \np &lt;- ggplot(data=exam_data, \n       aes(x = MATHS)) +\n  geom_dotplot_interactive(              \n    aes(data_id = CLASS, tooltip = exam_data$tooltip),              \n    stackgroups = TRUE,                  \n    binwidth = 1,                        \n    method = \"histodot\") +               \n  scale_y_continuous(NULL,               \n                     breaks = NULL)\ngirafe(                                  \n  ggobj = p,                             \n  width_svg = 6,                         \n  height_svg = 6*0.618,\n  options = list(                        \n    opts_hover(css = \"fill: #202020;\"),  \n    opts_hover_inv(css = \"opacity:0.2;\") \n  )                                        \n)\n\n\n\n\n\n\n\n\nTooltip-cum-Hover effect\nElements associated with a data_id (i.e CLASS) will be highlighted upon mouse over. At the same time, the tooltip will show the CLASS.\n\n\nShow code\nexam_data$tooltip &lt;- c(paste0(     \n  \"Name = \", exam_data$ID,         \n  \"\\n Class = \", exam_data$CLASS)) \n\np &lt;- ggplot(data=exam_data, \n       aes(x = MATHS)) +\n  geom_dotplot_interactive(              \n    aes(tooltip = exam_data$tooltip, \n        data_id = CLASS),              \n    stackgroups = TRUE,                  \n    binwidth = 1,                        \n    method = \"histodot\") +               \n  scale_y_continuous(NULL,               \n                     breaks = NULL)\ngirafe(                                  \n  ggobj = p,                             \n  width_svg = 6,                         \n  height_svg = 6*0.618,\n  options = list(                        \n    opts_hover(css = \"fill: #202020;\"),  \n    opts_hover_inv(css = \"opacity:0.2;\") \n  )                                        \n)"
   }
 ]
