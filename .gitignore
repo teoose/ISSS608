@@ -6,5 +6,8 @@
 .quarto
 
 data/
+Images
+styles.css
+theme.scss
 _extensions/
 /.quarto/
