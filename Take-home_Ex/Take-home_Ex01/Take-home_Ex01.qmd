@@ -1,0 +1,1550 @@
+---
+title: "Take-home Exercise 1"
+sub-title: "Creating data visualisation beyond default"
+date: "17 January 2024"
+date-modified: "last-modified"
+execute: 
+  eval: true
+  echo: true
+  warning: false
+  editor: visual
+---
+
+# 1. Overview
+
+## 1.1 Project Brief
+
+In a [BBC article (2016)](https://www.bbc.com/news/education-38212070), OECD Education Director, Andreas Schleicher shared that “Singapore managed to achieve excellence without wide differences between children from wealthy and disadvantaged families.” Meanwhile, the slogan "[Every School a Good School](https://www.straitstimes.com/singapore/parenting-education/dpm-heng-swee-keat-gives-three-suggestions-to-strengthen-schooling)" began to popularise in 2011 by the then Singapore Education Minister, Mr Heng Swee Keat. However, many still believe the existence of disparities, especially between elite schools and neighbourhood schools, between the higher and lower socioeconomic status of students' families, and between immigrant and non-immigrant families.
+
+## 1.2 Project Objectives
+
+The Programme for International Student Assessment (PISA), is an international survey conducted every three years to assess the performance of 15-years-old students in reading, mathematics, and science. The latest data was released on 5 December 2022.
+
+The objective of this project focuses on Singapore and aim to utilise **Exploratory Data Analysis** methods and **ggplot2** functions to uncover interesting insights on the following:
+
+-   the distribution of Singapore students’ performance in reading, mathematics, and science, and
+
+-   the relationship between these performances with schools, gender and socioeconomic status of the students.
+
+```{mermaid}
+%%| echo: false
+flowchart LR
+  A(Students \n-PISA Survey) -.-> |\nfilter| B{Students \n-Singapore}
+  B --> C(School)
+  B --> D(Socioeconomic)
+  B --> E(Gender)
+  C --> |\nany correlation?| F{Performance?}
+  D --> |\nany correlation?| F{Performance?}
+  E --> |\nany correlation?| F{Performance?}
+  F -.-> G(Maths)
+  F -.-> H(Reading)
+  F -.-> I(Science)
+```
+
+# 2. Data Preparation
+
+## 2.1 Install and launch R packages
+
+The project uses `p_load()` of pacman package to check if the R packages are installed in the computer.
+
+::: {.callout-note icon="false" collapse="true"}
+### R packages installed
+
+-   *tidyverse*: a family of modern R packages specially designed to support data science, analysis and communication task including creating static statistical graphs.
+
+-   *haven*: an R package that imports data formats in other statistical format (e.g. SAS, SPSS).
+
+-   *knitr*: an report generation tool.
+
+-   *labelled*: an R package that provide functions to manipulate metadata.
+
+-   *ggrepel:* an R package that provide `geoms` for ggplot2 to repel overlapping text labels.
+
+-   *dplyr*: an R tool for working with data frame (e.g. objects).
+
+-   *ggstatsplot*: an extension of ggplot2 package for statistical visualisation and graphics creation.
+
+-   *ggdist*: an R package that support visualisation of distribution and uncertainty.
+
+-   *ggridges*: an R package that provide `geoms`, `geom_ridgeline` and `geom_density_ridges`.
+
+-   *ggthemes*: an R package that provide extra themes, geoms and scales to ggplot2 package.
+
+-   *performance*: an R package used for assessment, comparison and testing of statistical models.
+
+-   *parameters*: an R package used for processing parameters of various statistical models.
+
+-   *RColorBrewer*: an R package that provide various colour schemes and colour palettes.
+
+-   *patchwork*: an R package for preparing composite figure created using ggplot2.
+
+-   *DT*: an R interface to the JavaScript library DataTables that create interactive table on html page.
+:::
+
+The following code chunk is used to install and launch the R packages.
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show code"
+pacman::p_load(tidyverse, haven, knitr, labelled, ggrepel, dplyr, ggstatsplot,
+               qqplotr, ggdist, ggridges, performance, parameters, see, ggthemes,
+               RColorBrewer, patchwork, DT)
+```
+
+## 2.2 Import PISA data
+
+The dataset source is from [PISA 2022 database](https://www.oecd.org/pisa/data/2022database/) which contain five data files. For this project, **Student questionnaire data file** (SAS format) is used.
+
+The code chunk below uses [`read_sas()`](https://haven.tidyverse.org/reference/index.html) of [`haven`](https://haven.tidyverse.org/) to import PISA data into R environment.
+
+```{r}
+#| eval: false
+stu_qqq <- 
+  read_sas("data/cy08msp_stu_qqq.sas7bdat")
+```
+
+```{r}
+#| eval: false
+stu_qqq_SG <- stu_qqq %>%
+  filter(CNT == "SGP")
+```
+
+```{r}
+#| eval: false
+write_rds(stu_qqq_SG,
+          "data/stu_qqq_SG.rds")
+```
+
+```{r}
+stu_qqq_SG <- 
+  read_rds("data/stu_qqq_SG.rds")
+```
+
+## 2.3 Overview of the data
+
+The final data (which focuses on students in Singapore) consists of 6,606 observations organised at student level. Each row describes the student's performance in terms of their learning context and outcomes. The original dataset contains 1,279 columns.
+
+::: panel-tabset
+### Dataset Structure
+
+#### **Checking the structure of demo data using `str()`:**
+
+```{r}
+#| eval: false
+str(stu_qqq_SG, 10)
+```
+
+There are a total of 6606 observations and 1279 variables.
+
+### Data Health
+
+#### **Using `duplicate()` to check for duplicates:**
+
+```{r}
+stu_qqq_SG[duplicated(stu_qqq_SG),]
+```
+
+The above output shows that there are no duplicated rows found in the dataset.
+
+#### **Using `sum(is.na())` to check for missing values:**
+
+```{r}
+sum(is.na(stu_qqq_SG))
+```
+
+The above output shows that there are 4,168,500 missing values across all columns.
+
+#### **Use `sum(is.na())` to check for missing values (student ID and school ID):**
+
+Given that there are missing values across columns, to ensure and check that the unique identifier (`CNTSTUID`) has no missing values.
+
+```{r}
+sum(is.na(stu_qqq_SG$CNTSTUID))
+```
+
+```{r}
+sum(is.na(stu_qqq_SG$CNTSCHID))
+```
+
+From the output, there are no missing values from the *studentID* and *schoolID*.
+
+::: callout-Tips
+##### **Do you know?**
+
+To locate missing values, `which(is.na())` could be used.
+:::
+:::
+
+::: {.callout-note icon="false"}
+### Summary
+
+There are a total of 6,606 observations and 1,279 variables. The output shows that there are 4,168,500 missing values across columns. Given that there are missing values across columns, checks were done to determine if there are missing values in the identifiers such as `CNTSTUID` and `CNTSCHID` before proceeding.
+:::
+
+# 3. Data Wrangling
+
+The flowchart diagram below provides an overview of the key variables used in this project.
+
+```{mermaid}
+%%| echo: false
+flowchart TD
+  A(StudentID \nCNTSTUID) --> B(Performance)
+  A --> C(Gender)
+  A --> D(Socioeconomic Status)
+  A --> E(School)
+  
+  B --> F(Mathematics) -.-> I(VARIABLES: \nPV1MATH to PV10MATH)
+  B --> G(Science) -.-> J(VARIABLES: \nPV1SCIE to PV10SCIE)
+  B --> H(Reading) -.-> K(VARIABLES: \nPV1READ to PV10READ)
+  
+  C -.-> L(VARIABLE: \nST00401T)
+  
+  D -.-> O(VARIABLE: \nESCS)
+  
+  E -.-> R(VARIABLE: \nCNTSCHID)
+```
+
+## 3.1 Filter data columns
+
+With the large dataset of 1,279 variables, it is essential to select the relevant variables to facilitate subsequent data analysis. Code chunk below reduced number of variables to 34 (from 1,279 variables) that pertains to analysing the distribution of Singapore students' performance and the relationship between school, gender and socioeconomic status.
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show code"
+stud_sg_filt <- stu_qqq_SG %>%
+  select(CNTSCHID, CNTSTUID, ST004D01T, ESCS, ends_with("MATH"), ends_with("SCIE"), ends_with("READ"))
+```
+
+## 3.2 Change data types
+
+-   *studentID* is classified as `dbl`, numerical continuous data. Use `as.character()` to cast as `<chr>` to be nominal data instead.
+
+-   *gender* is classified as `dbl`, numerical continuous data. Use `as.factor()` to cast as `<factors>` to be in categorical data instead.
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show code"
+
+rename_gender <- c(stud_sg_filt$ST004D01T)
+
+stud_sg_filt_new <- stud_sg_filt %>%
+  rename(
+    # rename variables
+    "schoolID" = "CNTSCHID",
+    "studentID" = "CNTSTUID",
+    "gender" = "ST004D01T",
+  ) %>%
+  mutate(
+    # change studentID to character
+    studentID = as.character(stud_sg_filt$CNTSTUID),
+    
+    # casting gender as factors  
+    gender = as.factor(stud_sg_filt$ST004D01T),
+    
+    # setting labels from "1" and "2" to "Female" and "Male"
+    gender = factor(rename_gender, labels = c("Female", "Male"))
+)
+```
+
+## 3.3 Drop missing values of key variables
+
+Final checks for missing values of key variables revealed ESCS variable with 47 missing observations in code chunk below. For complete case analysis, the final number of students (observations) used in this project will be reduced to 6,559 (i.e. all observations used with no missing values).
+
+```{r}
+#| code-fold: true 
+#| code-summary: "Show code" 
+colSums(is.na(stud_sg_filt_new)) 
+```
+
+`na.omit()` was used to remove missing values.
+
+```{r}
+stud_sg_filt_new <- na.omit(stud_sg_filt_new)
+```
+
+```{r}
+DT::datatable(stud_sg_filt_new, class= "compact")
+```
+
+## 3.4 Create dataframe & pivot table
+
+To have a quick summary of the dataset, dataframes and pivot table were created and computed the average (mean) of the 10 PVs of the three domains (i.e. mathematics, science and reading score).
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show code"
+
+df_math <- data.frame(PV1MATH = c(stud_sg_filt_new$PV1MATH),
+                      PV2MATH = c(stud_sg_filt_new$PV2MATH),
+                      PV3MATH = c(stud_sg_filt_new$PV3MATH),
+                      PV4MATH = c(stud_sg_filt_new$PV4MATH),
+                      PV5MATH = c(stud_sg_filt_new$PV5MATH),
+                      PV6MATH = c(stud_sg_filt_new$PV6MATH),
+                      PV7MATH = c(stud_sg_filt_new$PV7MATH),
+                      PV8MATH = c(stud_sg_filt_new$PV8MATH),
+                      PV9MATH = c(stud_sg_filt_new$PV9MATH),
+                      PV10MATH = c(stud_sg_filt_new$PV10MATH))
+
+df_sci <- data.frame(PV1SCIE = c(stud_sg_filt_new$PV1SCIE),
+                      PV2SCIE = c(stud_sg_filt_new$PV2SCIE),
+                      PV3SCIE = c(stud_sg_filt_new$PV3SCIE),
+                      PV4SCIE = c(stud_sg_filt_new$PV4SCIE),
+                      PV5SCIE = c(stud_sg_filt_new$PV5SCIE),
+                      PV6SCIE = c(stud_sg_filt_new$PV6SCIE),
+                      PV7SCIE = c(stud_sg_filt_new$PV7SCIE),
+                      PV8SCIE = c(stud_sg_filt_new$PV8SCIE),
+                      PV9SCIE = c(stud_sg_filt_new$PV9SCIE),
+                      PV10SCIE = c(stud_sg_filt_new$PV10SCIE))
+
+df_read <- data.frame(PV1READ = c(stud_sg_filt_new$PV1READ),
+                      PV2READ = c(stud_sg_filt_new$PV2READ),
+                      PV3READ = c(stud_sg_filt_new$PV3READ),
+                      PV4READ = c(stud_sg_filt_new$PV4READ),
+                      PV5READ = c(stud_sg_filt_new$PV5READ),
+                      PV6READ = c(stud_sg_filt_new$PV6READ),
+                      PV7READ = c(stud_sg_filt_new$PV7READ),
+                      PV8READ = c(stud_sg_filt_new$PV8READ),
+                      PV9READ = c(stud_sg_filt_new$PV9READ),
+                      PV10READ = c(stud_sg_filt_new$PV10READ))
+
+stud_sg_pivot <- stud_sg_filt_new %>%
+                reframe(
+                  schoolID, 
+                  studentID, gender, ESCS,
+                  mean_math = rowMeans(df_math),
+                  mean_sci = rowMeans(df_sci),
+                  mean_read = rowMeans(df_read)
+                  )
+```
+
+### Interactive Data Table
+
+```{r}
+DT::datatable(stud_sg_pivot, class= "compact")
+```
+
+# 4. Exploratory Data Analysis
+
+## 4.1 Quick Visual Summary
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show code"
+
+# Calculate min, max and median values for annotations
+min_math <- round(min(stud_sg_pivot$mean_math),0)
+max_math <- round(max(stud_sg_pivot$mean_math),0)
+mn_math <- round(mean(stud_sg_pivot$mean_math),0)
+q75_math <- round(quantile(stud_sg_pivot$mean_math, 0.75))
+q25_math <- round(quantile(stud_sg_pivot$mean_math, 0.25))
+median_math <- round(median(stud_sg_pivot$mean_math),0)
+
+min_sci <- round(min(stud_sg_pivot$mean_sci),0)
+max_sci <- round(max(stud_sg_pivot$mean_sci),0)
+mn_sci <- round(mean(stud_sg_pivot$mean_sci),0)
+q75_sci <- round(quantile(stud_sg_pivot$mean_sci, 0.75))
+q25_sci <- round(quantile(stud_sg_pivot$mean_sci, 0.25))
+median_sci <- round(median(stud_sg_pivot$mean_sci),0)
+
+min_read <- round(min(stud_sg_pivot$mean_read),0)
+max_read <- round(max(stud_sg_pivot$mean_read),0)
+mn_read <- round(mean(stud_sg_pivot$mean_read), 0)
+q75_read <- round(quantile(stud_sg_pivot$mean_read, 0.75))
+q25_read <- round(quantile(stud_sg_pivot$mean_read, 0.25))
+median_read <- round(median(stud_sg_pivot$mean_read),0)
+
+
+# Plot visualisations
+vis_math <- 
+  ggplot(
+    stud_sg_pivot, 
+    aes(x = mean_math)
+  ) +
+  geom_histogram(
+    bins = 25,
+    color = "white",
+    fill = "#b3e2cd"
+  ) +
+  scale_x_continuous(
+    breaks = scales::pretty_breaks(n = 5),
+    limits = c(200,900) # Set same limits for both plots to ensure justification
+  ) + 
+  geom_vline(
+    aes(xintercept = median_math),
+    colour="grey10", 
+    linewidth = 0.7, 
+    linetype = "dashed"
+  ) +
+  geom_vline(
+    aes(xintercept = mn_math),
+    colour="salmon", 
+    linewidth = 0.7, 
+    linetype = "dashed"
+  ) +
+  labs(
+    title = "Mathematics",
+    x = NULL, y = NULL
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.y = element_blank(),
+    panel.grid.major = element_blank()
+  )
+
+
+vis_sci <- 
+  ggplot(
+    stud_sg_pivot, 
+    aes(x = mean_sci)
+  ) +
+  geom_histogram(
+    bins = 25,
+    color = "white",
+    fill = "#fed9a6"
+  ) +
+  scale_x_continuous(
+    breaks = scales::pretty_breaks(n = 5),
+    limits = c(200,900) # Set same limits for both plots to ensure justification
+  ) + 
+  geom_vline(
+    aes(xintercept = median_sci),
+    colour="grey10", 
+    linewidth = 0.7, 
+    linetype = "dashed"
+  ) +
+  geom_vline(
+    aes(xintercept = mn_sci),
+    colour="salmon", 
+    linewidth = 0.7, 
+    linetype = "dashed"
+  ) +
+  labs(
+    title = "Science",
+    x = NULL, y = NULL
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.y = element_blank(),
+    panel.grid.major = element_blank()
+  )
+
+
+vis_read <- 
+  ggplot(
+    stud_sg_pivot, 
+    aes(x = mean_read)
+  ) +
+  geom_histogram(
+    bins = 25,
+    color = "white",
+    fill = "#cbd5e8"
+  ) +
+  scale_x_continuous(
+    breaks = scales::pretty_breaks(n = 5),
+    limits = c(100,900) # Set same limits for both plots to ensure justification
+  ) + 
+  geom_vline(
+    aes(xintercept = median_read),
+    colour="grey10", 
+    linewidth = 0.7, 
+    linetype = "dashed"
+  ) +
+  geom_vline(
+    aes(xintercept = mn_read),
+    colour="salmon", 
+    linewidth = 0.7, 
+    linetype = "dashed"
+  ) +
+  labs(
+    title = "Reading",
+    x = NULL, y = NULL
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.y = element_blank(),
+    panel.grid.major = element_blank()
+  )
+
+
+
+
+vis_gen <- ggplot(stud_sg_pivot, aes(x = gender)) +
+  geom_bar(
+    color = "white",
+    fill = "grey30"
+  ) +
+  labs(
+    title = "Gender",
+    x = NULL, y = NULL
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.y = element_blank(),
+    panel.grid.major = element_blank()
+  )
+
+vis_sch <- ggplot(stud_sg_pivot, aes(x = schoolID)) +
+  geom_dotplot(
+    binwidth = 1,
+    fill = "grey30",
+    dotsize = 0.2
+  ) +
+  labs(
+    title = "School",
+    x = NULL, y = NULL) +
+  theme_minimal() +
+  theme(
+    axis.text.y = element_blank(),
+    panel.grid.major = element_blank()
+  )
+
+vis_escs <- ggplot(stud_sg_pivot, aes(x = ESCS)) +
+  geom_dotplot(
+    fill = "grey30",
+    stackratio = 1.2,
+    stackdir = "up",
+    color = NA,
+    dotsize = 0.2
+  ) +
+  labs(
+    title = "Socioeconomic Status",
+    x = NULL,
+    y = NULL
+  ) +
+  coord_cartesian(xlim=c(-4,4),
+                  ylim=c(0, 8000)) + 
+  theme_minimal() +
+  theme(
+    axis.text.y = element_blank(), 
+    panel.grid.major = element_blank()
+  )
+```
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show code"
+# Patch all summary plots
+
+# performance in mathematics, science and reading
+rel_patch <- (vis_math + vis_gen) / (vis_sci + vis_escs) / (vis_read + vis_sch) +
+              plot_annotation(
+                title = "Summary Statistics of PISA 2022 results (Singapore)",
+                tag_levels = "I", 
+                caption = "Data Source: OECD, 2022")
+
+rel_patch & 
+  theme(
+  # Remove y axis
+  axis.text.y = element_blank(), 
+  # Remove lines in panel background for cleaner design
+  panel.grid.major = element_blank()
+  )
+```
+
+::: {.callout-warning icon="false"}
+### Initial Summary Insights
+
+-   Seemly normal distribution of students in their performance across performance domains (i.e. Mathematics, Science and Reading)
+
+-   Fairly even distribution across socio-economic status, with peaks between ESCS value of -2 and 2.
+
+-   Relatively uneven distribution across schools, with multiple peaks and troughs in the dotplot.
+:::
+
+## 4.2 Check for normality
+
+There are 10 Plausible Values for each performance domain (i.e. Mathematics, Science and Reading) for the multivariate distribution.
+
+To visualise the fit of normal distribution, test for normality is conducted on the students' performance in the respective domains. `check_normality()` calls `stats::shapiro.test` and checks the standardised residuals (and for mixed-effects model, studentised residual) for normal distribution. Normal distribution tend to fall closely along the fitted straight line.
+
+P-value \< 0.05 indicates statistical significance while p-value \> 0.05 fails to reject null hypothesis for statistical difference.
+
+*Note: shapiro.test() function is only suitable for sample size no larger than 5,000.*
+
+```{r}
+#| echo: false
+#| eval: false
+shapiro.test(stud_sg_filt_new$PV1MATH[1:5000])
+shapiro.test(stud_sg_filt_new$PV1SCIE[1:5000])
+shapiro.test(stud_sg_filt_new$PV1READ[1:5000])
+```
+
+**Normality Hypothesis**:
+
+*H~0~: The students' performance (in all three domains) is normally distributed.*
+
+*H~1~: The students' performance (in all three domains) is not normally distributed.*
+
+Results revealed that the performance distribution is significantly different from normal distribution.
+
+::: panel-tabset
+### Mathematics
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show code"
+# Mathematics
+model_m <- lm(PV10MATH ~ PV1MATH + PV2MATH + PV3MATH + PV4MATH + PV5MATH + PV6MATH + PV7MATH + PV8MATH + PV9MATH, 
+            data = stud_sg_filt_new)
+
+check_m <- check_normality(model_m)
+plot(check_m)
+model_m
+```
+
+### Science
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show code"
+# Science
+model_s <- lm(PV10SCIE ~ PV1SCIE + PV2SCIE + PV3SCIE + PV4SCIE + PV5SCIE + PV6SCIE + PV7SCIE + PV8SCIE + PV9SCIE, 
+            data = stud_sg_filt_new)
+check_s <- check_normality(model_s)
+plot(check_s)
+model_s
+```
+
+### Reading
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show code"
+# Reading
+model_r <- lm(PV10READ ~ PV1READ + PV2READ + PV3READ + PV4READ + PV5READ + PV6READ + PV7READ + PV8READ + PV9READ, 
+            data = stud_sg_filt_new)
+check_r <- check_normality(model_r)
+plot(check_r)
+```
+:::
+
+## 4.3 The performance distribution across Mathematics, Science and Reading
+
+There are 164 schools, of which 6,606 students who studied in Singapore have taken the PISA survey in 2022. The first study examined the distribution of students' performance. Students' performance in the respective domains will be analysed across different variables such as school, gender and socioeconomic status in the subsequent studies.
+
+::: {.callout-note icon="false"}
+### Visual Consideration
+
+-   `geom_histogram()` was used to display distribution counts and skewness.
+-   `geom_boxplot()` was patched then with `geom_histogram()` to visualise the summary statistics (mean, median, outliers, two-whiskers) in greater details.
+:::
+
+::: panel-tabset
+### Mathematics
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show code"
+
+# Histogram of math performance
+h_m <- vis_math +
+  annotate(
+    geom = "text", 
+    x = median_math + 200, 
+    y = 700,
+    label = paste0("Median Performance: \n", median_math),
+    color = "grey10"
+  ) +
+  annotate(
+    geom = "text",
+    x = mn_math - 150, 
+    y = 700,
+    label = paste0("Mean Performance: \n", mn_math),
+    color = "salmon"
+  ) +
+  labs(
+    title = "Slightly left-skewed distribution in Mathematics performance",
+    subtitle = "Presence of few outliers (i.e. Mean score is still relatively close to Median score).",
+    x = NULL, y = NULL
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.y = element_blank(),
+    panel.grid.major = element_blank()
+  )
+
+#Boxplot of math performance
+box_m <- 
+  ggplot(
+    stud_sg_pivot, 
+    aes(y = mean_math)
+  ) + 
+  geom_boxplot(
+    colour = "grey10",
+    fill = "#b3e2cd",
+    outlier.colour="salmon", 
+    outlier.shape=16,
+    outlier.size=1, 
+    notch=FALSE
+  ) + 
+  coord_flip() + 
+    # Annotate values on boxplot
+  annotate(
+    geom = "text", 
+    x = 0.38, 
+    y = min_math,
+    label = paste0("Min: ", min_math),
+    color = "grey20"
+  ) + 
+  annotate(
+    geom = "text", 
+    x = 0.38, 
+    y = max_math,
+    label = paste0("Max: ", max_math),
+    color = "grey20"
+  ) + 
+  labs(
+    y = "", 
+    x = "",
+    caption = "Data Source: OECD, 2022"
+    ) + 
+   scale_y_continuous(
+    limits = c(200,900)
+  ) +
+  stat_boxplot(
+    geom="errorbar", 
+    width=0.5
+  ) + 
+  theme_minimal() +
+  theme(
+    axis.text = element_blank(), 
+    axis.ticks = element_blank(),
+    panel.grid.major = element_blank()
+  )
+
+hbox_m <- (h_m / box_m) + 
+        plot_layout(heights = c(2.0, 0.8))
+
+hbox_m
+```
+
+### Science
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show code"
+
+# Histogram of math performance
+h_s <- vis_sci + 
+  annotate(
+    geom = "text", 
+    x = median_sci + 200, 
+    y = 800,
+    label = paste0("Median Performance: \n", median_sci),
+    color = "grey10"
+  ) +
+  annotate(
+    geom = "text",
+    x = mn_sci - 150, 
+    y = 800,
+    label = paste0("Mean Performance: \n", mn_sci),
+    color = "salmon"
+  ) +
+  labs(
+    title = "Slightly left-skewed distribution in Science performance",
+    subtitle = "Presence of multiple outliers which pulled down Mean score (i.e.below Median score).",    
+    x = NULL, y = NULL
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.y = element_blank(),
+    panel.grid.major = element_blank()
+  )
+
+#Boxplot of science performance
+box_s <- 
+  ggplot(
+    stud_sg_pivot, 
+    aes(y = mean_sci)
+  ) + 
+  geom_boxplot(
+    colour = "grey10",
+    fill = "#fdcdac",
+    outlier.colour="salmon", 
+    outlier.shape=16,
+    outlier.size=1, 
+    notch=FALSE
+  ) + 
+  coord_flip() + 
+    # Annotate values on boxplot
+  annotate(
+    geom = "text", 
+    x = 0.38, 
+    y = min_sci,
+    label = paste0("Min: ", min_sci),
+    color = "grey20"
+  ) + 
+  annotate(
+    geom = "text", 
+    x = 0.38, 
+    y = max_sci,
+    label = paste0("Max: ", max_sci),
+    color = "grey20"
+  ) + 
+  labs(
+    y = "", 
+    x = "",
+    caption = "Data Source: OECD, 2022"
+    ) + 
+   scale_y_continuous(
+    limits = c(200,900)
+  ) +
+  stat_boxplot(
+    geom="errorbar", 
+    width=0.5
+  ) + 
+  theme_minimal() +
+  theme(
+    axis.text = element_blank(), 
+    axis.ticks = element_blank(),
+    panel.grid.major = element_blank()
+  )
+
+hbox_s <- (h_s / box_s) + 
+        plot_layout(heights = c(2.0, 0.8))
+
+hbox_s
+```
+
+### Reading
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show code"
+
+# Histogram of math performance
+h_r <- vis_read +
+  annotate(
+    geom = "text", 
+    x = median_read + 200, 
+    y = 800,
+    label = paste0("Median Performance: \n", median_read),
+    color = "grey10"
+  ) +
+  annotate(
+    geom = "text",
+    x = mn_read - 150, 
+    y = 800,
+    label = paste0("Mean Performance: \n", mn_read),
+    color = "salmon"
+  ) +
+  labs(
+    title = "Slightly left-skewed distribution in Reading performance",
+    subtitle = "Presence of multiple outliers which pulled down Mean score (i.e.below Median score).",   
+    x = NULL, y = NULL
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.y = element_blank(),
+    panel.grid.major = element_blank()
+  )
+
+#Boxplot of math performance
+box_r <- 
+  ggplot(
+    stud_sg_pivot, 
+    aes(y = mean_read)
+  ) + 
+  geom_boxplot(
+    colour = "grey10",
+    fill = "#cbd5e8",
+    outlier.colour="salmon", 
+    outlier.shape=16,
+    outlier.size=1, 
+    notch=FALSE
+  ) + 
+  coord_flip() + 
+    # Annotate values on boxplot
+  annotate(
+    geom = "text", 
+    x = 0.38, 
+    y = min_read,
+    label = paste0("Min: ", min_read),
+    color = "grey20"
+  ) + 
+  annotate(
+    geom = "text", 
+    x = 0.38, 
+    y = max_read,
+    label = paste0("Max: ", max_read),
+    color = "grey20"
+  ) + 
+  labs(
+    y = "", 
+    x = "",
+    caption = "Data Source: OECD, 2022"
+    ) + 
+   scale_y_continuous(
+    limits = c(100,900)
+  ) +
+  stat_boxplot(
+    geom="errorbar", 
+    width=0.5
+  ) + 
+  theme_minimal() +
+  theme(
+    axis.text = element_blank(), 
+    axis.ticks = element_blank(),
+    panel.grid.major = element_blank()
+  )
+
+hbox_r <- (h_r / box_r) + 
+        plot_layout(heights = c(2.0, 0.8))
+
+hbox_r
+```
+:::
+
+::: {.callout-warning icon="false"}
+### Visual Insights from Histograms and Boxplots
+
+-   **Histogram Plots \[Mathematics, Science and Reading\]**
+
+    -   The histogram plots revealed slightly left-skewed distribution, with median score greater than mean score.
+
+-   **Boxplots** **\[Mathematics, Science and Reading\]**
+
+    -   The boxplots revealed relatively equal proportions around median values and dispersion of dataset. Presence of multiple outliers sighted, especially in science and reading performance.
+:::
+
+## 4.4 The effect of socioeconomic status on student performance
+
+The second study hoped to find out if there is any specific relationship between the performances and the socioeconomic status of the students. In other words, whether lower or higher ESCS value perform better (worse, or no difference) in mathematics, science and reading.
+
+::: {.callout-warning icon="false"}
+### Initial Visual Insights from Correlation Matrix
+
+-   Positive correlation between students' performance.
+
+-   Seemly no correlation between socioeconomic status across students' performance.
+:::
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show code"
+pairs(stud_sg_pivot[,4:7], 
+      upper.panel = NULL,
+      col = "#4477AA",
+      main = "Correlation between students performance and respective domains",
+      labels = c('Socioeconomic', 'Mathematics', 'Science', 'Reading')
+      )
+```
+
+### Binning of Socioeconomic Status into Groups
+
+Initial visual insights from the above correlation matrix revealed no correlation between socioeconomic status across students' performance. The relatively even distribution with peak values ranging between ESCS value of -2 and 2, is considerably large given the small ordinal scale (continuous).
+
+To ascertain whether students' performance are affected by their high and low socioeconomic status of students' families, binning of ESCS into five quantile groups (Lowest ESCS, Low ESCS, Average ESCS, High ESCS, Highest ESCS) were made.
+
+::: {.callout-note icon="false"}
+### Visual Consideration
+
+-   `pairs()` was used to plot correlation matrix for a quick visual summary of the correlation between performance and socioeconomic status.
+
+-   `stat_density_ridges`, a stat function from ggridges package for plotting ridgeline plot.
+
+-   Density ridges will reveal distribution of the subset (variation) of socioeconomic status for the respective domains. To identify potential differences in the distribution within ESCS and to identify potential relationships.
+
+-   Cut points of 2.5% and 97.5% tails were used to colour the ridgeline plot as well as to represent the empirical cumulative density function for the distribution of the respective domains.
+:::
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show code"
+binning <- stud_sg_pivot %>%
+  mutate(
+    # binning ESCS into 5 groups
+    ESCSGroup = (quantile_Rank=ntile(stud_sg_pivot$ESCS,5)),
+    
+    # renaming bin ESCS labels
+    ESCSGroup = factor(ESCSGroup, labels = c("Lowest ESCS", "Low ESCS", "Average ESCS", "High ESCS", "Highest ESCS"))
+    )
+```
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show code"
+dens_m <- ggplot(binning,
+       aes(x = mean_math, 
+           y = ESCSGroup, 
+           fill = factor(stat(quantile))
+           )) +
+  stat_density_ridges(
+    geom = "density_ridges_gradient",
+    calc_ecdf = TRUE, 
+    quantiles = c(0.025, 0.975)
+    ) + 
+  scale_fill_manual(
+    name = "Probability",
+    values = c("salmon", "#A0A0A0A0", "#4477AA"),
+    labels = c("(0, 0.025]", "(0.025, 0.975]", "(0.975, 1]")
+  ) +
+  theme_ridges()
+
+
+dens_s <- ggplot(binning,
+       aes(x = mean_sci, 
+           y = ESCSGroup, 
+           fill = factor(stat(quantile))
+           )) +
+  stat_density_ridges(
+    geom = "density_ridges_gradient",
+    calc_ecdf = TRUE, 
+    quantiles = c(0.025, 0.975)
+    ) +
+  scale_fill_manual(
+    name = "Probability",
+    values = c("salmon", "#A0A0A0A0", "#4477AA"),
+    labels = c("(0, 0.025]", "(0.025, 0.975]", "(0.975, 1]")
+  ) +
+  theme_ridges()
+
+
+dens_r <- ggplot(binning,
+       aes(x = mean_read, 
+           y = ESCSGroup, 
+           fill = factor(stat(quantile))
+           )) +
+  stat_density_ridges(
+    geom = "density_ridges_gradient",
+    calc_ecdf = TRUE, 
+    quantiles = c(0.025, 0.975)
+    ) +
+  scale_fill_manual(
+    name = "Probability",
+    values = c("salmon", "#A0A0A0A0", "#4477AA"),
+    labels = c("(0, 0.025]", "(0.025, 0.975]", "(0.975, 1]")
+  ) +
+  theme_ridges()
+```
+
+::: panel-tabset
+### Mathematics
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show code"
+pdens_m <- dens_m +
+
+  labs(
+    title = "Distribution relationship of Mathematics Performance \nacross socioeconomic status",
+    subtitle = "Higher probability of performing better with higher ESCS value",
+    x = "Mathematics", y = "Socioeconomic status",
+    caption = "Data Source: OECD, 2022"
+  ) +
+  annotate(
+    geom = "text", 
+    x = 500, y = 1.5,
+    label = "Lowest ESCS group\nrecorded lower performance score",
+    size = 3
+  ) +
+  annotate(
+    geom = "text", 
+    x = 650, y = 6.2,
+    label = "Highest ESCS \ngroup recorded \nhigher performance score",
+    size = 3
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.y = element_text(size = 7),
+    panel.grid.major = element_blank()
+  )
+
+pdens_m
+```
+
+### Science
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show code"
+pdens_s <- dens_s +
+
+  labs(
+    title = "Distribution relationship of Science Performance \nacross Socioeconomic status",
+    subtitle = "Higher probability of performing better with higher ESCS value",
+    x = "Science", y = "Socioeconomic status",
+    caption = "Data Source: OECD, 2022"
+  ) +
+  annotate(
+    geom = "text", 
+    x = 500, y = 1.5,
+    label = "Lowest ESCS group\nrecorded lower performance score",
+    size = 3
+  ) +
+  annotate(
+    geom = "text", 
+    x = 400, y = 6.2,
+    label = "Highest ESCS group recorded \nhigher performance score",
+    size = 3
+  ) +
+  annotate(
+    "segment", 
+    x = 520, xend = 580,
+    y = 6.2, yend = 6.2,
+    size = 0.5
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.y = element_text(size = 7),
+    panel.grid.major = element_blank()
+  )
+
+pdens_s
+```
+
+### Reading
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show code"
+pdens_r <- dens_r +
+
+  labs(
+    title = "Distribution relationship of Reading Performance \nacross Socioeconomic status",
+    subtitle = "Higher probability of performing better with higher ESCS value",
+    x = "Science", y = "Socioeconomic status",
+    caption = "Data Source: OECD, 2022"
+    ) +
+  annotate(
+    geom = "text", 
+    x = 480, y = 1.5,
+    label = "Lowest ESCS group\nrecorded lower performance score",
+    size = 3
+  ) +
+  annotate(
+    geom = "text", 
+    x = 400, y = 6.2,
+    label = "Highest ESCS group recorded \nhigher performance score",
+    size = 3
+  ) +
+  annotate(
+    "segment", 
+    x = 520, xend = 580,
+    y = 6.2, yend = 6.2,
+    size = 0.5
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.y = element_text(size = 7),
+    panel.grid.major = element_blank()
+  )
+
+pdens_r
+```
+:::
+
+::: {.callout-warning icon="false"}
+### Visual Insight from Density Ridge Plots
+
+-   **Density Ridge Plots \[Mathematics, Science and Reading\]**
+
+    Binning of ESCS variable (socioeconomic status) revealed the following:
+
+    -   Higher probability of students performing better with higher ESCS value.
+    -   Relatively lower performance of students with lower socioeconomic status.
+:::
+
+## 4.5 The effect of school on student performance
+
+The third study aimed to ascertain if there is any specific relationship between schools and their respective performances in the three performance domains. In other words, whether all schools are indeed good schools.
+
+::: {.callout-note icon="false"}
+### Visual Consideration
+
+-   `stat_pointinterval()` is a combination of `stat_sample_slabinterval()` and `geom_slabinterval()` that summarise using a `point_interval()` function.
+
+-   Visual sense of point estimates of each school and their respective performance domain would better serve its purpose, given that there are 164 schools that the students studied in.
+:::
+
+::: panel-tabset
+### Mathematics
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show code"
+
+#Base ggplot
+stats_point_m <- ggplot(
+  data = stud_sg_pivot,
+  aes(x = schoolID,
+      y = mean_math)) +
+  
+  #Using stat_pointinterval to plot the points and intervals
+  stat_pointinterval(
+    aes(interval_color = stat(level)),
+    .width = c(0.95, 0.99),
+    .point = median,
+    .interval = qi,
+    point_color = "salmon",
+    point_size = 1,
+    show.legend = FALSE) +
+
+  annotate(
+    "rect", 
+    xmin=c(70200000), xmax=c(70200005), 
+    ymin=c(620) , ymax=c(850), 
+    alpha=0.5, color="#b3e2cd", fill="#b3e2cd"
+  ) +  
+
+  annotate(
+    "rect", 
+    xmin=c(70200113), xmax=c(70200117), 
+    ymin=c(280) , ymax=c(480), 
+    alpha=0.5, color="#b3e2cd", fill="#b3e2cd"
+  ) +  
+  
+  annotate(
+    "rect", 
+    xmin=c(70200147), xmax=c(70200152), 
+    ymin=c(280) , ymax=c(480), 
+    alpha=0.5, color="#b3e2cd", fill="#b3e2cd"
+  ) +  
+
+  geom_hline(aes(yintercept=q75_math),
+            color="red", linewidth=0.8, linetype="solid") +
+  geom_text(aes(70200003, q75_sci, label = "75 Quantile", 
+                vjust = -1, font_size = 7)) +
+  
+  geom_hline(aes(yintercept=q25_math),
+            color="red", linewidth=0.8, linetype="solid") +
+  geom_text(aes(70200003, q25_sci, label = "25 Quantile", 
+                vjust = 1, font_size = 7)) +
+
+  #Defining the color of the intervals 
+  scale_color_manual(
+    values = c("grey", "grey40"),
+    aesthetics = "interval_color") +
+
+  #Title, subtitle, and caption
+  labs(title = 'Two schools performed exceptionally well while \ntwo schools performed exceptionally poor in Mathematics',
+  subtitle = 'Visualising uncertainty in median estimates & quantiles intervals (95% and 99%) of Mathematics performance by school',
+  caption = "Data Source: OECD, 2022",
+  x = "Schools",
+  y = "Mathematics Performance") +
+  
+  theme_hc() +
+  
+  theme(plot.title = element_text(face = "bold", size = 12),
+        plot.subtitle = element_text(size = 7),
+        axis.text.x = element_blank())
+
+stats_point_m
+```
+
+### Science
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show code"
+
+#Base ggplot
+stats_point_s <- ggplot(
+  data = stud_sg_pivot,
+  aes(x = schoolID,
+      y = mean_sci)) +
+  
+  #Using stat_pointinterval to plot the points and intervals
+  stat_pointinterval(
+    aes(interval_color = stat(level)),
+    .width = c(0.95, 0.99),
+    .point = median,
+    .interval = qi,
+    point_color = "salmon",
+    point_size = 1,
+    show.legend = FALSE) +
+
+  annotate(
+    "rect", 
+    xmin=c(70200000), xmax=c(70200005), 
+    ymin=c(620) , ymax=c(850), 
+    alpha=0.5, color="#fed9a6", fill="#fed9a6"
+  ) +  
+
+  annotate(
+    "rect", 
+    xmin=c(70200113), xmax=c(70200117), 
+    ymin=c(280) , ymax=c(480), 
+    alpha=0.5, color="#fed9a6", fill="#fed9a6"
+  ) +  
+  
+  annotate(
+    "rect", 
+    xmin=c(70200147), xmax=c(70200152), 
+    ymin=c(280) , ymax=c(480), 
+    alpha=0.5, color="#fed9a6", fill="#fed9a6"
+  ) +  
+  
+  geom_hline(aes(yintercept=q75_sci),
+            color="red", linewidth=0.8, linetype="solid") +
+  geom_text(aes(70200003, q75_sci, label = "75 Quantile", 
+                vjust = -0.5, font_size = 7)) +
+  
+  geom_hline(aes(yintercept=q25_sci),
+            color="red", linewidth=0.8, linetype="solid") +
+  geom_text(aes(70200003, q25_sci, label = "25 Quantile", 
+                vjust = 1, font_size = 7)) +
+
+  #Defining the color of the intervals 
+  scale_color_manual(
+    values = c("grey", "grey40"),
+    aesthetics = "interval_color") +
+
+  #Title, subtitle, and caption
+  labs(title = 'Two schools performed exceptionally well while \ntwo schools performed exceptionally poor in Science',
+  subtitle = 'Visualising uncertainty in median estimates & quantiles intervals (95% and 99%) of Science performance by school',
+  caption = "Data Source: OECD, 2022",
+  x = "Schools",
+  y = "Science Performance") +
+  
+  theme_hc() +
+  
+  theme(plot.title = element_text(face = "bold", size = 12),
+        plot.subtitle = element_text(size = 7),
+        axis.text.x = element_blank())
+
+stats_point_s
+```
+
+### Reading
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show code"
+
+#Base ggplot
+stats_point_r <- ggplot(
+  data = stud_sg_pivot,
+  aes(x = schoolID,
+      y = mean_read)) +
+  
+  #Using stat_pointinterval to plot the points and intervals
+  stat_pointinterval(
+    aes(interval_color = stat(level)),
+    .width = c(0.95, 0.99),
+    .point = median,
+    .interval = qi,
+    point_color = "salmon",
+    point_size = 1,
+    show.legend = FALSE) +
+
+  geom_hline(aes(yintercept=q75_read),
+            color="red", linewidth=0.8, linetype="solid") +
+  geom_text(aes(70200003, q75_read, label = "75 Quantile", 
+                vjust = -0.5, font_size = 7)) +
+  
+  geom_hline(aes(yintercept=q25_read),
+            color="red", linewidth=0.8, linetype="solid") +
+  geom_text(aes(70200003, q25_read, label = "25 Quantile", 
+                vjust = 1, font_size = 7)) +
+
+  #Defining the color of the intervals 
+  scale_color_manual(
+    values = c("grey", "grey40"),
+    aesthetics = "interval_color") +
+
+  #Title, subtitle, and caption
+  labs(title = 'General performance of schools in Reading',
+  subtitle = 'Visualising uncertainty in median estimates & quantiles intervals (95% and 99%) of Reading performance by school',
+  caption = "Data Source: OECD, 2022",
+  x = "Schools",
+  y = "Reading Performance") +
+  
+  theme_hc() +
+  
+  theme(plot.title = element_text(face = "bold", size = 12),
+        plot.subtitle = element_text(size = 7),
+        axis.text.x = element_blank())
+
+stats_point_r
+
+```
+:::
+
+::: {.callout-warning icon="false"}
+### Visual Insights from Interval Plots
+
+-   **Interval Plots \[Mathematics, Science and Reading\]**
+
+    -   Majority of the schools performed well within the quantile interval of 25 and 75 across all three performance domains.
+
+-   **Interval Plots \[Mathematics and Science\]**
+
+    -   Out of the 164 schools, two schools performed exceptionally well while two other schools performed exceptionally poor in Mathematics and Science domains.
+:::
+
+## 4.6 The gender differences and its impact on students' performance
+
+The final study aimed to find out if there is any specific relationship on gender and the respective performances in the three performance domains. In other words, whether female students are smarter than male students.
+
+::: {.callout-note icon="false"}
+### Visual Consideration
+
+-   `ggbetweenstats()` is a combination of box and violin plots that include statistical details.
+-   To build a visual for two-sample mean test of performance by gender.
+:::
+
+**Two-sample t-test Hypothesis:**
+
+*H~0~: The mean performance of female students is the same as the male students (*𝜇~F~ = 𝜇~M~*).*
+
+*H~1~: The mean performance of female students is not the same as the male students (*𝜇~F~ ≠ 𝜇~M~*).*
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show code"
+# Mathematics
+p1 <- ggbetweenstats(
+  data = stud_sg_pivot,
+  x = gender, 
+  y = mean_math,
+  ylab = "Mathematics", # label for y-axis
+  xlab = "Gender", # label for y-axis
+  title = "Statistical significant difference in performance between gender",
+  type = "np",
+  palette = "Pastel1",
+  messages = FALSE
+)
+
+# Science
+p2 <- ggbetweenstats(
+  data = stud_sg_pivot,
+  x = gender, 
+  y = mean_sci,
+  ylab = "Science", # label for y-axis
+  xlab = "Gender", # label for y-axis
+  title = "Statistical significant difference in performance between gender",
+  type = "np",
+  palette = "Pastel1",
+  messages = FALSE
+)
+
+# Reading
+p3 <- ggbetweenstats(
+  data = stud_sg_pivot,
+  x = gender, 
+  y = mean_read,
+  ylab = "Reading", # label for y-axis
+  xlab = "Gender", # label for y-axis
+  title = "Statistical significant difference in performance between gender",
+  type = "np",
+  palette = "Pastel1",
+  messages = FALSE
+)
+```
+
+::: panel-tabset
+### Mathematics
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show code"
+
+cbox_m <- p1  +
+        plot_annotation(
+          title = "Male students perform slightly better than female students in Mathematics",
+          caption = "Data Source: OECD, 2022"
+        ) 
+cbox_m
+```
+
+### Science
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show code"
+
+cbox_s <- p2  +
+        plot_annotation(
+          title = "Male students perform slightly better than female students in Science",
+          caption = "Data Source: OECD, 2022"
+        ) 
+cbox_s
+```
+
+### Reading
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show code"
+
+cbox_r <- p3  +
+        plot_annotation(
+          title = "Female students perform slightly better than male students in Reading",
+          caption = "Data Source: OECD, 2022"
+        ) 
+cbox_r
+```
+:::
+
+::: {.callout-warning icon="false"}
+### Visual Insights from Box/ Violin Plots
+
+-   **Box/ Violin Plots** **\[Mathematics and Science\]**
+
+    -   The Box/ Violin Plots revealed relatively equal proportions around median values and dispersion of dataset. Presence of multiple outliers sighted, especially in science and reading performance.
+
+-   **Two-sample Means Test**
+
+    -   Statistical significant difference in performance between gender across all three performance domains.
+
+    -   Male students perform slightly better than female students in Mathematics and Science.
+
+    -   Female students perform slightly better than male students in Reading.
+:::
+
+# 5. Data Limitation
+
+Further data analysis is required to improve data accuracy and future consideration is cautioned as follows:
+
+-   **Accuracy of data:** PISA estimations do not take into account national-level registry records (which included self-reported background, demographic and socioeconomic information contributed by the students). 
+
+-   **Completeness of data:** 47 missing values of variable *ESCS* which measured socioeconomic status were dropped to ensure complete case analysis.
+
+# 6. Summary
+
+The flowchart diagram below summarises the analytical findings for this project.
+
+```{mermaid}
+%%| echo: false
+flowchart TD
+  A(StudentID \nCNTSTUID) --> B(Performance)
+  A --> C(Gender)
+  A --> D(Socioeconomic Status)
+  A --> E(School)
+  
+  B --> F(Mathematics) -.-> I(VARIABLES: \nPV1MATH to PV10MATH)
+  B --> G(Science) -.-> J(VARIABLES: \nPV1SCIE to PV10SCIE)
+  B --> H(Reading) -.-> K(VARIABLES: \nPV1READ to PV10READ)
+  
+  C -.-> L(VARIABLE: \nST00401T)
+  
+  D -.-> O(VARIABLE: \nESCS)
+  
+  E -.-> R(VARIABLE: \nCNTSCHID)
+  
+  I --> S(Performance do not \nfollow normal distribution)
+  J --> S(Performance do not \nfollow normal distribution)
+  K --> S(Performance do not \nfollow normal distribution)
+
+  L --> T(Male students tend perform better in \nMathematics & Science, while female \nstudents tend perform better in Reading)
+  
+  O --> U(Students with higher ESCS has higher \nprobability of performing better)
+  
+  R --> V(2 schools performed relatively \nbetter than the other schools)
+
+```
+
+# 7. References
+
+-   [ISSS608 AY2023-24 January Term (2024), Take-home Exercise 1](https://isss608-ay2023-24jan.netlify.app/take-home_ex/th_ex01){target="_blank"}
+
+-   [OECD (2022), PISA 2022 Database, PISA, OECD Publishing, Paris.](https://www.oecd.org/pisa/data/2022database/){target="_blank"}
+
+-   [Quarto (n.d.)](https://quarto.org/docs/guide/){target="_blank"}
+
+-   [R for Visual Analytics (n.d.)](https://r4va.netlify.app/){target="_blank"}
+
+-   [R for Data Science (n.d.)](https://r4ds.had.co.nz/){target="_blank"}
+
+-   [The R Graph Gallery (n.d.)](https://r-graph-gallery.com/index.html){target="_blank"}

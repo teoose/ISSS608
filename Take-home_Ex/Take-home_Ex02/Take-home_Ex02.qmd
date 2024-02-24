@@ -1,0 +1,2016 @@
+---
+title: "Take-home Exercise 2"
+sub-title: "DataVis Makeover"
+date: "24 January 2024"
+date-modified: "last-modified"
+execute: 
+  eval: true
+  echo: true
+  warning: false
+  editor: visual
+---
+
+# 1. Overview
+
+This project is a continuation from Take-take Exercise 1. The objective is to analyse the charts by applying the data visualisation design principles and best practices, and to improve on one of the submissions prepared by a fellow classmate.
+
+# 2. Peer's Data Preparation Steps
+
+The original author's data preparation steps were taken to ensure consistency of data used.
+
+```{r}
+#| code-fold: true
+#| code-summary: "[A] Load R packages"
+pacman::p_load(tidyverse, haven, patchwork, ggrepel, ggdist, ggridges, knitr)
+```
+
+```{r}
+#| code-fold: true
+#| code-summary: "[B] Load PISA 2022 Dataset"
+stu_qqq_SG <- 
+  read_rds("data/stu_qqq_SG.rds")
+```
+
+```{r}
+#| code-fold: true
+#| code-summary: "[C] Data Wrangling"
+# Filtering columns
+stu2 <- stu_qqq_SG %>% 
+  select(CNTSTUID,CNTSCHID, ST004D01T, PROGN, AGE, ST003D02T, ST003D03T, ESCS, PAREDINT, HISEI, HOMEPOS,MISCED,FISCED,HISCED,LEARRES, SCHSUST,FAMSUP, WORKHOME,WORKPAY, STUDYHMW, EXERPRAC, LANGN, PQSCHOOL, ICTOUT, ICTAVHOM,  ICTHOME, ICTAVSCH, ICTSCH, ICTRES, COBN_S,COBN_M, COBN_F, OCOD1, OCOD2, PA042Q01TA, PA194Q01JA, PA195Q01JA, PA041Q01TA,  ends_with("MATH"), ends_with("READ"), ends_with("SCIE"), )
+
+
+# Remove columns with NA values
+stu2 <- stu2[, (colSums(is.na(stu2))<nrow(stu2))]
+
+
+# Drop rows with missing values
+stu2 <- stu2 %>%
+  drop_na()
+
+
+# Convert columns to `as.factor()`
+stu2 <- stu2 %>%
+  mutate_at(c('CNTSTUID', 'CNTSCHID', 'ST004D01T', 'PROGN','ST003D02T','ST003D03T','MISCED','FISCED','HISCED', 
+              'WORKHOME','WORKPAY', 'STUDYHMW','EXERPRAC','LANGN','ICTAVHOM','ICTHOME','ICTAVSCH','ICTSCH',
+              'COBN_S','COBN_M','COBN_F','OCOD1','OCOD2'), as.factor) 
+
+
+# Rename variable names
+stu2 <- stu2 %>% 
+  rename(Gender = ST004D01T) %>%
+  mutate(Gender = ifelse(Gender == 1, 'Female', 'Male'))
+
+stu2 <- stu2 %>% 
+  rename(SCHOOL = CNTSCHID) 
+
+
+# Compute Mean PV scores for each student
+stu2$AVG_PVMATH <- rowMeans(stu2[,c("PV1MATH", "PV2MATH", "PV3MATH", "PV4MATH", "PV5MATH", 
+                             "PV6MATH", "PV7MATH", "PV8MATH", "PV9MATH", "PV10MATH")])
+
+stu2$AVG_PVREAD <- rowMeans(stu2[,c("PV1READ", "PV2READ", "PV3READ", "PV4READ", "PV5READ", 
+                             "PV6READ", "PV7READ", "PV8READ", "PV9READ", "PV10READ")])
+
+stu2$AVG_PVSCI <- rowMeans(stu2[,c("PV1SCIE", "PV2SCIE", "PV3SCIE", "PV4SCIE", "PV5SCIE", 
+                             "PV6SCIE", "PV7SCIE", "PV8SCIE", "PV9SCIE", "PV10SCIE")])
+
+
+# Create new dataframe
+stu2s <- stu2 %>%
+  select(CNTSTUID, AVG_PVMATH, AVG_PVREAD, AVG_PVSCI) %>%
+  pivot_longer(-CNTSTUID) %>%
+  rename(subj = name, scores = value)
+
+```
+
+```{r}
+#| code-fold: true
+#| code-summary: "Additional code"
+# Calculate min, max and median values for annotations
+min_math <- round(min(stu2$AVG_PVMATH),0)
+max_math <- round(max(stu2$AVG_PVMATH),0)
+mn_math <- round(mean(stu2$AVG_PVMATH),0)
+q75_math <- round(quantile(stu2$AVG_PVMATH, 0.75))
+q25_math <- round(quantile(stu2$AVG_PVMATH, 0.25))
+med_math <- round(median(stu2$AVG_PVMATH),0)
+
+min_sci <- round(min(stu2$AVG_PVSCI),0)
+max_sci <- round(max(stu2$AVG_PVSCI),0)
+mn_sci <- round(mean(stu2$AVG_PVSCI),0)
+q75_sci <- round(quantile(stu2$AVG_PVSCI, 0.75))
+q25_sci <- round(quantile(stu2$AVG_PVSCI, 0.25))
+med_sci <- round(median(stu2$AVG_PVSCI),0)
+
+min_read <- round(min(stu2$AVG_PVREAD),0)
+max_read <- round(max(stu2$AVG_PVREAD),0)
+mn_read <- round(mean(stu2$AVG_PVREAD), 0)
+q75_read <- round(quantile(stu2$AVG_PVREAD, 0.75))
+q25_read <- round(quantile(stu2$AVG_PVREAD, 0.25))
+med_read <- round(median(stu2$AVG_PVREAD),0)
+
+```
+
+# 3. DataViz Critique & Makeover
+
+#### **Four visuals to be reviewed**
+
+There are four main graphs to be makeover in the peer's submission (Take-home Exercise 1). The four visuals will be reviewed in terms of their 'clarity' and 'aesthetics' by applying the data visualisation design principles and best practices.
+
+| Visual 1                                              | Visual 2                                              | Visual 3                                              | Visual 4                                              |
+|------------------|------------------|------------------|------------------|
+| ![](images/OD1.png){style="border: 0.5px solid gray"} | ![](images/OD2.png){style="border: 0.5px solid gray"} | ![](images/OD3.png){style="border: 0.5px solid gray"} | ![](images/OD4.png){style="border: 0.5px solid gray"} |
+
+This review will use the framework (Cartesian coordinate system) below to gauge the objective and subjective metrics of the four visuals, where x-axis represents to 'clarity' and y-axis represents 'aesthetics' ([DataRemixed, 2012](https://dataremixed.com/2012/05/data-visualization-clarity-or-aesthetics/){target="_blank"}). Clarity would refer to the effectiveness of the visual in imparting accurate understanding of the fundamental truth of data to readers, while aesthetic would refer to the evaluation of aesthetic qualities and articulation of author's view and avoid creating chartjunks.
+
+![DataRemixed (2012)](images/clarity_aesthetics.png){fig-align="left" width="40%"}
+
+## 3.1 Distribution of Students’ Scores for Maths, Reading and Science
+
+### Original Visual #1
+
+Ridgeline plot, `stat_density_ridges()`, a stat function from ggridges package was used.
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show original code"
+
+ggplot(stu2s, 
+       aes(x = scores,
+           y = subj,
+           fill = factor(stat(quantile)))) + 
+  #geom_text(aes(label = med_math), color = "black") + 
+  stat_density_ridges(geom = "density_ridges_gradient",
+                      calc_ecdf = TRUE,
+                      quantiles = c(0.025, 0.975)) +
+  scale_fill_manual(name = "Probability",
+    values = c("#FF0000A0", "#A0A0A0A0", "#0000FFA0"),
+    labels = c("(0, 0.025]", "(0.025, 0.975]", "(0.975, 1]")) + 
+  theme_ridges()+
+  labs(title = "Distribution of Average Subject Scores", caption = "Data from PISA 2022",
+       x= "Scores", y = "Subjects") + theme_minimal()
+```
+
+**Visual 1 seems to fall under "Quadrant IV - Beautiful but Confusing"**
+
+::: {.callout-important icon="false"}
+#### Observations from Visual 1 \[Ridgeline Plots\]
+
+##### {{< fa thumbs-up >}} Areas done well
+
+-   In terms of **Clarity**
+
+    -   Graph is well labelled with graph title, axes-labels, legend with caption to show data source.
+
+    -   Density ridges will reveal distribution of the subset (variation), i.e. performance of Mathematics, Reading and Science scores.
+
+-   In terms of **Aesthetic**
+
+    -   Colours used is clear and distinct, and easily readable.
+
+    -   Major gridlines are used to provide easy reference and visibility of scores across the three performance domains.
+
+##### {{< fa wand-sparkles >}} Room for further improvement
+
+-   In terms of **Clarity**
+
+    -   Colors are similar across the three subjects with probabilities of 2.5% and 97.5% highlighted in red and blue respectively.
+
+    -   Mean values were explained as part of observations, however, the ridgeline plot with probability was used with no reference or interpretation made in relation to the plot. Annotations of values could be included to aid focus with contextual highlights (e.g. mean or median values).
+
+    -   Annotations could be included to explain significant findings (e.g. Relatively close mean values with wide range of scores in students' performances).
+
+    -   Alternative chart option would be to use both density plot and boxplot to better reveal distribution. Box plot could be used to visualise the summary statistics (mean, median, outliers, two-whiskers) in greater details.
+
+-   In terms of **Aesthetic**
+
+    -   Axes-labels could be renamed to better reflect the variables (e.g. Science, Reading and Mathematics) instead of using the existing variable names (AVG_PVSCI, AVG_PVREAD, AVG_PVMATH).
+:::
+
+### Suggested Sketch #1
+
+From the original visual, it seemed that the original author wanted to compare the three subjects and their mean values. This might be the reason for using ridgeline plot, as the design is in a stacked version of density plot. One method to recreate the visual is to use density plot and boxplot for each subject and do patchwork of the three subjects together.
+
+A rough sketch of the proposed design is shown below.
+
+![Sketch by: TSE (2024)](images/sketch1.png){fig-align="left" width="60%"}
+
+### Visual Makeover #1
+
+This visual is created using patchwork to patch the three plots (subjects) of `geom_density()` and `geom_boxplot()` together. This will put the density-boxplot creating a ridgeline version that allow comparison of different subjects sharing the same x-axis.
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show suggested code"
+
+P1 <- ggplot(data = stu2,
+       aes(x = AVG_PVSCI)) +
+  geom_density(color = "#459397", size = 0.6, fill= "#459397", alpha = 0.4) +
+  coord_cartesian(xlim = c(0,1000)) +
+  
+  geom_vline(aes(xintercept = mean(AVG_PVSCI)),
+             color = "#4d5887", alpha = 0.8, linewidth = 0.7, linetype = "dashed") +
+  annotate("text", x = 420, y = 0.0035,
+           label = paste("Mean=", 
+                         round(mean(stu2$AVG_PVSCI, na.rm=T), 2)),
+           color = "#4d5887", size = 3) +
+  annotate(
+    geom = "curve", x = 490, xend = 570, y = 0.0035, yend = 0.004, 
+    curvature = -.3, arrow = arrow(length = unit(2, "mm")),
+    color = "#4d5887") +
+
+  geom_vline(aes(xintercept = median(AVG_PVSCI)),
+             color= "grey50", linewidth = 0.7, linetype = "solid") +
+  annotate("text", x = 800, y = 0.0035,
+           label = paste("Median=", 
+                         round(median(stu2$AVG_PVSCI, na.rm=T), 2)),
+           color = "grey20", size = 3) +  
+  annotate(
+    geom = "curve", x = 730, xend = 575, y = 0.0035, yend = 0.0035, 
+    curvature = .1, arrow = arrow(length = unit(2, "mm")),
+    color = "grey50") +
+
+  geom_boxplot(width = 0.0005, fill = "#459397", alpha = 0.5,
+               position = position_nudge(y = -0.0005),
+               outlier.colour="salmon", 
+               outlier.shape=16,
+               outlier.size=1, ) +
+
+  theme_minimal() +
+  labs(title="Science", y = NULL) +
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        plot.title = element_text(size= 12),
+        axis.text.y = element_blank(),
+        axis.text.x = element_blank(),
+        axis.text = element_text(size= 8),
+        panel.grid.major = element_blank()) 
+
+
+P2 <- ggplot(data = stu2,
+       aes(x = AVG_PVREAD)) +
+  geom_density(color = "#f6af6b", size = 0.6, fill= "#f6af6b", alpha = 0.4) +
+  coord_cartesian(xlim = c(0,1000)) +
+  geom_vline(aes(xintercept = mean(AVG_PVREAD)),
+             color = "#4d5887", alpha = 0.8, linewidth = 0.7, linetype = "dashed") +
+  annotate("text", x = 400, y = 0.0035,
+           label = paste("Mean=", 
+                         round(mean(stu2$AVG_PVREAD, na.rm=T), 2)),
+           color = "#4d5887", size = 3) +
+  
+  annotate(
+    geom = "curve", x = 470, xend = 542, y = 0.0030, yend = 0.0035, 
+    curvature = -.2, arrow = arrow(length = unit(2, "mm")),
+    color = "#4d5887") +
+  annotate(
+    geom = "curve", x = 730, xend = 560, y = 0.0035, yend = 0.0035, 
+    curvature = .1, arrow = arrow(length = unit(2, "mm")),
+    color = "grey50") +
+  
+  geom_vline(aes(xintercept = median(AVG_PVREAD)),
+             color= "grey50", linewidth = 0.7, linetype = "solid") +
+  annotate("text", x = 800, y = 0.0035,
+           label = paste("Median=", 
+                         round(median(stu2$AVG_PVREAD, na.rm=T), 2)),
+           color = "grey20", size = 3) +
+
+  geom_boxplot(width = 0.0005, fill = "#f6af6b", alpha = 0.5,
+               position = position_nudge(y = -0.0005),
+               outlier.colour="salmon", 
+               outlier.shape=16,
+               outlier.size=1, ) +
+  theme_minimal()+
+  labs(title="Reading", y = NULL) +
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        plot.title = element_text(size= 12),
+        axis.text.y = element_blank(),
+        axis.text.x = element_blank(),
+        axis.text = element_text(size= 8),
+        panel.grid.major = element_blank()) 
+
+
+P3 <- ggplot(data = stu2,
+       aes(x = AVG_PVMATH)) +
+  geom_density(color = "#73b2c2", size = 0.6, fill= "#73b2c2", alpha = 0.4) +
+  coord_cartesian(xlim = c(0,1000)) +
+  geom_vline(aes(xintercept = mean(AVG_PVMATH)),
+             color = "#4d5887", alpha = 0.8, linewidth = 0.7, linetype = "dashed") +
+  annotate("text", x = 400, y = 0.0035,
+           label = paste("Mean=", 
+                         round(mean(stu2$AVG_PVMATH, na.rm=T), 2)),
+           color = "#4d5887", size = 3) +
+  
+  annotate(
+    geom = "curve", x = 470, xend = 570, y = 0.0030, yend = 0.0035, 
+    curvature = -.2, arrow = arrow(length = unit(2, "mm")),
+    color = "#4d5887") +
+  annotate(
+    geom = "curve", x = 730, xend = 590, y = 0.0035, yend = 0.0035, 
+    curvature = .1, arrow = arrow(length = unit(2, "mm")),
+    color = "grey50") +
+  
+  geom_vline(aes(xintercept = median(AVG_PVMATH)),
+             color= "grey50", linewidth = 0.7, linetype = "solid") +
+  annotate("text", x = 800, y = 0.0035,
+           label = paste("Median=", 
+                         round(median(stu2$AVG_PVMATH, na.rm=T), 2)),
+           color = "grey20", size = 3) +  
+  geom_boxplot(width = 0.0005, fill = "#73b2c2", alpha = 0.5,
+               position = position_nudge(y = -0.0005),
+               outlier.colour="salmon", 
+               outlier.shape=16,
+               outlier.size=1) +
+  theme_minimal()+
+  labs(title="Mathematics", y = NULL) +
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        plot.title = element_text(size= 12),
+        axis.text.y = element_blank(),
+        axis.text.x = element_blank(),
+        axis.text = element_text(size= 8),
+        panel.grid.major = element_blank()) 
+
+
+# Patch plots together
+patch <- P1 / P2 / P3 
+
+patch +
+  labs(x= "Scores") + 
+  plot_annotation(
+                title = "Slightly left-skewed distribution in students' performance",
+                subtitle = "Relatively close mean values with wide range of scores in students' performances",
+                tag_levels = "I",
+                caption = "Data Source: OECD (2022)")+
+  theme_minimal() +
+  theme(axis.ticks = element_blank(),
+    axis.text.y = element_blank(),
+    panel.grid.major = element_blank())
+```
+
+::: {.callout-tip icon="false"}
+### {{< fa wand-sparkles >}} Make-over with Density-Boxplot
+
+-   Achieved in terms of **Clarity**
+
+    -   Density-boxplots provide a visual summary of the distribution of values and allow comparison across the different performance groups as well. Boxplots also allow visualisation of outlier values.
+
+    -   Graph title is added to highlight the performance distribution. Sub-title is added to provide more context and explanation on the findings.
+
+    -   Median and Mean values are annotated to enhance interpretation of distribution while serve as reference points. The values allow quick visualisation of the central tendency and skewness of distribution.
+
+-   Achieved in terms of **Aesthetic**
+
+    -   Different colours are used to represent the three domains (i.e. mathematics, reading and science).
+
+    -   Outliers are demarcated in a different and distinct colour to better differentiate them.
+:::
+
+## 3.2 Distribution of Scores By Gender
+
+### Original Visual #2
+
+A combination of density plot and boxplot with the use of `stat_halfeye()`and `geom_boxplot()` was used for this visual. Visual 2 contains individual subject plots and a patchwork.
+
+::: panel-tabset
+#### Mathematics
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show original code"
+
+# Mathematics
+g1 <- ggplot(stu2, aes(x = Gender, y = AVG_PVMATH, fill = Gender)) +
+  stat_halfeye(adjust = 0.5,
+               width = 0.3, 
+               justification = -0.1,
+               point_color = NA,
+               scale = 1.5) +
+  geom_boxplot(width = 0.05,
+               outlier.shape = NA) + coord_flip() +
+   stat_summary(fun = median, geom = "text", aes(label = round(after_stat(y), )),
+               position = position_nudge(x = 0.05), vjust = -0.5,size=3) +  
+  labs(title = "Distribution of Maths Scores",
+       y = "Scores", x = "Gender") +
+  theme_minimal() + scale_y_continuous(limits = c(100,900)) + theme(plot.title = element_text(size = 10))
+
+g1
+```
+
+#### Reading
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show original code"
+
+# Science
+g2 <- ggplot(stu2, aes(x = Gender, y = AVG_PVREAD, fill = Gender)) +
+  stat_halfeye(adjust = 0.5,
+               width = 0.3, 
+               justification = -0.1,
+               point_color = NA,
+               scale = 1.5) +
+  geom_boxplot(width = 0.05,
+               outlier.shape = NA) + coord_flip() +
+   stat_summary(fun = median, geom = "text", aes(label = round(after_stat(y), )),
+               position = position_nudge(x = 0.05), vjust = -0.5,size=3) +  
+ labs(title = "Distribution of Reading Scores",
+       y = "Scores", x = "Gender") + theme_minimal()+
+  scale_y_continuous(limits = c(100,900)) + theme(plot.title = element_text(size = 10))
+
+g2
+```
+
+#### Science
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show original code"
+g3 <- ggplot(stu2, aes(x = Gender, y = AVG_PVSCI, fill=Gender)) +
+  stat_halfeye(adjust = 0.5,
+               width = 0.3, 
+               justification = -0.1,
+               point_color = NA,
+               scale = 1.5) +
+  geom_boxplot(width = 0.05,
+               outlier.shape = NA) +coord_flip() +
+ stat_summary(fun = median, geom = "text", aes(label = round(after_stat(y), )),
+               position = position_nudge(x = 0.05), vjust = -0.5,size=3) +  
+ labs(title = "Distribution of Science Scores",
+       y = "Scores", x = "Gender") + theme_minimal() + 
+  scale_y_continuous(limits = c(100,900)) + theme(plot.title = element_text(size = 10))
+
+g3
+```
+:::
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show original code"
+patch1 <- g1 /  g2 / g3
+patch1+ plot_layout(guides = "collect") 
+```
+
+**Visual 2 seems to fall under "Quadrant IV - Beautiful but Confusing"**
+
+::: {.callout-important icon="false"}
+#### Observations from Visual 2 \[Density-Boxplots\]
+
+##### {{< fa thumbs-up >}} Areas done well
+
+-   In terms of **Clarity**
+
+    -   Individual graphs and patchwork are well labelled with graph title, axes-labels, legend with caption to show data source.
+
+-   In terms of **Aesthetic**
+
+    -   Colours used is clear and distinct, and easy to distinguish between male and female.
+
+##### {{< fa wand-sparkles >}} Room for further improvement
+
+-   In terms of **Clarity**
+
+    -   Patchwork shows repetitive axes (i.e. y-axis for Gender, x-axis for Scores) across Mathematics, Reading and Science which can be distracting and confusing to readers.
+
+    -   Uncertainty in values annotated as they do not have any labels/ explanation on the representation of values (e.g. values 597 and 580 annotated in chart - 'Distribution of Maths Scores'. Readers have to make their own interpretation of the values based on reading the chart. However, the original author did note under the observation on the difference in median values.
+
+    -   Annotations could be included to explain significant findings (e.g. wide range of scores for each subject with presence of outliers).
+
+    -   Annotation "tags" could be added to differentiate the different charts and for a more professional visual aspect.
+
+    -   Alternative visual is to flip the chart axes (i.e. y-axis for Scores, x-axis for Gender) for a more user-friendly reading mode. The three subjects would share a common y-axis which could allow ease of comparison of scores.
+:::
+
+### Suggested Sketch #2
+
+From the original visual, it seemed that the original author wanted to compare the three subjects and their values by gender with the use of patchwork. However, the patchwork shows repetitive axes (i.e. y-axis for Gender, x-axis for Scores) across Mathematics, Reading and Science which can be distracting and confusing to readers as `coord_flip()` was added to the ggplots. One method to recreate the visual is without `coord_flip()` and patch the three subject plots together so that they can share the same x- and y-axis line.
+
+A rough sketch of the proposed design is shown below.
+
+![Sketch by: TSE (2024)](images/sketch2.png){fig-align="left" width="60%"}
+
+### Visual Makeover #2
+
+This visual is created using patchwork to patch the three plots (subjects) of `stat_halfeye()`, `geom_point()` and `geom_boxplot()` together.
+
+```{r}
+#| echo: false
+
+# Mathematics
+a_g1 <- ggplot(stu2, aes(x = Gender, y = AVG_PVMATH, fill=Gender)) +
+  
+  stat_halfeye(aes(fill = Gender, 
+                      justification = ifelse(Gender == "Female", 1.2, 0),
+                      side = ifelse(Gender == "Female", "left", "right")),
+              position = position_nudge(x = 0.1, y = 0), 
+              adjust = 1.2,
+              .width = 0,
+              trim = FALSE,
+              point_color = NA,
+              alpha = 0.5,
+              orientation = ) +
+  geom_point(aes(x = Gender, y = AVG_PVMATH, color=Gender),
+             position = position_jitter(width = 0.05),
+             size = 0.25,
+             shape = 20,
+             alpha = 0.5) + 
+  geom_boxplot(width = 0.05,
+              outlier.colour="grey20", 
+              outlier.shape=16,
+              outlier.size=1,
+              outlier.alpha = 0.5) +
+  
+  stat_summary(fun = mean, geom = "text", aes(label = paste("Mean", round(after_stat(y), ))), position = position_nudge(x = ifelse(stu2$Gender == "Female", -0.5, 0.5)), vjust = 1.5,size=2.2, color ="#A64D79") +
+  
+  stat_summary(fun.y = mean, geom = "point", colour = "#A64D79") +
+  labs(title = "Mathematics", y = "Score", x = NULL) + theme_minimal() + 
+  scale_y_continuous(limits = c(100,900)) + theme(plot.title = element_text(size = 10)) +
+  
+  geom_hline(aes(yintercept=mean(AVG_PVMATH)),
+               color="#E3A857", linewidth=0.7, linetype="dashed") +
+  annotate(
+      geom = "text", x = 1.5, y = mn_math - 80,
+      label = paste0("Overall\nMean\n", mn_math),
+      color = "#E3A857", size = 2.5
+    )  +
+  
+  annotate(
+    geom = "curve", x = 1.3, xend = 1.2, y = 515, yend = 560, 
+    curvature = -.4, arrow = arrow(length = unit(2, "mm")),
+    color = "#E3A857") +
+  annotate(
+    geom = "curve", x = 1.3, xend = 1.3, y = 650, yend = 600, 
+    curvature = .3, arrow = arrow(length = unit(2, "mm")),
+    color = "grey20") +
+  
+  geom_hline(aes(yintercept=median(AVG_PVMATH)),
+               color="grey20", linewidth=0.7, linetype="dashed") +
+  annotate(
+      geom = "text", 
+      x = 1.5, 
+      y = med_math + 80,
+      label = paste0("Overall\nMedian\n", med_math),
+      color = "grey20",
+      size = 2.5
+    ) +
+  theme(
+    legend.position = 'none',
+    axis.text.x = element_blank(),
+    panel.grid.major.x = element_blank()
+  )
+
+
+# Reading
+a_g2 <- ggplot(stu2, aes(x = Gender, y = AVG_PVREAD, fill=Gender)) +
+  
+  stat_halfeye(aes(fill = Gender, 
+                      justification = ifelse(Gender == "Female", 1.2, 0),
+                      side = ifelse(Gender == "Female", "left", "right")),
+              position = position_nudge(x = 0.1, y = 0), 
+              adjust = 1.2,
+              .width = 0,
+              trim = FALSE,
+              point_color = NA,
+              alpha = 0.5,
+              orientation = ) +
+  geom_point(aes(x = Gender, y = AVG_PVREAD, color=Gender),
+             position = position_jitter(width = 0.05),
+             size = 0.25,
+             shape = 20,
+             alpha = 0.5) + 
+  geom_boxplot(width = 0.05,
+              outlier.colour="grey20", 
+              outlier.shape=16,
+              outlier.size=1,
+              outlier.alpha = 0.5) +
+
+  stat_summary(fun = mean, geom = "text", aes(label = paste("Mean", round(after_stat(y), ))), position = position_nudge(x = ifelse(stu2$Gender == "Female", -0.5, 0.5)), vjust = 1.5,size=2.2, color ="#A64D79") +
+  
+  stat_summary(fun.y = mean, geom = "point", colour = "#A64D79") +
+
+  labs(title = "Reading", y = "Score", x = NULL) + theme_minimal() + 
+  scale_y_continuous(limits = c(100,900)) + theme(plot.title = element_text(size = 10)) +
+  
+  geom_hline(aes(yintercept=mean(AVG_PVREAD)),
+               color="#E3A857", linewidth=0.7, linetype="dashed") +
+  annotate(
+      geom = "text", x = 1.5, y = mn_read - 80,
+      label = paste0("Overall\nMean\n", mn_read),
+      color = "#E3A857", size = 2.5
+    )  +
+  
+  annotate(
+    geom = "curve", x = 1.3, xend = 1.2, y = 525, yend = 565, 
+    curvature = -.4, arrow = arrow(length = unit(2, "mm")),
+    color = "#E3A857") +
+  annotate(
+    geom = "curve", x = 1.3, xend = 1.3, y = 610, yend = 555, 
+    curvature = .3, arrow = arrow(length = unit(2, "mm")),
+    color = "grey20") +
+  
+  geom_hline(aes(yintercept=median(AVG_PVREAD)),
+               color="grey20", linewidth=0.7, linetype="dashed") +
+  annotate(
+      geom = "text", 
+      x = 1.5, 
+      y = med_read + 80,
+      label = paste0("Overall\nMedian\n", med_read),
+      color = "grey20",
+      size = 2.5
+    ) +
+  theme(
+    legend.position = "bottom",
+    axis.text.y = element_blank(),
+    axis.text.x = element_blank(),
+    panel.grid.major.x = element_blank()
+  )
+
+
+# Science
+a_g3 <- ggplot(stu2, aes(x = Gender, y = AVG_PVSCI, fill=Gender)) +
+  
+  stat_halfeye(aes(fill = Gender, 
+                      justification = ifelse(Gender == "Female", 1.2, 0),
+                      side = ifelse(Gender == "Female", "left", "right")),
+              position = position_nudge(x = 0.1, y = 0), 
+              adjust = 1.2,
+              .width = 0,
+              trim = FALSE,
+              point_color = NA,
+              alpha = 0.5,
+              orientation = ) +
+  geom_point(aes(x = Gender, y = AVG_PVSCI, color=Gender),
+             position = position_jitter(width = 0.05),
+             size = 0.25,
+             shape = 20,
+             alpha = 0.5) + 
+  geom_boxplot(width = 0.05,
+              outlier.colour="grey20", 
+              outlier.shape=16,
+              outlier.size=1,
+              outlier.alpha = 0.5) +
+
+  stat_summary(fun = mean, geom = "text", aes(label = paste("Mean", round(after_stat(y), ))), position = position_nudge(x = ifelse(stu2$Gender == "Female", -0.5, 0.5)), vjust = 1.5,size=2.2, color ="#A64D79") +
+  
+  stat_summary(fun.y = mean, geom = "point", colour = "#A64D79") +
+  
+  labs(title = "Science", y = "Score", x = NULL) + theme_minimal() + 
+  scale_y_continuous(limits = c(100,900)) + theme(plot.title = element_text(size = 10)) +
+  
+  geom_hline(aes(yintercept=mean(AVG_PVSCI)),
+               color="#E3A857", linewidth=0.7, linetype="dashed") +
+  annotate(
+      geom = "text", x = 1.5, y = mn_sci - 80,
+      label = paste0("Overall\nMean\n", mn_sci),
+      color = "#E3A857", size = 2.5
+    )  +
+  
+  annotate(
+    geom = "curve", x = 1.3, xend = 1.2, y = 535, yend = 575, 
+    curvature = -.4, arrow = arrow(length = unit(2, "mm")),
+    color = "#E3A857") +
+  annotate(
+    geom = "curve", x = 1.3, xend = 1.3, y = 630, yend = 580, 
+    curvature = .3, arrow = arrow(length = unit(2, "mm")),
+    color = "grey20") +
+  
+  geom_hline(aes(yintercept=median(AVG_PVSCI)),
+               color="grey20", linewidth=0.7, linetype="dashed") +
+  annotate(
+      geom = "text", 
+      x = 1.5, 
+      y = med_sci + 80,
+      label = paste0("Overall\nMedian\n", med_sci),
+      color = "grey20",
+      size = 2.5
+    ) +
+  theme(
+    legend.position = 'none',
+    panel.grid.major.x = element_blank()
+  )
+```
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show suggested code"
+# Patch plots together
+patch <- (a_g1 | a_g2 | a_g3) 
+
+patch +
+  plot_annotation(
+                title = "Male students performed slightly better than female students in Math and Science",
+                subtitle = "Wide range of scores for each subject with presence of outliers",
+                tag_levels = "I",
+                caption = "Data Source: OECD (2022)") +
+  theme_minimal() +
+  theme(axis.ticks = element_blank(),
+        axis.text.y = element_blank(),
+        axis.text.x = element_blank(),
+        panel.grid.major.x = element_blank(),
+        legend.position = 'none')
+```
+
+::: panel-tabset
+#### Mathematics
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show suggested code"
+
+# Mathematics
+a_g1 <- ggplot(stu2, aes(x = Gender, y = AVG_PVMATH, fill=Gender)) +
+  
+  stat_halfeye(aes(fill = Gender, 
+                      justification = ifelse(Gender == "Female", 1.2, 0),
+                      side = ifelse(Gender == "Female", "left", "right")),
+              position = position_nudge(x = 0.1, y = 0), 
+              adjust = 1.2,
+              .width = 0,
+              trim = FALSE,
+              point_color = NA,
+              alpha = 0.5,
+              orientation = ) +
+  geom_point(aes(x = Gender, y = AVG_PVMATH, color=Gender),
+             position = position_jitter(width = 0.05),
+             size = 0.25,
+             shape = 20,
+             alpha = 0.5) + 
+  geom_boxplot(width = 0.05,
+              outlier.colour="grey20", 
+              outlier.shape=16,
+              outlier.size=1,
+              outlier.alpha = 0.5) +
+  
+  stat_summary(fun = mean, geom = "text", aes(label = paste("Mean", round(after_stat(y), ))), position = position_nudge(x = ifelse(stu2$Gender == "Female", -0.15, 0.15)), vjust = 1,size=2.2, color ="#A64D79") +
+  
+  stat_summary(fun.y = mean, geom = "point", colour = "#A64D79") +
+  
+  labs(y = "Score", x = NULL) + theme_minimal() + 
+  scale_y_continuous(limits = c(100,900)) + theme(plot.title = element_text(size = 10)) +
+  
+  geom_hline(aes(yintercept=mean(AVG_PVMATH)),
+               color="#E3A857", linewidth=0.7, linetype="dashed") +
+  annotate(
+      geom = "text", x = 1.5, y = mn_math - 80,
+      label = paste0("Overall Mean: ", mn_math),
+      color = "#E3A857", size = 2.5
+    )  +
+  
+  annotate(
+    geom = "curve", x = 1.3, xend = 1.2, y = 515, yend = 560, 
+    curvature = -.4, arrow = arrow(length = unit(2, "mm")),
+    color = "#E3A857") +
+  annotate(
+    geom = "curve", x = 1.3, xend = 1.3, y = 650, yend = 600, 
+    curvature = .3, arrow = arrow(length = unit(2, "mm")),
+    color = "grey20") +
+  
+  geom_hline(aes(yintercept=median(AVG_PVMATH)),
+               color="grey20", linewidth=0.7, linetype="dashed") +
+  annotate(
+      geom = "text", 
+      x = 1.5, 
+      y = med_math + 80,
+      label = paste0("Overall Median: ", med_math),
+      color = "grey20",
+      size = 2.5
+    ) +
+  theme(
+    axis.text.x = element_blank(),
+    panel.grid.major.x = element_blank()
+  )
+
+a_g1 +
+  plot_annotation(
+                title = "Male students performed slightly better than female students in Mathematics",
+                subtitle = "Wide range of scores for each subject with presence of outliers",
+                caption = "Data Source: OECD (2022)") +
+  theme_minimal() +
+  theme(axis.ticks = element_blank(),
+        axis.text.x = element_blank(),
+        legend.position = "bottom")
+```
+
+#### Reading
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show suggested code"
+
+# Reading
+a_g2 <- ggplot(stu2, aes(x = Gender, y = AVG_PVREAD, fill=Gender)) +
+  
+  stat_halfeye(aes(fill = Gender, 
+                      justification = ifelse(Gender == "Female", 1.2, 0),
+                      side = ifelse(Gender == "Female", "left", "right")),
+              position = position_nudge(x = 0.1, y = 0), 
+              adjust = 1.2,
+              .width = 0,
+              trim = FALSE,
+              point_color = NA,
+              alpha = 0.5,
+              orientation = ) +
+  geom_point(aes(x = Gender, y = AVG_PVREAD, color=Gender),
+             position = position_jitter(width = 0.05),
+             size = 0.25,
+             shape = 20,
+             alpha = 0.5) + 
+  geom_boxplot(width = 0.05,
+              outlier.colour="grey20", 
+              outlier.shape=16,
+              outlier.size=1,
+              outlier.alpha = 0.5) +
+  stat_summary(fun = mean, geom = "text", aes(label = paste("Mean", round(after_stat(y), ))), position = position_nudge(x = ifelse(stu2$Gender == "Female", -0.15, 0.15)), vjust = 1.5,size=2.2, color ="#A64D79") +
+  
+  stat_summary(fun.y = mean, geom = "point", colour = "#A64D79") +
+  
+  labs(y = "Score", x = NULL) + theme_minimal() + 
+  scale_y_continuous(limits = c(100,900)) + theme(plot.title = element_text(size = 10)) +
+  
+  geom_hline(aes(yintercept=mean(AVG_PVREAD)),
+               color="#E3A857", linewidth=0.7, linetype="dashed") +
+  annotate(
+      geom = "text", x = 1.5, y = mn_read - 80,
+      label = paste0("Overall Mean: ", mn_read),
+      color = "#E3A857", size = 2.5
+    )  +
+  
+  annotate(
+    geom = "curve", x = 1.3, xend = 1.2, y = 525, yend = 565, 
+    curvature = -.4, arrow = arrow(length = unit(2, "mm")),
+    color = "#E3A857") +
+  annotate(
+    geom = "curve", x = 1.3, xend = 1.3, y = 610, yend = 555, 
+    curvature = .3, arrow = arrow(length = unit(2, "mm")),
+    color = "grey20") +
+  
+  geom_hline(aes(yintercept=median(AVG_PVREAD)),
+               color="grey20", linewidth=0.7, linetype="dashed") +
+  annotate(
+      geom = "text", 
+      x = 1.5, 
+      y = med_read + 80,
+      label = paste0("Overall Median: ", med_read),
+      color = "grey20",
+      size = 2.5
+    ) +
+  theme(
+    axis.text.x = element_blank(),
+    panel.grid.major.x = element_blank()
+  )
+
+a_g2 +
+  plot_annotation(
+                title = "Female students performed slightly better than male students in Reading",
+                subtitle = "Wide range of scores for each subject with presence of outliers",
+                caption = "Data Source: OECD (2022)") +
+  theme_minimal() +
+  theme(axis.ticks = element_blank(),
+        axis.text.x = element_blank(),
+        legend.position = "bottom")
+```
+
+#### Science
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show suggested code"
+
+# Science
+a_g3 <- ggplot(stu2, aes(x = Gender, y = AVG_PVSCI, fill=Gender)) +
+  
+  stat_halfeye(aes(fill = Gender, 
+                      justification = ifelse(Gender == "Female", 1.2, 0),
+                      side = ifelse(Gender == "Female", "left", "right")),
+              position = position_nudge(x = 0.1, y = 0), 
+              adjust = 1.2,
+              .width = 0,
+              trim = FALSE,
+              point_color = NA,
+              alpha = 0.5,
+              orientation = ) +
+  geom_point(aes(x = Gender, y = AVG_PVSCI, color=Gender),
+             position = position_jitter(width = 0.05),
+             size = 0.25,
+             shape = 20,
+             alpha = 0.5) + 
+  geom_boxplot(width = 0.05,
+              outlier.colour="grey20", 
+              outlier.shape=16,
+              outlier.size=1,
+              outlier.alpha = 0.5) +
+
+  stat_summary(fun = mean, geom = "text", aes(label = paste("Mean", round(after_stat(y), ))), position = position_nudge(x = ifelse(stu2$Gender == "Female", -0.15, 0.15)), vjust = 1.5,size=2.2, color ="#A64D79") +
+  
+  stat_summary(fun.y = mean, geom = "point", colour = "#A64D79") +
+  
+  labs(y = "Score", x = NULL) + theme_minimal() + 
+  scale_y_continuous(limits = c(100,900)) + theme(plot.title = element_text(size = 10)) +
+  
+  geom_hline(aes(yintercept=mean(AVG_PVSCI)),
+               color="#E3A857", linewidth=0.7, linetype="dashed") +
+  annotate(
+      geom = "text", x = 1.5, y = mn_sci - 80,
+      label = paste0("Overall\nMean\n", mn_sci),
+      color = "#E3A857", size = 2.5
+    )  +
+  
+  annotate(
+    geom = "curve", x = 1.3, xend = 1.2, y = 535, yend = 575, 
+    curvature = -.4, arrow = arrow(length = unit(2, "mm")),
+    color = "#E3A857") +
+  annotate(
+    geom = "curve", x = 1.3, xend = 1.3, y = 630, yend = 580, 
+    curvature = .3, arrow = arrow(length = unit(2, "mm")),
+    color = "grey20") +
+  
+  geom_hline(aes(yintercept=median(AVG_PVSCI)),
+               color="grey20", linewidth=0.7, linetype="dashed") +
+  annotate(
+      geom = "text", 
+      x = 1.5, 
+      y = med_sci + 80,
+      label = paste0("Overall\nMedian\n", med_sci),
+      color = "grey20",
+      size = 2.5
+    ) +
+  theme(
+    axis.text.x = element_blank(),
+    panel.grid.major.x = element_blank()
+  )
+
+a_g3 +
+  plot_annotation(
+                title = "Male students performed slightly better than female students in Science",
+                subtitle = "Wide range of scores for each subject with presence of outliers",
+                caption = "Data Source: OECD (2022)") +
+  theme_minimal() +
+  theme(axis.ticks = element_blank(),
+        axis.text.x = element_blank(),
+        legend.position = "bottom")
+
+```
+:::
+
+::: {.callout-tip icon="false"}
+### {{< fa wand-sparkles >}} Make-over with Density-Boxplot
+
+-   Achieved in terms of **Clarity**
+
+    -   Graph title is added to contrast the difference between male and female performance.
+
+    -   Sub-title is added to provide more context and explanation on the significant findings.
+
+    -   Caption is added to show data source.
+
+    -   Legend is placed at the bottom of the chart (along x-axis).
+
+    -   Overall Median and Mean values are annotated to enhance interpretation of distribution while serve as reference points. The values allow quick visualisation of the central tendency and skewness of distribution.
+
+    -   Subject mean values are also added to aid in explanation of data, and hightlighted in a distinct colour that tie in with box-plot "mean dot" value.
+
+    -   Charts are flipped (i.e. y-axis for Scores, x-axis for Gender) to enhance reading mode with a common y-axis.
+
+    -   Annotation "tags" are included to differentiate the different charts and for a more professional visual aspect.
+
+-   Achieved in terms of **Aesthetic**
+
+    -   Outliers are highlighted to better differentiate them.
+:::
+
+## 3.3 Differences in Subject Scores Among Schools
+
+### Original Visual #3
+
+Range Plot was used for visual 3, where minimum, maximum and differences in each subject scores were calculated by school level.
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show original code"
+math_sch <- stu2 %>%
+  group_by(SCHOOL) %>%
+  summarise_at(vars(AVG_PVMATH), 
+               list(minscore = min, maxscore = max)) %>%
+  mutate(difference = maxscore - minscore)
+
+read_sch <- stu2 %>%
+  group_by(SCHOOL) %>%
+  summarise_at(vars(AVG_PVREAD), 
+               list(minscore = min, maxscore = max)) %>%
+  mutate(difference = maxscore - minscore)
+
+sci_sch <- stu2 %>%
+  group_by(SCHOOL) %>%
+  summarise_at(vars(AVG_PVSCI), 
+               list(minscore = min, maxscore = max)) %>%
+  mutate(difference = maxscore - minscore)
+```
+
+::: panel-tabset
+#### Mathematics
+
+```{r}
+#| code-fold: TRUE
+#| code-summary: "Show original code"
+# Mathematics
+math_sch_high5 <- math_sch %>% slice_max(maxscore, prop = 0.05)
+
+
+math_sch_min <- math_sch_high5 %>%
+  select(-maxscore)
+
+
+math_sch_max <- math_sch_high5%>%
+  select(-minscore)
+
+
+math_long <- math_sch_high5%>% 
+  select(-difference)%>%
+  pivot_longer(-SCHOOL) 
+
+
+h1 <- ggplot(math_long) +
+  geom_segment(data = math_sch_min,
+               aes(x = minscore, y = SCHOOL,
+                   yend = math_sch_max$SCHOOL, xend=math_sch_max$maxscore),
+               color= "#aeb6bf",
+               size = 4,
+               alpha = 0.5) +
+  geom_point(aes(x = value, y = SCHOOL, color = name), size = 4, show.legend = TRUE) + 
+  labs(title = "Differences in Students Scores for Top 5% Schools in Maths", x = "Maths Scores", y = "School", color = "Min/Max Scores") +
+  geom_text(data = math_sch_min,
+            aes(label= paste("Diff: ", difference), x= minscore+100, y= SCHOOL),
+             color = "black",
+             size = 2.5)+ theme_minimal()+
+  theme(panel.grid.minor.y = element_blank(),
+        panel.grid.minor.x = element_blank(), 
+        axis.ticks.x = element_line(color = "#4a4e4d"),
+        axis.text.y = element_text(size = 8),
+        axis.title.y = element_text(size = 8), 
+        axis.text.x = element_text(size = 8),
+        axis.title.x = element_text(size = 8))
+
+h1
+```
+
+#### Reading
+
+```{r}
+#| code-fold: TRUE
+#| code-summary: "Show original code"
+# Reading
+read_sch_high5 <- read_sch %>% slice_max(maxscore, prop = 0.05)
+
+read_sch_min <- read_sch_high5 %>%
+  select(-maxscore)
+
+read_sch_max <- read_sch_high5%>%
+  select(-minscore)
+
+read_long <- read_sch_high5%>% 
+  select(-difference)%>%
+  pivot_longer(-SCHOOL) 
+
+h2 <- ggplot(read_long) +
+  geom_segment(data = read_sch_min,
+               aes(x = minscore, y = SCHOOL,
+                   yend = read_sch_max$SCHOOL, xend=read_sch_max$maxscore),
+               color= "#aeb6bf",
+               size = 4,
+               alpha = 0.5) +
+  geom_point(aes(x = value, y = SCHOOL, color = name), size = 4, show.legend = TRUE) + 
+  labs(title = "Differences in Students Scores for Top 5% Schools in Reading", x = "Reading Scores", y = "School", color = "Min/Max Scores") +
+  geom_text(data = read_sch_min,
+            aes(label= paste("Diff: ", difference), x= minscore+100, y= SCHOOL),
+             color = "black",
+             size = 2.5)+ theme_minimal()+
+  theme(panel.grid.minor.y = element_blank(),
+        panel.grid.minor.x = element_blank(), 
+        axis.ticks.x = element_line(color = "#4a4e4d"),
+        axis.text.y = element_text(size = 8),
+        axis.title.y = element_text(size = 8), 
+        axis.text.x = element_text(size = 8),
+        axis.title.x = element_text(size = 8))
+
+h2
+```
+
+#### Reading
+
+```{r}
+#| code-fold: TRUE
+#| code-summary: "Show original code"
+# Science
+sci_sch_high5 <- sci_sch %>% slice_max(maxscore, prop = 0.05)
+
+sci_sch_min <- sci_sch_high5 %>%
+  select(-maxscore)
+
+sci_sch_max <- sci_sch_high5%>%
+  select(-minscore)
+
+sci_long <- sci_sch_high5%>% 
+  select(-difference)%>%
+  pivot_longer(-SCHOOL) 
+
+h3 <- ggplot(sci_long) +
+  geom_segment(data = sci_sch_min,
+               aes(x = minscore, y = SCHOOL,
+                   yend = sci_sch_max$SCHOOL, xend=sci_sch_max$maxscore),
+               color= "#aeb6bf",
+               size = 4,
+               alpha = 0.5) +
+  geom_point(aes(x = value, y = SCHOOL, color = name), size = 4, show.legend = TRUE) + 
+  labs(title = "Differences in Students Scores for Top 5% Schools in Science", caption = "Data from PISA 2022 Study", x = "Science Scores", y = "School", color = "Min/Max Scores") +
+  geom_text(data = sci_sch_min,
+            aes(label= paste("Diff: ", difference), x= minscore+100, y= SCHOOL),
+             color = "black",
+             size = 2.5) + theme_minimal()+
+  theme(panel.grid.minor.y = element_blank(),
+        panel.grid.minor.x = element_blank(), 
+        axis.ticks.x = element_line(color = "#4a4e4d"), 
+        axis.text.y = element_text(size = 8),
+        axis.title.y = element_text(size = 8), 
+        axis.text.x = element_text(size = 8),
+        axis.title.x = element_text(size = 8))
+
+h3
+```
+:::
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show original code"
+# patch
+h1+ h2 + h3 + plot_layout(nrow = 3, guides = "collect")
+```
+
+**Visual 3 seems to fall under "Quadrant IV - Beautiful but Confusing"**
+
+::: {.callout-important icon="false"}
+#### Observations from Visual 3 \[Range Plot\]
+
+##### {{< fa thumbs-up >}} Areas done well
+
+-   In terms of **Clarity**
+
+    -   Individual graphs and patchwork are well labelled with graph title, axes-labels, axis-ticks, and legend with caption to show data source.
+
+    -   Value difference for top 5% of schools are labelled clearly and properly.
+
+-   In terms of **Aesthetic**
+
+    -   Colours used is clear and distinct, and easy to distinguish between minimum and maximum score, and score differences.
+    -   Major x- and y-axis gridlines are used as guide for readers to identify respective schools and their scores.
+    -   Axes range did not start from zero given that the minimum score is above 300. This removed unwanted whitespace as the scale would not be affected by it.
+
+##### {{< fa wand-sparkles >}} Room for further improvement
+
+-   In terms of **Clarity**
+
+    -   Patchwork shows repetitive axes (i.e. y-axis for School, x-axis for Scores) across Mathematics, Reading and Science which can be distracting and confusing to readers.
+
+    -   Linear range plot might be hard to visualise the scale of difference. In addition, there was no specific order sequence (e.g. ascending or descending order of the Top 5%) in terms of mean values (i.e. minimum, maximum or differences).
+
+    -   Annotation "tags" could be added to differentiate the different charts and for a more professional visual aspect.
+
+    -   The intended focus was unclear as the original author wanted to focus on exploring the score difference of both Top 10% and Bottom 10% performing schools for each subject. However, the original code chunk prepared and charts created were done on the Top 5% of schools only. This inconsistency could confuse and mislead readers.
+:::
+
+### Suggested Sketch #3
+
+From the original visual, it seemed that the original author wanted to focus on the differences in score among Top 10% and Bottom 10% performing schools for each subject. A linear range plot was used, however, it might be hard to visualise the scale of difference. An alternative visual design to show potential relationship would be the use of `bubble plot`, which allow a third dimension comparison, in this case (score difference).
+
+A rough sketch of the proposed design is shown below.
+
+![Sketch by: TSE (2024)](images/sketch3.png){fig-align="left" width="60%"}
+
+### Visual Makeover #3
+
+New data values were prepared and calculated for this makeover. The code chunk below uses `intsvy package` to calculate the mean scores from the 10 Plausible Values by using `pisa.mean.pv()` function. The function also allow sub-grouping of variables i.e. School ID.
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show suggested code"
+library(intsvy)
+
+sch_mnpv_math <- pisa.mean.pv(pvlabel = paste0("PV",1:10,"MATH"), by = "CNTSCHID", data = stu_qqq_SG)
+
+sch_mnpv_math <- sch_mnpv_math %>%
+  rename(
+    # rename variables
+    "SCHOOL" = "CNTSCHID",
+  )
+
+sch_mnpv_sci <- pisa.mean.pv(pvlabel = paste0("PV",1:10,"SCIE"), by = "CNTSCHID", data = stu_qqq_SG)
+
+sch_mnpv_sci <- sch_mnpv_sci %>%
+  rename(
+    # rename variables
+    "SCHOOL" = "CNTSCHID",
+  )
+
+sch_mnpv_read <- pisa.mean.pv(pvlabel = paste0("PV",1:10,"READ"), by = "CNTSCHID", data = stu_qqq_SG)
+
+sch_mnpv_read <- sch_mnpv_read %>%
+  rename(
+    # rename variables
+    "SCHOOL" = "CNTSCHID",
+  )
+```
+
+The code chunk (adapted from original author's version) below identify the Top 10% and Bottom 10% performing schools.
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show suggested code"
+# extract top 10%
+math_sch_top10 <- sch_mnpv_math %>% 
+  top_n(n = floor(0.1 * n()), wt = Mean) 
+
+sci_sch_top10 <- sch_mnpv_sci %>% 
+  top_n(n = floor(0.1 * n()), wt = Mean) 
+
+read_sch_top10 <- sch_mnpv_read %>% 
+  top_n(n = floor(0.1 * n()), wt = Mean) 
+
+
+# extract bottom 10%
+math_sch_bot10 <- sch_mnpv_math %>% 
+  top_n(n = floor(-0.1 * n()), wt = Mean)
+
+sci_sch_bot10 <- sch_mnpv_sci %>% 
+  top_n(n = floor(-0.1 * n()), wt = Mean)
+
+read_sch_bot10 <- sch_mnpv_read %>% 
+  top_n(n = floor(-0.1 * n()), wt = Mean)
+
+
+# calculate difference by school
+math_sch_diff <- stu2 %>%
+  group_by(SCHOOL) %>%
+  summarise_at(vars(AVG_PVMATH), 
+               list(minscore = min, maxscore = max)) %>%
+  mutate(difference = maxscore - minscore)
+
+sci_sch_diff <- stu2 %>%
+  group_by(SCHOOL) %>%
+  summarise_at(vars(AVG_PVSCI), 
+               list(minscore = min, maxscore = max)) %>%
+  mutate(difference = maxscore - minscore)
+
+read_sch_diff <- stu2 %>%
+  group_by(SCHOOL) %>%
+  summarise_at(vars(AVG_PVREAD), 
+               list(minscore = min, maxscore = max)) %>%
+  mutate(difference = maxscore - minscore)
+```
+
+The code chunk below calculates the score differences and thereafter combines the tables for Mathematics, Reading and Science respectively.
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show suggested code"
+# round values to 2 d.p
+math_sch_diff$difference <- round(math_sch_diff$difference, digits = 2)
+math_sch_diff$minscore <- round(math_sch_diff$minscore, digits = 2)
+math_sch_diff$maxscore <- round(math_sch_diff$maxscore, digits = 2)
+
+sci_sch_diff$difference <- round(sci_sch_diff$difference, digits = 2)
+sci_sch_diff$minscore <- round(sci_sch_diff$minscore, digits = 2)
+sci_sch_diff$maxscore <- round(sci_sch_diff$maxscore, digits = 2)
+
+read_sch_diff$difference <- round(read_sch_diff$difference, digits = 2)
+read_sch_diff$minscore <- round(read_sch_diff$minscore, digits = 2)
+read_sch_diff$maxscore <- round(read_sch_diff$maxscore, digits = 2)
+
+# merge tables
+join_math_scht <- merge(x=math_sch_diff, y = math_sch_top10, by = "SCHOOL")
+join_math_schb <- merge(x=math_sch_diff, y = math_sch_bot10, by = "SCHOOL")
+
+join_sci_scht <- merge(x=sci_sch_diff, y = sci_sch_top10, by = "SCHOOL")
+join_sci_schb <- merge(x=sci_sch_diff, y = sci_sch_bot10, by = "SCHOOL")
+
+join_read_scht <- merge(x=read_sch_diff, y = read_sch_top10, by = "SCHOOL")
+join_read_schb <- merge(x=read_sch_diff, y = read_sch_bot10, by = "SCHOOL")
+```
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show suggested code"
+# add rows
+join_math_sch <- rbind(join_math_scht, join_math_schb)
+
+join_sci_sch <- rbind(join_sci_scht, join_sci_schb)
+
+join_read_sch <- rbind(join_read_scht, join_read_schb)
+
+
+# rename columns
+join_math_sch <- join_math_sch %>%
+  rename(
+    # rename variables
+    "School" = "SCHOOL",
+    "Difference" = "difference",
+    "Max" = "maxscore",
+    "Min" = "minscore"
+  )
+
+join_sci_sch <- join_sci_sch %>%
+  rename(
+    # rename variables
+    "School" = "SCHOOL",
+    "Difference" = "difference",
+    "Max" = "maxscore",
+    "Min" = "minscore"
+  )
+
+join_read_sch <- join_read_sch %>%
+  rename(
+    # rename variables
+    "School" = "SCHOOL",
+    "Difference" = "difference",
+    "Max" = "maxscore",
+    "Min" = "minscore"
+  )
+```
+
+As part of chart aesthetics enhancement, in order to create the interactive bubble plots and set the colour palette scale, `plotly()` and `RColorBrewer` packages are installed.
+
+::: panel-tabset
+#### Mathematics
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show suggested code"
+library(plotly, RColorBrewer)
+
+pl1 <- ggplot(join_math_sch, aes(x = School, y = Mean,
+                                 text = paste("School ID : ", 
+                                              School, "\nNo. of Students : ",
+                                              Freq, "\nMax Score : ", 
+                                              Max, "\nMean Score : ", 
+                                              Mean, "\nMin Score : ", 
+                                              Min, "\nScore Difference : ", Difference))) +
+  geom_point(aes(size = Difference, color = Difference), alpha = 0.5) +
+  scale_color_gradient(low = "#a2c9cb", high = "#22494b") +
+  theme_minimal() +
+  theme(plot.title = element_text(size=12),
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor = element_blank()
+  ) +
+  ylim(300, 800) +
+  labs(title = "Top 10% performing schools have relatively smaller difference \nin Mathematics performance compared to the Bottom 10%",
+       y = "Mathematics Scores", x = "Schools",
+       caption = "Data Source: OECD (2022)", size = "Score \nDifference", 
+       color = "Score \nDifference") +
+  # annotate charts to highlight top and bottom 10% of schools with rectangles, arrows & text
+  geom_hline(aes(yintercept=min(math_sch_top10$Mean) - 10),
+            color="#A9BA9D", linewidth=0.5, linetype="dash") +
+  geom_hline(aes(yintercept=max(math_sch_top10$Mean) + 10),
+            color="#A9BA9D", linewidth=0.5, linetype="dash") +
+  geom_text(aes(15, 720, label = "Top 10% Performing Schools", 
+                vjust = 1, font_size = 7)) +
+  
+  geom_hline(aes(yintercept=min(math_sch_bot10$Mean) - 10),
+            color="salmon", linewidth=0.5, linetype="dash") +
+  geom_hline(aes(yintercept=max(math_sch_bot10$Mean) + 10),
+            color="salmon", linewidth=0.5, linetype="dash") +
+  geom_text(aes(10, 420, label = "Bottom 10% Performing Schools", 
+                vjust = 1, font_size = 7)) 
+
+# convert to an interactive plot
+ggplotly(pl1, tooltip = "text")
+```
+
+#### Reading
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show suggested code"
+library(plotly, RColorBrewer)
+
+pl2 <- ggplot(join_read_sch, aes(x = School, y = Mean,
+                                 text = paste("School ID : ", 
+                                              School, "\nNo. of Students : ",
+                                              Freq, "\nMax Score : ", 
+                                              Max, "\nMean Score : ", 
+                                              Mean, "\nMin Score : ", 
+                                              Min, "\nScore Difference : ", Difference))) +
+  geom_point(aes(size = Difference, color = Difference), alpha = 0.5) +
+  scale_color_gradient(low = "#f9cfa6", high = "#ac7a4a") +
+  theme_minimal() +
+  theme(plot.title = element_text(size=12),
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor = element_blank()
+  ) +
+  ylim(300, 800) +
+  labs(title = "Top 10% performing schools have relatively smaller difference \nin Reading performance compared to the Bottom 10%",
+    y = "Reading Scores", 
+    x = "Schools",
+    caption = "Data Source: OECD (2022)",
+    size = "Score \nDifference", 
+    color = "Score \nDifference") +
+  # annotate charts to highlight top and bottom 10% of schools with rectangles, arrows & text
+  geom_hline(aes(yintercept=min(read_sch_top10$Mean) - 15),
+            color="#A9BA9D", linewidth=0.5, linetype="dash") +
+  geom_hline(aes(yintercept=max(read_sch_top10$Mean) + 15),
+            color="#A9BA9D", linewidth=0.5, linetype="dash") +
+  geom_text(aes(15, 700, label = "Top 10% Performing Schools", 
+                vjust = 1, font_size = 7)) +
+  
+  geom_hline(aes(yintercept=min(read_sch_bot10$Mean) - 15),
+            color="salmon", linewidth=0.5, linetype="dash") +
+  geom_hline(aes(yintercept=max(read_sch_bot10$Mean) + 15),
+            color="salmon", linewidth=0.5, linetype="dash") +
+  geom_text(aes(10, 400, label = "Bottom 10% Performing Schools", 
+                vjust = 1, font_size = 7)) 
+
+# convert to an interactive plot
+ggplotly(pl2, tooltip = "text")
+```
+
+#### Science
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show suggested code"
+library(plotly, RColorBrewer)
+
+pl3 <- ggplot(join_sci_sch, aes(x = School, y = Mean,
+                                 text = paste("School ID : ", 
+                                              School, "\nNo. of Students : ",
+                                              Freq, "\nMax Score : ", 
+                                              Max, "\nMean Score : ", 
+                                              Mean, "\nMin Score : ", 
+                                              Min, "\nScore Difference : ", Difference))) +
+  geom_point(aes(size = Difference, color = Difference), alpha = 0.5) +
+  scale_color_gradient(low = "#abd0da", high = "#456a74") +
+  theme_minimal() +
+  theme(plot.title = element_text(size=12),
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor = element_blank()
+  ) +
+  ylim(300, 800) +
+  labs(title = "Top 10% performing schools have relatively smaller difference \nin Science performance compared to the Bottom 10%",
+    y = "Science Scores", 
+    x = "Schools",
+    caption = "Data Source: OECD (2022)",
+    size = "Score \nDifference", 
+    color = "Score \nDifference") +
+  # annotate charts to highlight top and bottom 10% of schools with rectangles, arrows & text
+  geom_hline(aes(yintercept=min(sci_sch_top10$Mean) - 15),
+            color="#A9BA9D", linewidth=0.5, linetype="dash") +
+  geom_hline(aes(yintercept=max(sci_sch_top10$Mean) + 15),
+            color="#A9BA9D", linewidth=0.5, linetype="dash") +
+  geom_text(aes(15, 700, label = "Top 10% Performing Schools", 
+                vjust = 1, font_size = 7)) +
+  
+  geom_hline(aes(yintercept=min(sci_sch_bot10$Mean) - 15),
+            color="salmon", linewidth=0.5, linetype="dash") +
+  geom_hline(aes(yintercept=max(sci_sch_bot10$Mean) + 15),
+            color="salmon", linewidth=0.5, linetype="dash") +
+  geom_text(aes(10, 400, label = "Bottom 10% Performing Schools", 
+                vjust = 1, font_size = 7)) 
+
+# convert to an interactive plot
+ggplotly(pl3, tooltip = "text")
+```
+:::
+
+::: {.callout-tip icon="false"}
+### {{< fa wand-sparkles >}} Make-over with Bubble Plot
+
+-   Achieved in terms of **Clarity**
+
+    -   Graph title is added to explain the significant findings (e.g. Top 10% performing schools have relatively smaller difference in students' performance compared to Bottom 10% performing schools).
+
+    -   Top 10% and Bottom 10% performing schools are demarcated with text and dashlines to clearly show the range difference. There was a deliberate choice of using two different dashline colours to clearly distinguish the Top 10% and Bottom 10%.
+
+    -   Scores differences of Top 10% and Bottom 10% were re-calcuated to ensure accuracy of results.
+
+    -   Y-axis scale limit has been standardised across the three subjects for ease of comparison.
+
+    -   Bubble plot is used to add a third dimension to scatter plot (as scatter plot only compares two variables). This chart type is able to present relationship between the variables (Schools, Mean scores and Score differences). The third dimension (score difference) will allow readers to better visualise the difference in terms of the bubble size and colour intensity (i.e. the larger the bubble the larger the difference, and the darker the bubble the larger the difference).
+
+-   Achieved in terms of **Aesthetic**
+
+    -   Interactive bubble plot is used to include more information without cluttering the chart. Additional information (such as School ID, minimum, mean and maximum scores, number of students, and score differences) is available to reader when hover over the respective bubble which represents a school.
+
+    -   Y-axis range did not start from zero for these bubble plots given that the minimum score is above 300. Bubble chart provides three dimension comparison based on position and magnitude, rather than height/ length. Hence, the charts used will not necessarily need to start with zero axis as it will not distort the visualisation and interpretation of data (i.e. it will only affect if bar/ column charts were used). It is important to select the right scale to show all data as well as to reduce any redundant white space on chart.
+
+    -   X-axis value labels are intentionally removed to keep a clean design look for readers, given the interactivity element of the bubble chart as information will be made available to readers when hover over.
+:::
+
+## 3.4 Students’ Scores and Socioeconomic Factors
+
+### Original Visual #4
+
+Scatter Plot with `geom_point()` and `geom_smooth()` were used for visual 4. Visual 4 contains individual subject plots and a patchwork.
+
+::: panel-tabset
+#### Mathematics
+
+```{r}
+#| code-fold: TRUE
+#| code-summary: "Show original code"
+
+# Mathematics
+z1 <- ggplot(stu2, 
+       aes(x = AVG_PVMATH, y = ESCS)) +
+  geom_point() + 
+  geom_smooth(method = "lm", size=0.5, fill = "blue")+ 
+   coord_cartesian(xlim=c(150,850),
+                  ylim=c(-3,3)) + theme_minimal()+
+      theme(legend.position="none") + 
+  labs(title = "Relationship between Maths Scores and ESCS", 
+       x = 'Maths Scores', y = "ESCS")
+
+z1
+```
+
+#### Reading
+
+```{r}
+#| code-fold: TRUE
+#| code-summary: "Show original code"
+# Reading
+z2 <- ggplot(stu2, 
+       aes(x = AVG_PVREAD, y = ESCS)) +
+  geom_point()+
+  geom_smooth(method = "lm", size=0.5, fill = "blue")+ 
+   coord_cartesian(xlim=c(150,850),
+                  ylim=c(-3,3)) + theme_minimal()+
+      theme(legend.position="none") +   
+  labs(title = "Relationship between Reading Scores and ESCS", 
+       x = 'Reading Scores', y = "ESCS")
+
+z2
+```
+
+#### Science
+
+```{r}
+#| code-fold: TRUE
+#| code-summary: "Show original code"
+# Science
+z3 <- ggplot(stu2, 
+       aes(x = AVG_PVSCI, y = ESCS)) +
+  geom_point() + 
+    geom_smooth(method = "lm", size=0.5, fill = "blue")+ 
+   coord_cartesian(xlim=c(150,850),
+                  ylim=c(-3,3)) + theme_minimal()+
+      theme(legend.position="none") + 
+  labs(title = "Relationship between Science Scores and ESCS", 
+       caption = "Data from PISA 2022", 
+       x = 'Science Scores', y = "ESCS")
+
+z3
+```
+:::
+
+```{r}
+#| code-fold: True
+#| code-summary: "Show original code"
+# patch
+patch3 <- z1 +  z2 + z3
+patch3 + plot_layout(nrow = 3)
+```
+
+**Visual 4 seems to fall under "Quadrant II - Clear but Ugly"**
+
+::: {.callout-important icon="false"}
+#### Observations from Visual 4 \[Scatter Plot\]
+
+##### {{< fa thumbs-up >}} Areas done well
+
+-   In terms of **Clarity**
+
+    -   Patchwork is well labelled with graph title, axes-labels, legend with caption to show data source.
+
+    -   `geom_smooth` is added to ascertain potential correlation between variables ESCS and Scores of Mathematics, Reading and Science.
+
+    -   Overall chart is easy to understand. However, readers may need to take note of the y-axis that extends to the negative value range.
+
+-   In terms of **Aesthetic**
+
+    -   Contrasting colours were used to distinguish the correlation line and the scatter points.
+
+##### {{< fa wand-sparkles >}} Room for further improvement
+
+-   In terms of **Clarity**
+
+    -   Patchwork shows repetitive axes (i.e. y-axis for Gender, x-axis for Scores) across Mathematics, Reading and Science which can be distracting and confusing to readers.
+
+    -   Y-axis label could be renamed to better reflect the variables (e.g. Socioeconomic status) instead of using the existing variable name which is an acroynm.
+
+    -   Major gridlines on the y-axis label may not be meaningful, given that ESCS values are in continuous range (largely between -2 and 2). However, if minor gridlines were added, it might clutter the y-axis.
+
+-   In terms of **Aesthetic**
+
+    -   Gridlines may not be necessary in the scatter plots (especially in patchwork).
+:::
+
+### Suggested Sketch #4
+
+From the original visual, it seemed that the original author wanted to explore the correlation of ESCS with the respective subjects. An alternative visual design to show potential relationship for this would be to bin ESCS first and then visualise with the use of `raincloud plot`.
+
+A rough sketch of the proposed design is shown below.
+
+![Sketch by: TSE (2024)](images/sketch4.png){fig-align="left" width="60%"}
+
+### Visual Makeover #4
+
+`ggpairs()` is used to plot correlation matrix for a quick visual summary of the correlation between respective scores and socioeconomic status as well as respective scores and Gender. `ggpairs()` is part of `GGally` package. The correlation matrix, `ggpairs()` can replace the individual correlation plot as well as the patchwork.
+
+The correlation matrix will allow readers to have a quick visual glimpse into the distribution and correlation of between the respective variables.
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show suggested code"
+library(GGally)
+corr <- stu2[, c(3, 8, 62:64)]
+ggpairs(corr,
+        mapping = aes(color = stu2$Gender),
+        upper = list(continuous = wrap('cor', size = 3)),
+        lower = list(combo = wrap("facethist", bins = 30)),
+        diag = list(continuous = wrap("densityDiag", alpha = 0.5)),
+        columnLabels = c('Gender', 'Socioeconomic', 'Mathematics', 'Science', 'Reading'),
+        title = "Correlation between students performance and gender/ socioeconomic status"
+      )
+```
+
+The relatively even distribution with peak values ranging between ESCS value of -2 and 2, is considerably large given the small ordinal scale (continuous). The code chunk below bins the socioeconomic status (ESCS) variables into 5 groups.
+
+```{r}
+#| code-fold: True
+#| code-summary: "Show suggested code"
+binning <- stu2 %>%
+  mutate(
+    # binning ESCS into 5 groups
+    ESCSGroup = (quantile_Rank=ntile(stu2$ESCS,5)),
+    
+    # renaming bin ESCS labels
+    ESCSGroup = factor(ESCSGroup, labels = c("Lowest", "Low", "Average", "High", "Highest"))
+  )
+```
+
+::: panel-tabset
+#### Mathematics
+
+```{r}
+#| code-fold: True
+#| code-summary: "Show suggested code"
+
+# Mathematics
+b1 <- ggplot(binning, aes(x = ESCSGroup, y = AVG_PVMATH, fill=ESCSGroup)) +
+  
+  stat_halfeye(
+    # adjust bandwidth
+    adjust = 0.5,
+    # move to the right
+    justification = -0.2,
+    # remove the slub interval
+    .width = 0,
+    point_colour = NA,
+    alpha = 0.5) +
+  
+  geom_boxplot(width = 0.05,
+              outlier.colour="salmon",
+              outlier.shape=16,
+              outlier.size=0.05,
+              outlier.alpha = 0.5) + 
+  
+  stat_summary(fun.y = mean, geom = "point", colour = "#A64D79") +
+  
+  stat_summary(fun = mean, geom = "text", 
+               aes(label = paste("Mean", round(after_stat(y), ))),
+               position = position_nudge(x = 0.05), vjust = -0.5, size=2.2,
+               colour = "#A64D79") + 
+  
+  stat_dots(
+    # ploting on left side
+    side = "left",
+    # adjusting position
+    justification = 1.1,
+    # adjust grouping (binning) of observations
+    binwidth = 0.25
+  ) +
+  
+  geom_hline(aes(yintercept=mean(AVG_PVMATH)),
+               color="#E3A857", linewidth=0.7, linetype="dashed") +
+  annotate(
+      geom = "text", 
+      x = 0.5, 
+      y = mn_math - 60,
+      label = paste0("Overall Mean\n", mn_math),
+      color = "#E3A857",
+      size = 2.5
+    )  +
+  annotate(
+    geom = "curve", x = 0.01, y = mn_math - 10, xend = 0.20, 
+    yend = mn_math - 30, curvature = -.7, arrow = arrow(length = unit(2, "mm")),
+    color = "#E3A857") +
+  
+  scale_fill_manual(values = c("#c7e0e6", "#8fc1ce", "#73b2c2", "#5c8e9b", "#395961"), name = "ESCS") +
+  
+  geom_hline(aes(yintercept=median(AVG_PVMATH)),
+               color="grey20", linewidth=0.7, linetype="dashed") +
+  annotate(
+      geom = "text", 
+      x = 0.5, 
+      y = med_math + 100,
+      label = paste0("Overall Median\n", med_math),
+      color = "grey20",
+      size = 2.5
+    ) +
+  
+  annotate(
+    geom = "curve", x = 0.01, y = med_math + 10, xend = 0.20, 
+    yend = med_math + 30, curvature = .7, arrow = arrow(length = unit(2, "mm"))
+  ) +
+  
+  annotate(
+    geom = "text", 
+    x = 1.6, y = mn_math - 100,
+    label = "Lowest ESCS group\nrecorded lower performance score",
+    size = 2.2
+  ) +
+  
+  annotate(
+    geom = "text", 
+    x = 5.8, y = med_math + 90,
+    label = "Highest ESCS group \nrecorded higher performance score",
+    size = 2.2
+  ) +
+
+  labs(title = "Distribution Relationship of Mathematics by Socioeconomic Status", 
+       subtitle = "Groups with higher ESCS value perform above overall Mean and Median score as compared to the other groups",
+       y = "Score", x = "Socioeconomic Status",
+       caption = "Data Source: OECD (2022)") + 
+  theme_minimal() + 
+  scale_y_continuous(limits = c(100,900)) + 
+  
+  coord_flip() +
+  theme(plot.title = element_text(size = 12),
+        legend.position = "right")
+
+b1
+```
+
+#### Reading
+
+```{r}
+#| code-fold: True
+#| code-summary: "Show suggested code"
+# Reading
+b2 <- ggplot(binning, aes(x = ESCSGroup, y = AVG_PVREAD, fill=ESCSGroup)) +
+  
+  stat_halfeye(
+    # adjust bandwidth
+    adjust = 0.5,
+    # move to the right
+    justification = -0.2,
+    # remove the slub interval
+    .width = 0,
+    point_colour = NA,
+    alpha = 0.5) +
+  
+  geom_boxplot(width = 0.05,
+              outlier.colour="salmon", 
+              outlier.shape=16,
+              outlier.size=0.05,
+              outlier.alpha = 0.5) +
+  
+  stat_summary(fun.y = mean, geom = "point", colour = "#A64D79") +
+  
+  stat_summary(fun = mean, geom = "text", 
+               aes(label = paste("Mean", round(after_stat(y), ))),
+               position = position_nudge(x = 0.05), vjust = -0.5, size=2.2,
+               colour = "#A64D79") + 
+  
+  stat_dots(
+    # ploting on left side
+    side = "left",
+    # adjusting position
+    justification = 1.1,
+    # adjust grouping (binning) of observations
+    binwidth = 0.25
+  ) +
+
+  geom_hline(aes(yintercept=mean(AVG_PVREAD)),
+               color="#E3A857", linewidth=0.7, linetype="dashed") +
+  annotate(
+      geom = "text", 
+      x = 0.5, 
+      y = mn_sci - 80,
+      label = paste0("Overall Mean\n", mn_read),
+      color = "#E3A857",
+      size = 2.5
+    )  +
+  annotate(
+    geom = "curve", x = 0.01, y = mn_read - 10, xend = 0.20, 
+    yend = mn_read - 30, curvature = -.7, arrow = arrow(length = unit(2, "mm")),
+    color = "#E3A857") +
+  
+  scale_fill_manual(values = c("#fbdfc3", "#f8c797", "#f6af6b", "#ac7a4a", "#62462a"), name = "ESCS") +
+  
+  geom_hline(aes(yintercept=median(AVG_PVREAD)),
+               color="grey20", linewidth=0.7, linetype="dashed") +
+  annotate(
+      geom = "text", 
+      x = 0.5, 
+      y = med_read + 70,
+      label = paste0("Overall Median\n", med_read),
+      color = "grey20",
+      size = 2.5
+    ) +
+  
+  annotate(
+    geom = "curve", x = 0.01, y = med_read + 10, xend = 0.20, 
+    yend = med_read + 30, curvature = .7, arrow = arrow(length = unit(2, "mm"))
+  ) +
+  
+  annotate(
+    geom = "text", 
+    x = 1.6, y = mn_read - 100,
+    label = "Lowest ESCS group\nrecorded lower performance score",
+    size = 2.2
+  ) +
+  
+  annotate(
+    geom = "text", 
+    x = 5.8, y = med_read + 90,
+    label = "Highest ESCS group \nrecorded higher performance score",
+    size = 2.2
+  ) +
+
+  labs(title = "Distribution Relationship of Reading by Socioeconomic Status", 
+       subtitle = "Groups with higher ESCS value perform above overall Mean and Median score as compared to the other groups",
+       y = "Score", x = "Socioeconomic Status",
+       caption = "Data Source: OECD (2022)") + 
+  theme_minimal() + 
+  scale_y_continuous(limits = c(100,900)) + 
+  
+  coord_flip() +
+  theme(plot.title = element_text(size = 12),
+        legend.position = "right")
+
+b2
+```
+
+#### Science
+
+```{r}
+#| code-fold: True
+#| code-summary: "Show suggested code"
+# Science
+b3 <- ggplot(binning, aes(x = ESCSGroup, y = AVG_PVSCI, fill=ESCSGroup)) +
+  
+  stat_halfeye(
+    # adjust bandwidth
+    adjust = 0.5,
+    # move to the right
+    justification = -0.2,
+    # remove the slub interval
+    .width = 0,
+    point_colour = NA,
+    alpha = 0.5) +
+  
+  geom_boxplot(width = 0.05,
+              outlier.colour="salmon", 
+              outlier.shape=16,
+              outlier.size=0.05,
+              outlier.alpha = 0.5) +
+  
+  stat_summary(fun.y = mean, geom = "point", colour = "#A64D79") +
+  
+  stat_summary(fun = mean, geom = "text", 
+               aes(label = paste("Mean", round(after_stat(y), ))),
+               position = position_nudge(x = 0.05), vjust = -0.5, size=2.2,
+               colour = "#A64D79") + 
+  
+  stat_dots(
+    # ploting on left side
+    side = "left",
+    # adjusting position
+    justification = 1.1,
+    # adjust grouping (binning) of observations
+    binwidth = 0.25
+  ) +
+
+  geom_hline(aes(yintercept=mean(AVG_PVSCI)),
+               color="#E3A857", linewidth=0.7, linetype="dashed") +
+  annotate(
+      geom = "text", 
+      x = 0.5, 
+      y = mn_sci - 60,
+      label = paste0("Overall Mean\n", mn_sci),
+      color = "#E3A857",
+      size = 2.5
+    )  +
+  annotate(
+    geom = "curve", x = 0.01, y = mn_sci - 10, xend = 0.20, 
+    yend = mn_sci - 30, curvature = -.7, arrow = arrow(length = unit(2, "mm")),
+    color = "#E3A857") +
+  
+  scale_fill_manual(values = c("#b4d3d5", "#7cb3b6", "#459397", "#306669", "#1b3a3c"), name = "ESCS") +
+  
+  geom_hline(aes(yintercept=median(AVG_PVSCI)),
+               color="grey20", linewidth=0.7, linetype="dashed") +
+  annotate(
+      geom = "text", 
+      x = 0.5, 
+      y = med_sci + 70,
+      label = paste0("Overall Median\n", med_sci),
+      color = "grey20",
+      size = 2.5
+    ) +
+  
+  annotate(
+    geom = "curve", x = 0.01, y = med_sci + 10, xend = 0.20, 
+    yend = med_sci + 30, curvature = .7, arrow = arrow(length = unit(2, "mm"))
+  ) +
+  
+  annotate(
+    geom = "text", 
+    x = 1.6, y = mn_sci - 100,
+    label = "Lowest ESCS group\nrecorded lower performance score",
+    size = 2.2
+  ) +
+  
+  annotate(
+    geom = "text", 
+    x = 5.8, y = med_sci + 110,
+    label = "Highest ESCS group \nrecorded higher performance score",
+    size = 2.2
+  ) +
+
+  labs(title = "Distribution Relationship of Science by Socioeconomic Status", 
+       subtitle = "Groups with higher ESCS value perform above overall Mean and Median score as compared to the other groups",
+       y = "Score", x = "Socioeconomic Status",
+       caption = "Data Source: OECD (2022)") + 
+  theme_minimal() + 
+  scale_y_continuous(limits = c(100,900)) + 
+  
+  coord_flip() +
+  theme(plot.title = element_text(size = 12),
+        legend.position = "right")
+
+b3
+```
+:::
+
+::: {.callout-tip icon="false"}
+### {{< fa wand-sparkles >}} Make-over with Raincloud Plot
+
+-   Achieved in terms of **Clarity**
+
+    -   ESCS values is binned into five groups (Lowest ESCS, Low ESCS, Average ESCS, High ESCS, Highest ESCS) to ascertain whether students’ performance are affected by their high and low socioeconomic status of students’ families.
+
+    -   Graph title and subtitle are added to explain the significant findings (e.g. Highest ESCS group recorded higher performance Mean score as compared to the rest).
+
+    -   Caption is added to show data source.
+
+    -   Legend is placed on the right side of the chart to align with the ESCS groups.
+
+    -   Overall Median and Mean values are annotated to enhance interpretation of distribution while serve as reference points. The values allow quick visualisation of the central tendency and skewness of distribution across the different ESCS groups.
+
+    -   Respective Mean values of ESCS groups are also annotated in a distinct colour for ease of comparison.
+:::
+
+# 4. Summary
+
+Below is a summary table of the peer's original visuals and the visual makeover designs suggested after examining their clarity and aesthetics elements.
+
+|          |                                           Original Visual                                           |                            Suggested Sketch                            |                                           Visual Makeover                                           |
+|:------------------|:----------------:|:-----------------:|:----------------:|
+| Visual 1 | ![Sketch by: TSE (2024)](images/OD1.png){style="border: 0.5px solid gray" width="180" height="130"} | ![Sketch by: TSE (2024)](images/sketch1.png){width="191" height="130"} |       ![Sketch by: TSE (2024)](images/AD1.png){style="border: 0.5px solid gray" width="181"}        |
+| Visual 2 | ![Sketch by: TSE (2024)](images/OD2.png){style="border: 0.5px solid gray" width="180" height="130"} |       ![Sketch by: TSE (2024)](images/sketch2.png){width="191"}        |       ![Sketch by: TSE (2024)](images/AD2.png){style="border: 0.5px solid gray" width="181"}        |
+| Visual 3 | ![Sketch by: TSE (2024)](images/OD3.png){style="border: 0.5px solid gray" width="180" height="130"} | ![Sketch by: TSE (2024)](images/sketch3.png){width="191" height="130"} | ![Sketch by: TSE (2024)](images/AD3.png){style="border: 0.5px solid gray" width="181" height="130"} |
+| Visual 4 | ![Sketch by: TSE (2024)](images/OD4.png){style="border: 0.5px solid gray" width="180" height="130"} | ![Sketch by: TSE (2024)](images/sketch4.png){width="191" height="130"} |       ![Sketch by: TSE (2024)](images/AD4.png){style="border: 0.5px solid gray" width="181"}        |
+
+: Summary Table of DataViz Makeover
+
+# 5. Learning Points
+
+Three key learning points from this take-home exercise 2 to keep in mind:
+
+-   Review charts from readers' perspective by understanding the purpose and intention of using a particular visualisation.
+
+-   Re-evaluate the most efficient way of presenting data for data storytelling.
+
+-   Strike an appropriate balance between clarity and aesthetic of chart with creativity.
+
+# 6. References
+
+-   [ISSS608 AY2023-24 January Term (2024), Take-home Exercise 1](https://isss608-ay2023-24jan.netlify.app/take-home_ex/th_ex01){target="_blank"}
+
+-   [ISSS608 AY2023-24 January Term (2024), Take-home Exercise 2](https://isss608-ay2023-24jan.netlify.app/take-home_ex/th_ex02){target="_blank"}
+
+-   [OECD (2022), PISA 2022 Database, PISA, OECD Publishing, Paris.](https://www.oecd.org/pisa/data/2022database/){target="_blank"}
