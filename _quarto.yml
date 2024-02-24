@@ -1,0 +1,112 @@
+project:
+  type: website
+
+website:
+  title: "TSE:ISSS608"
+  page-navigation: true
+  back-to-top-navigation: true
+
+  navbar:
+    logo: "Images/Name_Logo2.png"
+    title: false
+    tools:
+      - icon: house-heart
+        href: index.qmd      
+      - icon: github
+        href: ""
+      - icon: linkedin
+        href: "https://www.linkedin.com/in/suanernteo"
+    search: true
+    
+    left:
+      - text: "{{< fa highlighter >}} Hands-on Exercises"
+        menu: 
+        - text: "[1] A Layered Grammar of Graphics: ggplot2 methods"
+          href: "Hands-on_Ex/Hands-on_Ex01/Hands-on_Ex01.html"
+        - text: "[2] Beyond ggplot2 Fundamentals"
+          href: "Hands-on_Ex/Hands-on_Ex02/Hands-on_Ex02.html"
+        - text: "[3] Programming Data Visualisation with R (Interactive vs Animated)"
+          href: "Hands-on_Ex/Hands-on_Ex03/Hands-on_Ex03.html"
+        - text: "[4.1] Visualising Distribution"
+          href: "Hands-on_Ex/Hands-on_Ex04/Hands-on_Ex04-1.html"
+        - text: "[4.2] Visual Statistical Analysis"
+          href: "Hands-on_Ex/Hands-on_Ex04/Hands-on_Ex04-2.html"
+        - text: "[4.3] Visualising Uncertainty"
+          href: "Hands-on_Ex/Hands-on_Ex04/Hands-on_Ex04-3.html"
+        - text: "[4.4] Building Funnel Plot with R"
+          href: "Hands-on_Ex/Hands-on_Ex04/Hands-on_Ex04-4.html"
+        - text: "[5.1] Visual Creating Ternary Plot with R"
+          href: "Hands-on_Ex/Hands-on_Ex05/Hands-on.html"
+        - text: "[5.2] Visual Correlation Analysis"
+          href: "Hands-on_Ex/Hands-on_Ex05/Hands-on.html"
+        - text: "[5.3] Visual Multivariate Analysis with Heatmap"
+          href: "Hands-on_Ex/Hands-on_Ex05/Hands-on.html"
+        - text: "[5.4] Visual Multivariate Analysis with Parallel Coordinates Plot"
+          href: "Hands-on_Ex/Hands-on_Ex05/Hands-on.html"
+        - text: "[5.5] Treemap Visualisation with R"
+          href: "Hands-on_Ex/Hands-on_Ex05/Hands-on.html"
+        - text: "[6] Visualising and Analysing Time-oriented Data"
+          href: "Hands-on_Ex/Hands-on_Ex06/Hands-on.html"
+        - text: "[7.1] Choropleth Mapping in R"
+          href: "Hands-on_Ex/Hands-on_Ex07/Hands-on_Ex07-1.html"
+        - text: "[7.2] Visualising Geospatial Point Data"
+          href: "Hands-on_Ex/Hands-on_Ex07/Hands-on_Ex07-2.html"        
+        - text: "[7.3] Analytical Mapping"
+          href: "Hands-on_Ex/Hands-on_Ex07/Hands-on_Ex07-3.html"
+        - text: "[8] Modelling, Visualising and Analysing Network Data with R"
+          href: "Hands-on_Ex/Hands-on_Ex08/Hands-on.html"
+        - text: "[9] Visualising and Analysing Text Data"
+          href: "Hands-on_Ex/Hands-on_Ex09/Hands-on.html"
+        - text: "[10] Information Dashboard Design: R methods"
+          href: "Hands-on_Ex/Hands-on_Ex10/Hands-on.html"
+      - text: "{{< fa school >}} In-class Exercises"
+        menu: 
+        - text: "[1] Now You See It!"
+          href: "In-class_Ex/In-class_Ex01/In-class_Ex01.html"
+        - text: "[3] Exploring Tableau and Graph Critique"
+          href: "In-class_Ex/In-class_Ex03/In-class_Ex03.html"
+        - text: "[4] Exploring Interactivity"
+          href: "In-class_Ex/In-class_Ex04/In-class_Ex04.html"
+        - text: "[6] Time on the horizon"
+          href: "In-class_Ex/In-class_Ex06/In-class_Ex06.html"
+      - text: "{{< fa laptop-code >}} Take-home Exercises"
+        menu: 
+        - text: "[1] Creating data visualisation beyond default"
+          href: "Take-home_Ex/Take-home_Ex01/Take-home_Ex01.html"
+        - text: "[2] DataVis Makeover"
+          href: "Take-home_Ex/Take-home_Ex02/Take-home_Ex02.html"
+        - text: "[3] Be Weatherwise or Otherwise"
+          href: "Take-home_Ex/Take-home_Ex03/Take-home_Ex03.html"
+      - text: "{{< fa r >}} Shiny"
+        menu: 
+        - text: "R Shiny Basic"
+          href: "Shiny/Shiny.html"
+      - text: "{{< fa users-line >}} Project"
+        menu: 
+        - text: "In progress"
+          href: "Project/Project.html"
+  page-footer:
+    right: 
+      - text: "©2024! Designed by TSE!"
+    center:
+      - icon: github
+        href: "https://www.linkedin.com/in/suanernteo"
+      - icon: linkedin
+        href: "https://www.linkedin.com/in/suanernteo"
+format:
+  html:
+    theme: 
+      - minty
+      - theme.scss
+    mermaid: 
+      theme: neutral
+    css: styles.css
+    toc: true
+    grid:
+      sidebar-width: 100px
+      body-width: 1200px
+      margin-width: 200px
+      gutter-width: 2.0rem
+editor: visual
+
+

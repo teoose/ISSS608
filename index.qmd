@@ -1,0 +1,14 @@
+---
+title: "Visual Analytics and Application"
+---
+
++------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| ![](Images/Page_Index3.png){width="212"} | ```                                                                                                                                                                                                                          |
+|                                          | ```                                                                                                                                                                                                                          |
+|                                          |                                                                                                                                                                                                                              |
+|                                          | Welcome to my **ISSS608 Visual Analytics and Applications** webpage.                                                                                                                                                         |
+|                                          |                                                                                                                                                                                                                              |
+|                                          | This course is taken as part of my Master of IT in Business (MITB) in Singapore Management University (SMU) and is taught by [SMU Professor Dr. Kam](https://faculty.smu.edu.sg/profile/kam-tin-seong-486){target="_blank"}. |
+|                                          |                                                                                                                                                                                                                              |
+|                                          | The coursework prepared will use R programming as the main courseware and maintain using Quarto for the website.                                                                                                             |
++------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
