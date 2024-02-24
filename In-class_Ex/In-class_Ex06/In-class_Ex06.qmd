@@ -42,6 +42,8 @@ averp <- read_csv("data/AVERP.csv") %>%
 Code chunk below plots classic line graph. This type of graph has its limitations in visualising large time-series data.
 
 ```{r}
+#| fig-width: 12
+#| fig-height: 10
 #| code-fold: true
 #| code-summary: "Show code"
 averp %>% 
