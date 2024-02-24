@@ -1,0 +1,14 @@
+{
+  "hash": "a9a1b34e392f4bcfd15325d954b6ffa8",
+  "result": {
+    "markdown": "---\ntitle: \"In-class Exercise 1: Now You See It!\"\ndate: \"13 January 2024\"\ndate-modified: \"last-modified\"\nauthor: \"Teo Suan Ern\"\nexecute: \n  eval: true\n  echo: true\n  freeze: true\n  warning: false\n  message: false\n  editor: visual\n---\n\n\n## Loading R packages\n\nIn this hands-on exercise, two R packages will be used. They are:\n\n-   [tidyverse](https://www.tidyverse.org/), and\n\n-   [haven](https://www.tidyverse.org/).\n\nThe code chunk used is as follows:\n\n\n::: {.cell}\n\n```{.r .cell-code}\npacman::p_load(tidyverse, haven)\n```\n:::\n\n\n## Importing PISA data\n\nThe code chunk below uses [`read_sas()`](https://haven.tidyverse.org/reference/index.html) of [`haven`](https://haven.tidyverse.org/) to import PISA data into R environment.\n\n\n::: {.cell}\n\n```{.r .cell-code}\nstu_qqq <- \n  read_sas(\"data/cy08msp_stu_qqq.sas7bdat\")\n```\n:::\n\n::: {.cell}\n\n```{.r .cell-code}\nstu_qqq_SG <- stu_qqq %>%\n  filter(CNT == \"SGP\")\n```\n:::\n\n::: {.cell}\n\n```{.r .cell-code}\nwrite_rds(stu_qqq_SG,\n          \"data/stu_qqq_SG.rds\")\n```\n:::\n\n::: {.cell}\n\n```{.r .cell-code}\nstu_qqq_SG <- \n  read_rds(\"data/stu_qqq_SG.rds\")\n```\n:::\n",
+    "supporting": [],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

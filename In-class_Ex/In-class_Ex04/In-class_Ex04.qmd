@@ -3,10 +3,13 @@ title: "In-class Exercise 4"
 subtitle: "Exploring Interactivity"
 date: "3 February 2024"
 date-modified: "last-modified"
+author: "Teo Suan Ern"
 execute: 
   eval: true
   echo: true
+  freeze: true
   warning: false
+  message: false
 ---
 
 Note: In-class Exercise 4 is an exploratory extension from Hands-on Exercise 3 to include interactivity element (tool-tip) to existing scatter plots.
@@ -28,8 +31,7 @@ exam_data <- read_csv("data/Exam_data.csv")
 
 ## Tooltip effects
 
-
-### [Default] Hover effect
+### \[Default\] Hover effect
 
 Code chunk below shows the second interactive feature of ggiraph, namely `data_id`. Elements associated with a *data_id* (i.e **CLASS**) will be highlighted upon mouse over. Note that the default value of the hover css is *hover_css = “fill:orange;”*.
 
@@ -57,7 +59,7 @@ girafe(
 )
 ```
 
-### [Styling] Hover effect
+### \[Styling\] Hover effect
 
 Code chunk below shows the second interactive feature of ggiraph, namely `data_id`. Elements associated with a *data_id* (i.e **CLASS**) will be highlighted upon mouse over. Style tooltip by including `opts_hover()`.
 
@@ -121,5 +123,3 @@ girafe(
   )                                        
 ) 
 ```
-
-

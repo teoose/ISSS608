@@ -2,10 +2,13 @@
 title: "In-class Exercise 3: "
 date: "27 January 2024"
 date-modified: "last-modified"
+author: "Teo Suan Ern"
 execute: 
   eval: true
   echo: true
+  freeze: true
   warning: false
+  message: false
   editor: visual
 ---
 
