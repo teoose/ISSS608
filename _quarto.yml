@@ -54,7 +54,7 @@ website:
         - text: "[7.3] Analytical Mapping"
           href: "Hands-on_Ex/Hands-on_Ex07/Hands-on_Ex07-3.html"
         - text: "[8] Modelling, Visualising and Analysing Network Data with R"
-          href: "Hands-on_Ex/Hands-on_Ex08/Hands-on.html"
+          href: "Hands-on_Ex/Hands-on_Ex08/Hands-on_Ex08.html"
         - text: "[9] Visualising and Analysing Text Data"
           href: "Hands-on_Ex/Hands-on_Ex09/Hands-on.html"
         - text: "[10] Information Dashboard Design: R methods"
@@ -80,7 +80,7 @@ website:
       - text: "{{< fa r >}} Shiny"
         menu: 
         - text: "R Shiny Basic"
-          href: "Shiny/Shiny.html"
+          href: "https://isss608-vaa-suanern.shinyapps.io/prototype/"
   page-footer:
     right: 
       - text: "©2024! Designed by TSE!"
