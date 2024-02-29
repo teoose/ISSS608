@@ -31,30 +31,30 @@ The project team consists of three members, and each member will take one of the
 
 ## 1.2 Project Objectives
 
-The objective of my assignment is to build a prototype and user interface (UI) design on **Exploratory Data Analysis (Initial & Geospatial)** by using open-source data from armed conflict events (Armed Conflict Location & Event Data Project (ACLED)) to provide easy-to-use and insightful visualisation tools that can be especially suitable for Defence and Security sectors to develop effective counter measures and strategies.
+The project will be using open-source data from armed conflict events (Armed Conflict Location & Event Data Project (ACLED)). The objective of my assignment is to build a prototype and user interface (UI) design on **Exploratory Data Analysis (Initial & Geospatial)** that provides easy-to-use and insightful visualisation tools that can be suitable for Defence and Security sectors to develop effective counter measures and strategies.
 
 ## 1.3 Exploratory Data Analysis
 
 This project is separated into two segments:
 
 1.  Initial Data Exploratory Analysis (IDEA) – Current Page
-2.  Geospatial Data Exploratory Analysis (GDEA) – [Click here for GDEA page](Take-home_Ex/Take-home_Ex04/Take-home_Ex04-2.html).
+2.  Geospatial Data Exploratory Analysis (GDEA) – [Click here for GDEA page](Take-home_Ex/Take-home_Ex04/Take-home_Ex04-2.html){target="_blank"}.
 
 # 2. Storyboard
 
 The Exploratory Data Analysis is developed into two main portions.
 
--   *Initial Data Exploratory Analysis* allows users to select different variables and perform initial exploration on the dataset for detailed analysis to discover distribution and trends of armed conflicts in Myanmar.
+-   *Initial Data Exploratory Analysis* allows users to select different variables and perform initial exploration on the dataset to discover distribution and trends of armed conflicts in Myanmar.
 
--   *Geospatial Data Exploratory Analysis* allows users to select different variables and perform initial spatial exploration on the dataset for detailed analysis to conceptualise armed conflict spaces in Myanmar.
+-   *Geospatial Data Exploratory Analysis* allows users to select different variables and perform spatial exploration on the dataset to conceptualise armed conflict spaces in Myanmar.
 
 The initial proposed layouts and features of the three sections under **Exploratory** are as follows:
 
-## Overview
+## Section One - Overview
 
-## Geospatial Exploration
+## Section Two - Geospatial Exploration
 
-## Data Analysis
+## Section Three - Data Analysis
 
 # 3. Initial Data Preparation
 
@@ -88,7 +88,7 @@ pacman::p_load(tidyverse, kableExtra,
 
 ## 3.2 Import Data
 
-The project will examine the dataset from [Armed Conflict Location & Event Data Project (ACLED)](https://acleddata.com/data-export-tool/), specifically Myanmar country, between Year 2010 and Year 2023.
+The project will examine the dataset from [Armed Conflict Location & Event Data Project (ACLED)](https://acleddata.com/data-export-tool/){target="_blank"}, specifically Myanmar country, between Year 2010 and Year 2023.
 
 ```{r}
 #| code-fold: true 
@@ -560,11 +560,15 @@ cloudtext2 <- function(year) {
 years <- 2023
 # Word clouds for each year
 cloud_patch <- lapply(years, cloudtext2)
-```
 
-```{r}
 cloud_patch
 ```
+
+# 6. Geospatial Exploratory Data Analysis
+
+------------------------------------------------------------------------
+
+[Click here for Geospatial Exploratory Data Analysis page](Take-home_Ex/Take-home_Ex04/Take-home_Ex04-2.html){target="_blank"}.
 
 # Reference
 
