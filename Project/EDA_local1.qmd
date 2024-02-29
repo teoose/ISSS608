@@ -62,7 +62,6 @@ mymap <-  leaflet() %>%
 mymap
 ```
 
-
 ### Choropleth Map - Number of Attacks
 
 ```{r}
@@ -91,8 +90,7 @@ hc_plot = highchart() %>%
 hc_plot
 ```
 
-
-## Text Analysis 
+## Text Analysis
 
 ### Word Cloud - Terrorist(s) Target
 
@@ -158,7 +156,6 @@ hc_plot <-  highchart() %>%
 hc_plot
 ```
 
-
 ### Bar/ Line Chart - Total Number of Global Terrorism Incidents per Year
 
 ```{r, message = FALSE, echo = FALSE}
@@ -181,7 +178,6 @@ plot1 <-  ggplot(incident_line, aes(x=iyear, y=total)) +
 ```{r}
 plot1
 ```
-
 
 ### Line chart - Total People Killed and Injured per Year
 
@@ -281,10 +277,10 @@ ggplot(killter, aes(x=reorder(year, terrorist_killed), y=terrorist_killed)) +
   labs(x="Year", y="Terrorist killed", title = "Number of terrorist killed from 1970 - 2016")
 ```
 
-
 ## Distribution Analysis
 
 ### Crime
+
 #### Crime Types
 
 ```{r}
@@ -304,6 +300,7 @@ ggplot(crime, aes(x=reorder(alternative_txt, killing), y = killing)) +
 ```
 
 ### Weapon
+
 #### Weapon Types
 
 ```{r}
@@ -335,7 +332,6 @@ plot2 <- ggplot(weapon_subtype, aes(x = reorder(weapsubtype1_txt, Events), y = E
 plot1
 ```
 
-
 #### Weapon-Subtypes
 
 ```{r}
@@ -343,6 +339,7 @@ plot2
 ```
 
 ### Terrorist Attacks
+
 #### Attack Types
 
 ```{r}
@@ -360,6 +357,7 @@ plot3
 ```
 
 ### Target
+
 #### Target Types
 
 ```{r}
@@ -391,7 +389,6 @@ plot5 <- ggplot(target_subtype, aes(x = reorder(targsubtype1_txt, Events), y = E
 ```{r}
 plot4
 ```
-
 
 #### Target-Subtypes
 
@@ -437,7 +434,6 @@ ggplot(terrorist, aes(x=reorder(natlty1_txt, killing), y = killing)) +
   labs(x="Nationality of Terrorists", y="Number of people killed") +
   coord_flip()
 ```
-
 
 ## Countries effected by the terrorism
 

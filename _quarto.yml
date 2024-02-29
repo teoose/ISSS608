@@ -77,6 +77,10 @@ website:
           href: "Take-home_Ex/Take-home_Ex02/Take-home_Ex02.html"
         - text: "[3] Be Weatherwise or Otherwise"
           href: "Take-home_Ex/Take-home_Ex03/Take-home_Ex03.html"
+        - text: "[4.1] Decoding Chaos - Initial Exploratory Data Analysis"
+          href: "Take-home_Ex/Take-home_Ex04/Take-home_Ex04-1.html"
+        - text: "[4.2] Decoding Chaos - Geospatial Exploratory Data Analysis"
+          href: "Take-home_Ex/Take-home_Ex04/Take-home_Ex04-2.html"
       - text: "{{< fa r >}} Shiny"
         menu: 
         - text: "R Shiny Basic"
