@@ -1610,7 +1610,6 @@ A full in-depth analysis by expanding the time horizon to include the whole time
 # Reference
 
 -   [Communicate Data with R](https://communicate-data-with-r.netlify.app/docs/visualisation/2htmlwidgets/dt/){target="_blank"}
--   [ISSS608 AY2023-24 January Term (2024), Take-home Exercise 3](https://isss608-ay2023-24jan.netlify.app/take-home_ex/th_ex03){target="_blank"}
 -   [Plotly](https://plotly.com/r/){target="_blank"}
 -   [RStudio, plotly examples 3](https://rstudio-pubs-static.s3.amazonaws.com/352801_12ebacbc1acb46ff89dd0a08cc1301f3.html){target="_blank"}
 -   [R for Data Science](https://r4ds.had.co.nz/){target="_blank"}
