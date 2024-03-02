@@ -41,8 +41,6 @@ This assignment is separated into three segments (web pages):
 2.  Geospatial Data Exploratory Analysis (GDEA) – [Click here for GDEA page](Take-home_Ex/Take-home_Ex04/Take-home_Ex04-GDEA.html){target="_blank"}.
 3.  Prototype: Exploratory – [Click here for Prototype: Exploratory page.](Take-home_Ex/Take-home_Ex04/Take-home_Ex04-Prototype.html){target="_blank"}
 
-
-
 # 2. Initial Data Preparation
 
 ------------------------------------------------------------------------
@@ -56,17 +54,10 @@ The following code chunk is used to install and launch the R packages.
 ```{r}
 #| code-fold: true 
 #| code-summary: "Show code" 
-pacman::p_load(tidyverse, kableExtra, knitr,
-               highcharter, # timeseries highchart
-               scales, ggthemes, RColorBrewer,  
-               lubridate, # convert date from char to date format
-               wordcloud, tidytext, # word cloud
-               ggforce, # boxplot
-               ggraph, igraph, visNetwork, # network
-               tm, plotly)
+pacman::p_load(tidyverse, kableExtra, knitr, highcharter, scales, 
+               ggthemes, RColorBrewer, lubridate, wordcloud, tidytext,
+               ggforce, ggraph, igraph, visNetwork, tm, plotly)
 ```
-
-<include R packages>
 
 ::: {.callout-warning icon="false" collapse="true"}
 ### R packages installed
@@ -93,12 +84,13 @@ pacman::p_load(tidyverse, kableExtra, knitr,
 
 -   *ggforce*: an extension of ggplot2 to provide visual data analysis with newer stats and geoms.
 
--   *ggraph*: build network graph visualisation using appropriate functions 
+-   *ggraph*: build network graph visualisation using appropriate functions
 
 -   *igraph*: an interface for analysis of graphs or networks.
 
 -   *visNetwork*: an R package for interactive network visualisation.
 
+-   *highcharter*: a wrapper that contains 'highcharts' library for plotting of R objects.
 :::
 
 ## 2.2 Import Data
@@ -148,7 +140,6 @@ There is no duplicate entries in the dataset.
 ```{r}
 data[duplicated(data),]
 ```
-
 
 # 3. Data Wrangling
 
@@ -707,8 +698,7 @@ combined3 %>%
 
 Geospatial Exploratory Data Analysis can be found via [link here](Take-home_Ex/Take-home_Ex04/Take-home_Ex04-GDEA.html){target="_blank"}.
 
-This segment has been separated on a standalone web page due to Quarto rendering capacity. 
-
+This segment has been separated on a standalone web page due to Quarto rendering capacity.
 
 # 6. Prototype: Exploratory
 
@@ -716,9 +706,7 @@ This segment has been separated on a standalone web page due to Quarto rendering
 
 Prototype: Exploratory can be found via [link here](Take-home_Ex/Take-home_Ex04/Take-home_Ex04-Prototype.html){target="_blank"}.
 
-This segment has been separated on a standalone web page due to Quarto rendering capacity. 
-
-
+This segment has been separated on a standalone web page due to Quarto rendering capacity.
 
 # Reference
 
