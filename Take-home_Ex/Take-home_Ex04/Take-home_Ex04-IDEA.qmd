@@ -39,7 +39,7 @@ This assignment is separated into three segments (web pages):
 
 1.  Initial Data Exploratory Analysis (IDEA) – Current Page.
 
-2.  Geospatial Data Exploratory Analysis (GDEA) – [Click here for GDEA page](Take-home_Ex/Take-home_Ex04/Take-home_Ex04-GDEA.html){target="_blank"}.
+2.  Geospatial Data Exploratory Analysis (GDEA) – [Click here for GDEA page](https://isss608-ay2024-suanern.netlify.app/take-home_ex/take-home_ex04/take-home_ex04-GDEA.html){target="_blank"}.
 
 3.  Prototype: Exploratory – [Click here for Prototype: Exploratory page](https://isss608-ay2024-suanern.netlify.app/take-home_ex/take-home_ex04/take-home_ex04-Prototype.html){target="_blank"}.
 
@@ -704,7 +704,7 @@ combined3 %>%
 
 ------------------------------------------------------------------------
 
-Geospatial Exploratory Data Analysis can be found via [link here](https://isss608-ay2024-suanern.netlify.app/take-home_ex/take-home_ex04/take-home_ex04-GDEA.html){target="_blank"}.
+**Geospatial Exploratory Data Analysis** can be found via [link here](https://isss608-ay2024-suanern.netlify.app/take-home_ex/take-home_ex04/take-home_ex04-GDEA.html){target="_blank"}.
 
 This segment has been separated on a standalone web page due to Quarto rendering capacity.
 
@@ -712,7 +712,7 @@ This segment has been separated on a standalone web page due to Quarto rendering
 
 ------------------------------------------------------------------------
 
-Prototype: Exploratory can be found via [link here](https://isss608-ay2024-suanern.netlify.app/take-home_ex/take-home_ex04/take-home_ex04-Prototype.html){target="_blank"}.
+**Prototype: Exploratory** can be found via [link here](https://isss608-ay2024-suanern.netlify.app/take-home_ex/take-home_ex04/take-home_ex04-Prototype.html){target="_blank"}.
 
 This segment has been separated on a standalone web page due to Quarto rendering capacity.
 

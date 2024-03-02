@@ -18,9 +18,12 @@ execute:
 *Note: This is a continuation of the take-home exercise 4.*
 
 This assignment is separated into three segments (web pages):
-    1.  Initial Data Exploratory Analysis (IDEA) – [Click here for IDEA page](Take-home_Ex/Take-home_Ex04/Take-home_Ex04-IDEA.html){target="_blank"}.
-    2.  Geospatial Data Exploratory Analysis (GDEA) – Current Page
-    3.  Prototype: Exploratory – [Click here for Prototype: Exploratory page.](Take-home_Ex/Take-home_Ex04/Take-home_Ex04-Prototype.html){target="_blank"}
+
+1\. Initial Data Exploratory Analysis (IDEA) – [Click here for IDEA page](https://isss608-ay2024-suanern.netlify.app/take-home_ex/take-home_ex04/take-home_ex04-IDEA.html){target="_blank"}.
+
+2\. Geospatial Data Exploratory Analysis (GDEA) – Current Page
+
+3\. Prototype: Exploratory – [Click here for Prototype: Exploratory page.](https://isss608-ay2024-suanern.netlify.app/take-home_ex/take-home_ex04/take-home_ex04-Prototype.html){target="_blank"}.
 
 # 2. Geospatial Data Preparation
 
@@ -223,6 +226,8 @@ The output above reveals that the EPSG is now set correctly to 4144.
 Use `st_join()` to do a spatial join to related the polygon IDs to each armed conflict incident by its location. Then use `join = st_intersects()` to identify the points in each LGA.
 
 ```{r}
+#| code-fold: true 
+#| code-summary: "Show code" 
 joined_data <- st_join(data_sf4144, myan_bound4144, 
                        join = st_intersects,
                        left = TRUE)
@@ -253,8 +258,6 @@ inci_pts$Area <- inci_pts %>%
 ```
 
 ### Create new variables
-
-Use st_join to combine aspatial data and geospatial data.
 
 New variables are created at sub-national administrative region two for the years (2010 to 2023).
 
@@ -384,7 +387,7 @@ inci_pts$total_fata <-
 
 ### Filter dataset
 
-The code chunk below to compute density area of total armed conflict incidents and total fatalities at each sub-national administrative region level, and filter the selected variables for subsequential geospatial analysis.
+The code chunk below to compute density area of total armed conflict incidents and total fatalities at each "second sub-national administrative region" level, and filter the selected variables for subsequent geospatial analysis.
 
 ```{r}
 #| code-fold: true 
@@ -549,7 +552,7 @@ boxmap <- function(vnam, df,
 
 ### Plot boxmap
 
-Use `boxmap()` to plot boxmap and `tmap_arrange()` to arrange small multiple maps in grid layout.
+The code chunk below uses `boxmap()` to plot boxmap and `tmap_arrange()` to arrange small multiple maps in grid layout. Extreme outliers and different quartiles are encoded in different colour intensity, within Myanmar's geographical area.
 
 ```{r}
 #| code-fold: true 
@@ -563,7 +566,7 @@ tmap_arrange(box_fata, box_inci, asp=1, ncol=2)
 
 ## 3.2 Spatial Area Density
 
-This segment will visualise spatial density (concentration) within the different geographical subnational administrative regions by plotting density map.
+This segment will visualise spatial area density (concentration) within the different geographical sub-national administrative regions by plotting density map.
 
 ::: {.callout-note icon="false"}
 ### Design Features
@@ -575,7 +578,7 @@ This segment will visualise spatial density (concentration) within the different
 
 ### Visualising Spatial Density of Armed Conflicts
 
-The code chunk below uses `tm_shape()` to plot the density map and density variables created earlier.
+The code chunk below uses `tm_shape()` to plot the density map based on the density variables created earlier.
 
 arguments:
 
@@ -1598,6 +1601,8 @@ tmap_arrange(f10, f11, f12, f13, f14, f15, f16,
 
 ### Interactive Choropleth Map (Spatial Distribution)
 
+An example below is an interactive spatial map, which uses `tmap_leaflet()` a leaflet widget from tmap object. This code chunk will be used to plot interactive maps for **spatial statistical distribution**, **spatial area density** and **spatial distribution**.
+
 ```{r}
 #| code-fold: true
 #| code-summary: "Show code"
@@ -1622,10 +1627,11 @@ tmap_obj <- tm_shape(mapping_rates) +
 leaflet_map <- tmap_leaflet(tmap_obj) %>%
   addTiles('https://basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png') %>%
   addPolygons(data = mapping_rates, 
-              label = ~paste("Custom Tooltip Content: ", mapping_rates$total_inci, "\n", mapping_rates$total_fata))
+              label = ~paste("Custom Tooltip Content: ",
+                             mapping_rates$total_inci, "\n",
+                             mapping_rates$total_fata))
 
 leaflet_map
-
 ```
 
 ## 3.4 Spatial Points
@@ -1639,7 +1645,7 @@ To visualise the spatial points (armed conflict events) based on their geographi
     -   Radio button selection on *total armed conflicts* or *total fatalities*
     -   Checkbox selection to filter/ select by *event_type*
     -   Slider bar to select the *years*
--   Information such as event date, country, sub-national administrative region (1, 2, 3), event type, summary of incident, and number of fatalities of each armed conflict incident.
+-   Information such as event date, country, sub-national administrative region (1, 2, 3), event type, summary of incident, and number of fatalities of each armed conflict incident when users click on each points.
 :::
 
 ### Interactive Point Symbol Map (Spatial Points)
@@ -1731,6 +1737,8 @@ hotmap_inci <-  leaflet() %>%
 hotmap_fata
 ```
 
+The code chunk below turns off plot mode.
+
 ```{r}
 # switch tmap off
 tmap_mode("plot")
@@ -1740,13 +1748,12 @@ tmap_mode("plot")
 
 ------------------------------------------------------------------------
 
-Prototype: Exploratory can be found via [link here](Take-home_Ex/Take-home_Ex04/Take-home_Ex04-Prototype.html){target="_blank"}.
+**Prototype: Exploratory** can be found via [link here](https://isss608-ay2024-suanern.netlify.app/take-home_ex/take-home_ex04/take-home_ex04-Prototype.html){target="_blank"}.
 
 This segment has been separated on a standalone web page due to Quarto rendering capacity.
 
-
 # Reference
 
--   [Basic Mapping, Luc Anselin and Grant Morrison (2018)](https://spatialanalysis.github.io/lab_tutorials/4_R_Mapping.html)
+-   [Basic Mapping, Luc Anselin and Grant Morrison (2018)](https://spatialanalysis.github.io/lab_tutorials/4_R_Mapping.html){target="_blank"}
 -   [ISSS608 AY2023-24 January Term (2024), Take-home Exercise 4](https://isss608-ay2023-24jan.netlify.app/take-home_ex/th_ex04){target="_blank"}
--   [ISSS624 AY2022-23 November Term (2023)](https://isss624-ay2022-23nov.netlify.app/)
+-   [ISSS624 AY2022-23 November Term (2023)](https://isss624-ay2022-23nov.netlify.app/){target="_blank"}
