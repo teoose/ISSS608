@@ -1,0 +1,13 @@
+name: ProjectPrototypeExploratory
+title: ProjectPrototypeExploratory
+username: isss608-vaa-suanern
+account: isss608-vaa-suanern
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 11415972
+bundleId:
+url: https://isss608-vaa-suanern.shinyapps.io/ProjectPrototypeExploratory/
+version: 1
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: data/1900-01-01-2024-02-26-Southeast_Asia-Myanmar.csv

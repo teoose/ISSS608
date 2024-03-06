@@ -58,7 +58,9 @@ The following code chunk is used to install and launch the R packages.
 #| code-summary: "Show code" 
 pacman::p_load(tidyverse, kableExtra, knitr, highcharter, scales, 
                ggthemes, RColorBrewer, lubridate, wordcloud, tidytext,
-               ggforce, ggraph, igraph, visNetwork, tm, plotly)
+               ggforce, ggraph, igraph, visNetwork, tm, plotly,
+               
+               tidygraph)
 ```
 
 ::: {.callout-warning icon="false" collapse="true"}
@@ -609,6 +611,20 @@ The dataset consists of variables *actor1*, *actor2*, *assoc_actor1* and *assoc_
 
 There are multiple actors (1,364 unique groups) that have created conflicts in Myanmar. The team hopes to make use of a network graph to schematically depict the nodes and connections amongst the different actors and their associations.
 
+-   The *nodes* of the network represent the groups (actors and associate actors).
+
+-   The *edges* of the network represent whether the two nodes are interconnected or not.
+
+To visualise the network, the team will calculate the following measures: Number of Components (Communities) and Cliques in the network.
+
+-   Degree and Weighted Degree Centrality of each group.
+
+-   Betweenness Centrality of each group.
+
+-   Eigenvector Centrality of each group.
+
+-   Clustering Coefficient of each group.
+
 ::: {.callout-note icon="false"}
 ### Design Features
 
@@ -621,12 +637,12 @@ There are multiple actors (1,364 unique groups) that have created conflicts in M
 #| code-summary: "Show code" 
 
 # calculate frequency
-conflict_count = final %>% 
+conflict_count <- final %>% 
   group_by(actor1) %>% 
   summarise(frequency = n()) %>%
   arrange(desc(frequency)) 
 
-conflict_count2 = final %>% 
+conflict_count2 <- final %>% 
   group_by(actor2) %>% 
   summarise(frequency = n()) %>%
   arrange(desc(frequency))
@@ -648,14 +664,14 @@ final$actor2  = trimws(str_replace(final$actor2, "[Õ]", ""))
 final$assoc_actor_1 = trimws(str_replace(final$assoc_actor_1, "[Õ]", ""))
 final$assoc_actor_2 = trimws(str_replace(final$assoc_actor_2, "[Õ]", ""))
 
-assoc1 = final %>%
+assoc1 <- final %>%
   filter(!is.na(actor1)) %>%
   filter(!is.na(assoc_actor_1)) %>%
   filter(!(actor1 == "")) %>%
   filter(!(assoc_actor_1 == "")) %>%
   select(actor1,assoc_actor_1)
 
-assoc2 = final %>%
+assoc2 <- final %>%
   filter(!is.na(actor2)) %>%
   filter(!is.na(assoc_actor_2)) %>%
   filter(!(actor2 == "")) %>%
@@ -668,20 +684,23 @@ colnames(assoc2) = c("actor","assoc_actor")
 # combine both assoc 1 & 2
 combined1 = rbind(assoc1,assoc2)
 
-combined2 = combined1 %>%
+combined2 <- combined1 %>%
   group_by(actor,assoc_actor) %>%
   tally(sort = TRUE) 
 
 
 final_conflict_count3 = trimws(final_conflict_count2$actor)
 
-combined3 = combined2 %>%
+combined3 <- combined2 %>%
   filter(actor %in% final_conflict_count3)
+```
 
-
+```{r}
+#| code-fold: true    
+#| code-summary: "Show code" 
 # network graph
 viz_actors_12 <- function(actors_12) {
-  set.seed(2016)
+  set.seed(1234)
   a <- grid::arrow(type = "closed", length = unit(.15, "inches"))
   
   actors_12 %>%

@@ -403,6 +403,11 @@ mapping_rates <- inci_pts %>%
          total_fata, fata_density, starts_with("pct"))
 ```
 
+```{r}
+write_rds(mapping_rates, 
+          "data/mapping_rates.rds")
+```
+
 # 3. Geospatial Exploratory Data Analysis
 
 The flowchart diagram below shows an overview of the four geospatial explorations.
