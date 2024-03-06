@@ -122,7 +122,7 @@ med_read <- round(median(stu2$AVG_PVREAD),0)
 There are four main graphs to be makeover in the peer's submission (Take-home Exercise 1). The four visuals will be reviewed in terms of their 'clarity' and 'aesthetics' by applying the data visualisation design principles and best practices.
 
 | Visual 1                                              | Visual 2                                              | Visual 3                                              | Visual 4                                              |
-|-------------------------------------------------------|-------------------------------------------------------|-------------------------------------------------------|-------------------------------------------------------|
+|------------------|------------------|------------------|------------------|
 | ![](images/OD1.png){style="border: 0.5px solid gray"} | ![](images/OD2.png){style="border: 0.5px solid gray"} | ![](images/OD3.png){style="border: 0.5px solid gray"} | ![](images/OD4.png){style="border: 0.5px solid gray"} |
 
 This review will use the framework (Cartesian coordinate system) below to gauge the objective and subjective metrics of the four visuals, where x-axis represents to 'clarity' and y-axis represents 'aesthetics' ([DataRemixed, 2012](https://dataremixed.com/2012/05/data-visualization-clarity-or-aesthetics/){target="_blank"}). Clarity would refer to the effectiveness of the visual in imparting accurate understanding of the fundamental truth of data to readers, while aesthetic would refer to the evaluation of aesthetic qualities and articulation of author's view and avoid creating chartjunks.
@@ -1994,7 +1994,7 @@ b3
 Below is a summary table of the peer's original visuals and the visual makeover designs suggested after examining their clarity and aesthetics elements.
 
 |          |                                           Original Visual                                           |                            Suggested Sketch                            |                                           Visual Makeover                                           |
-|:---------|:---------------------------------------------------------------------------------------------------:|:----------------------------------------------------------------------:|:---------------------------------------------------------------------------------------------------:|
+|:-----------------|:-----------------:|:----------------:|:-----------------:|
 | Visual 1 | ![Sketch by: TSE (2024)](images/OD1.png){style="border: 0.5px solid gray" width="180" height="130"} | ![Sketch by: TSE (2024)](images/sketch1.png){width="191" height="130"} |       ![Sketch by: TSE (2024)](images/AD1.png){style="border: 0.5px solid gray" width="181"}        |
 | Visual 2 | ![Sketch by: TSE (2024)](images/OD2.png){style="border: 0.5px solid gray" width="180" height="130"} |       ![Sketch by: TSE (2024)](images/sketch2.png){width="191"}        |       ![Sketch by: TSE (2024)](images/AD2.png){style="border: 0.5px solid gray" width="181"}        |
 | Visual 3 | ![Sketch by: TSE (2024)](images/OD3.png){style="border: 0.5px solid gray" width="180" height="130"} | ![Sketch by: TSE (2024)](images/sketch3.png){width="191" height="130"} | ![Sketch by: TSE (2024)](images/AD3.png){style="border: 0.5px solid gray" width="181" height="130"} |
