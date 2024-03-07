@@ -203,7 +203,7 @@ output2 <- renderPlotly({}) # plot 2
 
 ![Prototype: Exploratory - Network Relationships](images/prototype5.png)
 
-This tab provides user with data exploration tools to explore on network association amongst the top actors (with more than 300 interactions in each year) involved in the armed conflict incidents in Myanmar. Figure below shows the UI interactive features in the **Network Relationships** sub-tab.
+This tab provides users with data exploration tools to explore on network association amongst the top actors (with more than 300 interactions in each year) involved in the armed conflict incidents in Myanmar. Figure below shows the UI interactive features in the **Network Relationships** sub-tab.
 
 ![](images/prototype5-1.png)
 
