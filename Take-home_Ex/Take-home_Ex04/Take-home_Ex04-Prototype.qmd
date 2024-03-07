@@ -1,0 +1,259 @@
+---
+title: "Take-home Exercise 4 - Part 3"
+subtitle: "Decoding Chaos: Prototype - Exploratory"
+date: "2 March 2024"
+date-modified: "last-modified"
+author: "Teo Suan Ern"
+execute: 
+  eval: true
+  echo: true
+  freeze: true
+  warning: false
+  message: false
+  editor: visual
+---
+
+# 1. Overview
+
+*Note: This is a continuation of the take-home exercise 4.*
+
+This assignment is separated into three segments (web pages):
+
+1.  Initial Data Exploratory Analysis (IDEA) – [Click here for IDEA page](https://isss608-ay2024-suanern.netlify.app/take-home_ex/take-home_ex04/take-home_ex04-IDEA.html){target="_blank"}.
+2.  Geospatial Data Exploratory Analysis (GDEA) – [Click here for GDEA page](https://isss608-ay2024-suanern.netlify.app/take-home_ex/take-home_ex04/take-home_ex04-GDEA.html){target="_blank"}.
+3.  Prototype: Exploratory – Current Page
+
+# 2. Storyboard
+
+Storyboard aims to visually maps out user's experience. It is a tool for making strong visual connection between the insights uncovered based on research and user's interaction with the R Shiny dashboard application. The interactive components and UI design aims to facilitate data (and geospatial) exploration and analysis for users in the Defence and Security sectors to develop effective counter measures and strategies.
+
+The **"Exploratory"** dashboard can be broadly classify into two key areas:
+
+-   *Geospatial Data Exploratory Analysis* allows users to select different variables and perform spatial exploration on the dataset to conceptualise armed conflict spaces in Myanmar.
+
+-   *Data Exploratory Analysis* allows users to select different variables and perform initial exploration on the dataset to discover distribution, trends and network relationships of armed conflicts in Myanmar.
+
+The proposed layouts and UI features for "**Exploratory"** have been conceptualised into six sections (or `tabPanel()` in R Shiny Application terms).
+
+Code chunk below shows the six `tabPanel()` in which `ExploreSubTabs` will form one of the three `tabsetPanel()` in the entire project dashboard as part of UI.
+
+```{r}
+#| eval: false
+#| code-fold: true 
+#| code-summary: "Show code" 
+ExploreSubTabs <- tabsetPanel(
+  tabPanel("Overview", 
+           ExploreOverviewrow1
+  ),
+  tabPanel("Geospatial Exploration", 
+           ExploreGeospatialrow1
+  ),
+  tabPanel("Trends", 
+           ExploreTrendrow1,
+           ExploreTrendrow2
+  ),  
+  tabPanel("Distribution", 
+           ExploreDistributionrow1,
+           ExploreDistributionrow2,
+           ExploreDistributionrow3
+  ),
+  tabPanel("Network Relationship", 
+           ExploreNetworkrow1
+  ),
+  tabPanel("Incident Summary", 
+           ExploreSummaryrow1
+  )
+)
+```
+
+Code chunk below shows the R packages required to run the R Shiny application.
+
+```{r}
+#| eval: false
+#| code-fold: true 
+#| code-summary: "Show code" 
+# load R packages
+pacman::p_load(shiny, shinydashboard, tidyverse, dplyr, leaflet, leaflet.extras, plotly, 
+               highcharter, fresh, shinycssloaders, ggthemes, sf, spdep, tmap, mapview, 
+               leafsync, tm, ggforce, ggraph, igraph, wordcloud, tidytext, DT)
+```
+
+## Section One - Overview
+
+![Prototype: Exploratory - Overview sub-tab](images/prototype1.png)
+
+This tab serves as the "landing page" that displays the map of Myanmar and its spatial points of armed conflicts over the years (i.e. 2010 to 2023). Figure below shows the UI interactive features in the **Overview** sub-tab.
+
+![](images/prototype1-1.png)
+
+Code chunk below shows the simplified version of UI and Server components in R Shiny application for **Overview** sub-tab.
+
+```{r}
+#| eval: false
+#| code-fold: true 
+#| code-summary: "Show code" 
+# UI Components
+ExploreOverviewrow1 <-  fluidRow(
+  leafletOutput(), # display point spatial map
+  selectizeInput(), # select event (allows multiple selection)
+  selectizeInput(), # select administrative region (allows multiple selection)
+  sliderInput() # select year range
+)
+
+# Server Components
+output <- renderLeaflet({}) # point spatial map
+```
+
+## Section Two - Geospatial Exploration
+
+![Prototype: Exploratory - Geospatial Exploration](images/prototype2.png)
+
+This tab displays two geospatial exploration maps (i.e. statistical distribution and spatial distribution). Each map allows users to select different display variables and perform spatial exploration to conceptualise armed conflict spaces in Myanmar. Figure below shows the UI interactive features in the **Geospatial Exploration** sub-tab.
+
+![](images/prototype2-1.png)
+
+Code chunk below shows the simplified version of UI and Server components in R Shiny application for **Geospatial Exploration** sub-tab.
+
+```{r}
+#| eval: false
+#| code-fold: true 
+#| code-summary: "Show code" 
+# UI Components
+ExploreGeospatialrow1 <-  fluidRow(
+  radioButtons(), # display radio button options
+  tmapOutput(), # display statistical distribution map
+  tmapOutput(), # display spatial distribution map
+  selectInput(), # dropdown box selection for year
+  radioButtons(), # display radio button options
+  selectInput(), # dropbox selection for classification types
+  selectInput() # dropbox selection for number of classes
+)
+
+# Server Components
+output1 <- renderTmap({}) # statistical distribution map
+output2 <- renderTmap({}) # spatial distribution map
+```
+
+## Section Three - Trends
+
+![Prototype: Exploratory - Trends](images/prototype3.png)
+
+This tab allows user to perform time series analysis to identify trends, or cyclic patterns, spot anomalies, visualise distribution of armed conflict incidents/ fatalities and how it has changed over the years using either line chart or calendar heatmap. Figure below shows the UI interactive features in the **Trends** sub-tab.
+
+![](images/prototype3-1.png)
+
+Code chunk below shows the simplified version of UI and Server components in R Shiny application for **Trends** sub-tab.
+
+```{r}
+#| eval: false
+#| code-fold: true 
+#| code-summary: "Show code" 
+# UI Components
+ExploreTrendrow1 <-  fluidRow(
+  highchartOutput(), # display line chart
+  selectizeInput(), # select event (allows multiple selection)
+  selectizeInput(), # select administrative region (allows multiple selection)
+  sliderInput() # select year range
+)
+
+
+ExploreTrendrow2 <-  fluidRow(
+  plotlyOutput(), # display calendar heatmap
+  selectInput(), # dropdown box selection for year
+  radioButtons() # display radio button options
+)
+
+
+# Server Components
+output1 <- renderPlotly({}) # plot 1
+output2 <- renderPlotly({}) # plot 2
+```
+
+## Section Four - Distributions
+
+![Prototype: Exploratory - Distributions](images/prototype4.png)
+
+This tab provides user with data exploration tools to explore the distribution of armed conflict incidents in Myanmar and the dispersion of incidents across the years. Figure below shows the UI interactive features in the **Distribution** sub-tab.
+
+![](images/prototype4-1.png)
+
+Code chunk below shows the simplified version of UI and Server components in R Shiny application for **Distributions** sub-tab.
+
+```{r}
+#| eval: false
+#| code-fold: true 
+#| code-summary: "Show code" 
+# UI Components
+ExploreDistributionrow1 <-  fluidRow(
+  sliderInput() # select year range
+  )
+
+ExploreDistributionrow2 <- fluidRow(
+  plotlyOutput(), # display plot 1
+  plotlyOutput() # display plot 2
+  )
+
+
+# Server Components
+output1 <- renderPlotly({}) # plot 1
+output2 <- renderPlotly({}) # plot 2
+```
+
+## Section Five - Network Relationships
+
+![Prototype: Exploratory - Network Relationships](images/prototype5.png)
+
+This tab provides user with data exploration tools to explore on network association amongst the actors involved in the armed conflict incidents in Myanmar. Figure below shows the UI interactive features in the **Network Relationships** sub-tab.
+
+![](images/prototype5-1.png)
+
+Code chunk below shows the simplified version of UI and Server components in R Shiny application for **Network Relationships** sub-tab.
+
+```{r}
+#| eval: false
+#| code-fold: true 
+#| code-summary: "Show code" 
+# UI Components
+ExploreNetworkrow1 <-  fluidRow(
+  plotOutput(), # display network graph
+  selectizeInput(), # select event (allows multiple selection)
+  selectizeInput(), # select administrative region (allows multiple selection)
+  selectInput() # select year
+)
+
+
+# Server Components
+output <- renderPlot({}) # network graph
+```
+
+## Section Six - Incident Summary
+
+![Prototype: Exploratory - Incident Summary](images/prototype6.png)
+
+This tab visualises large volume of armed conflict incident summary notes that captures keywords recorded in a word cloud. This is useful to spot changes over time where users do not have to read through all incident summary notes. In addition, an interactive datatable is provided for users who prefer to explore the dataset.
+
+Figure below shows the UI interactive features in the **Incident Summary** sub-tab.
+
+![](images/prototype6-1.png)
+
+Code chunk below shows the simplified version of UI and Server components in R Shiny application for **Incident Summary** sub-tab.
+
+```{r}
+#| eval: false
+#| code-fold: true 
+#| code-summary: "Show code" 
+# UI Components
+ExploreSummaryrow1 <-  fluidRow(
+  selectizeInput(), # select event (allows multiple selection)
+  selectizeInput(), # select administrative region (allows multiple selection)
+  selectInput(), # select year
+  plotOutput(), # display word cloud
+  DT::dataTableOutput() # display datatable
+  )
+
+
+# Server Components
+output <- renderPlot({}) # word cloud
+
+output <- DT::renderDataTable({}) # data table
+```
