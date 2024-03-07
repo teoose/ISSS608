@@ -289,7 +289,7 @@ ExploreTrendrow2 <-  fluidRow(
     column(8,
            box(
              width = 12,  # Use full width
-             withSpinner(plotlyOutput("calendar_et1", height = "400px"))  # Set map width to 100% of box
+             withSpinner(plotlyOutput("calendar_et1", height = "400px"))
            )
     ),
     column(
@@ -314,6 +314,7 @@ ExploreTrendrow2 <-  fluidRow(
     )
   )
 )
+
 
 #==========================================================  
 # ExploreDistributionrow1 ---
@@ -343,7 +344,7 @@ ExploreDistributionrow2 <- fluidRow(
            solidHeader = TRUE, 
            width = 12,
            height = 700,
-           withSpinner(plotlyOutput("box_ed1", height = "600px"))  # Width is automatically 100% of the box
+           withSpinner(plotlyOutput("box_ed1", height = "600px"))  
          )),
   column(6,
          box(
@@ -361,14 +362,14 @@ ExploreDistributionrow2 <- fluidRow(
 #========================================================== 
 ExploreDistributionrow3 <- fluidRow(
   column(12,
-    box(title = "Chart Interpretation",
-      status = "danger",
-      solidHeader = TRUE,
-      collapsible = TRUE,
-      width = NULL,
-      align = "justify",
-      textOutput("distributiontext") 
-  ))
+         box(title = "Chart Interpretation",
+             status = "danger",
+             solidHeader = TRUE,
+             collapsible = TRUE,
+             width = NULL,
+             align = "justify",
+             textOutput("distributiontext") 
+         ))
 )
 
 #==========================================================  
@@ -493,8 +494,7 @@ ExploreSubTabs <- tabsetPanel(
            ExploreOverviewrow1
   ),
   tabPanel("Geospatial Exploration", 
-           ExploreGeospatialrow1,
-           # ExploreGeospatialrow2
+           ExploreGeospatialrow1
   ),
   tabPanel("Trends", 
            ExploreTrendrow1,
@@ -506,12 +506,10 @@ ExploreSubTabs <- tabsetPanel(
            ExploreDistributionrow3
   ),
   tabPanel("Network Relationships", 
-           ExploreNetworkrow1,
-           # ExploreNetworkrow2
+           ExploreNetworkrow1
   ),
   tabPanel("Incident Summary", 
-           ExploreSummaryrow1,
-           # ExploreDatarow2
+           ExploreSummaryrow1
   )
 )
 
@@ -880,11 +878,15 @@ server <- function(input, output) {
     filter(final, year %in% input$YearSlider_ed1)
     
   })
+
+  box_pts <- final %>%
+    filter(fatalities >0)
+  
   # Render Boxplot1 --- 
+  
   output$box_ed1 <- renderPlotly({
-    # tooltip_box <- paste("<b>", final$date, "</b>", "\nFatalities : ", final$fatalities)
     
-    box1 <- ggplot(final, aes(x = forcats::fct_infreq(admin1), y = event_date, 
+    box1 <- ggplot(box_pts, aes(x = forcats::fct_infreq(admin1), y = event_date, 
                               color = factor(admin1))) +
       
       geom_boxplot(width = .2, color = "#000000", fill = NA, size = .5, 
@@ -906,7 +908,7 @@ server <- function(input, output) {
   output$box_ed2 <- renderPlotly({
     # tooltip_box <- paste("<b>", final$date, "</b>", "\nFatalities : ", final$fatalities)
     
-    box2 <- ggplot(final, aes(x = forcats::fct_infreq(event_type), y = event_date, 
+    box2 <- ggplot(box_pts, aes(x = forcats::fct_infreq(event_type), y = event_date, 
                               color = factor(event_type), fill = factor(event_type))) +
       geom_sina(method = "density", alpha = .3) +
       geom_boxplot(width = .2, color = "#000000", fill = NA, size = .5, 
@@ -929,7 +931,7 @@ server <- function(input, output) {
     It helps to determine how spread out the incidents were across the years, 
     how it started/ ended in certain years or high concentrations in certain years. 
     "  
-    })
+  })
   
   #==========================================================
   # Explore Network Relationship ---
@@ -944,14 +946,19 @@ server <- function(input, output) {
     
   })
   
+  # select year
+  years <- 2023  # input$YearSelect_en1
+  
   # calculate frequency
-  conflict_count = final %>% 
+  conflict_count <- final %>% 
     group_by(actor1) %>% 
+    filter (year == years) %>%
     summarise(frequency = n()) %>%
     arrange(desc(frequency)) 
   
-  conflict_count2 = final %>% 
+  conflict_count2 <- final %>% 
     group_by(actor2) %>% 
+    filter (year == years) %>%
     summarise(frequency = n()) %>%
     arrange(desc(frequency))
   
@@ -1005,7 +1012,7 @@ server <- function(input, output) {
   
   # network graph
   viz_actors_12 <- function(actors_12) {
-    set.seed(2016)
+    set.seed(1234)
     a <- grid::arrow(type = "closed", length = unit(.15, "inches"))
     
     actors_12 %>%
@@ -1021,7 +1028,7 @@ server <- function(input, output) {
   # Render network --- 
   output$network_en1 <- renderPlot({
     combined3 %>%
-      filter(n >= 100) %>%
+      filter(n >= 300) %>%
       viz_actors_12
   })
   
