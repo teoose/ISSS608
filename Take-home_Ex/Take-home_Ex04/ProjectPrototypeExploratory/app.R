@@ -626,7 +626,7 @@ server <- function(input, output) {
       This threatens the public at both physical and psychological levels. 
       this visualisation dashboard helps: 
       (1) discover armed conflicts trends and 
-      (2) conceptualise armed conflict spaces." 
+      (2) conceptualise armed conflict spaces in Myanmar." 
   })
   
   #==========================================================
