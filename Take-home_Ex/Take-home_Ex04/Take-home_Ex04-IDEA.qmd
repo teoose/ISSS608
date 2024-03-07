@@ -110,7 +110,7 @@ data <- read.csv("data/1900-01-01-2024-02-26-Southeast_Asia-Myanmar.csv")
 
 ## 2.3 Overview of the data
 
-The combined data consists of 55,574 observations and 35 variables. Each row details the armed conflict event on the type, agents, location, date and other characteristics of conflict events (such as political violence, demonstration) in Myanmar.
+The dataset consists of 55,574 observations and 35 variables. Each row details the armed conflict event on the type, agents, location, date and other characteristics of conflict events (such as political violence, demonstration) in Myanmar.
 
 ### Dataset Structure
 
@@ -218,7 +218,6 @@ The code chunk below creates the following new variables based on total armed co
 #| code-fold: true 
 #| code-summary: "Show code" 
 data2 <- data %>%
-  filter(fatalities > 0) %>%
   group_by(year) %>%
   mutate(
     total_fata = sum(fatalities),
@@ -287,7 +286,7 @@ final <- data2 %>%
          -population_1km, -population_2km, -population_5km, -population_best)
 ```
 
-The code chunk below save the cleaned dataset in .rds format for subsequent geospatial EDA.
+The code chunk below save the cleaned dataset in .rds format for subsequent geospatial EDA and R Shiny Application.
 
 ```{r}
 #| code-fold: true 
@@ -308,7 +307,7 @@ str(final)
 
 ## 4.1 Descriptive Statistics
 
-Before proceeding with data visualisation, it is essential to be able to navigate the dataset of 13,177 observations and 30 variables with ease. This segment will help users identify or navigate through the dataset observations instead of scrolling through each observation one-by-one. The interactive datatable is created using DT package.
+Before proceeding with data visualisation, it is essential to be able to navigate the dataset of 55,574 observations and 32 variables with ease. This segment will help users identify or navigate through the dataset observations instead of scrolling through each observation one-by-one. The interactive datatable is created using DT package.
 
 ::: {.callout-note icon="false"}
 ### Design Features - Interactive Data Table
@@ -322,8 +321,6 @@ Before proceeding with data visualisation, it is essential to be able to navigat
 -   Filter observations with the filter bar directly below column headers.
 
 -   Column visibility allows user to select the columns that they are interested to view and hide the rest.
-
--   *Excel, CSV, Print* buttons allow user to either download or print the dataset.
 :::
 
 ```{r}
@@ -357,10 +354,7 @@ The dataset consists of a variable called *admin1*, that is the largest sub-nati
 ### Design Features
 
 -   The prototype proposes to include the following interactivity elements for users' data exploratory:
-    -   Dropdown filters such as *event_type*
-    -   Radio button selection on *total armed conflicts* or *total fatalities*
-    -   Slider bar to select the *years*
-    -   Checkbox selection to filter/ select by *sub-national administrative region 1*
+    -   Slider bar to select the *year* range
 -   `forcats::fct_infreq` is used to assign frequency values to factor levels while visualising it over time period.
 -   `geom_boxplot()` with the use of `ggplotly` provides statistical information such as *minimum, maximum, mean, median, first-and-third-quantile* values when hover-over.
 -   `geom_sina()` is useful for plotting single variable in a multiclass dataset to show density distribution within each class.
@@ -422,7 +416,8 @@ The dataset consists of a variable called *event_date*, that recorded the date a
 ### Design Features
 
 -   The prototype proposes to include the following interactivity elements for users' data exploratory:
-    -   Dropdown filters on *years*
+    -   Dropdown filters by *year*
+    -   Radio button selection on the *armed conflicts* or *fatalities*
     -   Tooltip is customised to show the different information such that when users hover-over the different day of the calendar year. *Date, total fatalities and total number of incidents within the calendar day* will be displayed.
 :::
 
@@ -508,10 +503,8 @@ The team hopes to make use of a line chart to visualise the trend in the number 
 ### Design Features
 
 -   The prototype proposes to include the following interactivity elements for users' data exploratory:
-    -   Dropdown filters such as *event_type*
-    -   Radio button selection on *total armed conflicts* or *total fatalities*
-    -   Slider bar to select the *years*
-    -   Checkbox selection to filter/ select by *sub-national administrative region 1*
+    -   Slider bar to select the *year* range
+    -   Selection options to select by *event_type* and *admin1*
 -   Information such as year, count of armed conflicts and fatalities will be available when hover-over.
 :::
 
@@ -562,7 +555,8 @@ The dataset consists of a variable called *notes*, that recorded a short descrip
 ### Design Features
 
 -   The prototype proposes to include the following interactivity elements for users' data exploratory:
-    -   Dropdown filters on *years*. This allows quick visual summary on the keywords used in all armed conflict incidents of each year.
+    -   Selection options to select by *event_type* and *admin1*
+    -   Dropdown filters by year. This allows quick visual summary on the keywords used in all armed conflict incidents of each year.
 :::
 
 ```{r}
@@ -609,41 +603,37 @@ cloud_patch <- lapply(years, cloudtext2)
 
 The dataset consists of variables *actor1*, *actor2*, *assoc_actor1* and *assoc_actor2*. The variables are main groups that initiated the armed conflict events as well as associated groups involved alongside with main groups.
 
-There are multiple actors (1,364 unique groups) that have created conflicts in Myanmar. The team hopes to make use of a network graph to schematically depict the nodes and connections amongst the different actors and their associations.
+There are multiple actors (over 1,000 unique groups, with new groups formed and some groups renamed themselves over the years) that have created conflicts in Myanmar. The team hopes to make use of a network graph to schematically depict the nodes and connections amongst the different actors and their associations, and to identify the top actors with more than 300 interactions in each year.
 
 -   The *nodes* of the network represent the groups (actors and associate actors).
 
 -   The *edges* of the network represent whether the two nodes are interconnected or not.
 
-To visualise the network, the team will calculate the following measures: Number of Components (Communities) and Cliques in the network.
-
--   Degree and Weighted Degree Centrality of each group.
-
--   Betweenness Centrality of each group.
-
--   Eigenvector Centrality of each group.
-
--   Clustering Coefficient of each group.
-
 ::: {.callout-note icon="false"}
 ### Design Features
 
 -   The prototype proposes to include the following interactivity elements for users' data exploratory:
-    -   Dropdown filters on *years*. This allows quick visual summary of the network association of the actors in each year.
+    -   Selection options to select by *event_type* and *admin1*
+    -   Dropdown filters by year. This allows quick visual summary of the network association of the actors in each year.
 :::
 
 ```{r}
 #| code-fold: true    
 #| code-summary: "Show code" 
 
+# select year
+years <- 2023
+
 # calculate frequency
 conflict_count <- final %>% 
   group_by(actor1) %>% 
+  filter (year == years) %>%
   summarise(frequency = n()) %>%
   arrange(desc(frequency)) 
 
 conflict_count2 <- final %>% 
   group_by(actor2) %>% 
+  filter (year == years) %>%
   summarise(frequency = n()) %>%
   arrange(desc(frequency))
 
@@ -715,7 +705,7 @@ viz_actors_12 <- function(actors_12) {
 
 
 combined3 %>%
-  filter(n >= 100) %>%
+  filter(n >= 300) %>%
   viz_actors_12
 ```
 
