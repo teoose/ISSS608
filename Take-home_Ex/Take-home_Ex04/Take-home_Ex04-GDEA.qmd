@@ -77,7 +77,7 @@ The following code chunk is used to install and launch the R packages.
 #| code-summary: "Show code" 
 pacman::p_load(tidyverse, kableExtra, knitr,
                sf, spdep, tmap, leaflet,
-               leaflet.extras, mapview, leafsync, # hotspot
+               leaflet.extras, mapview, leafsync,
                tm, plotly)
 ```
 
@@ -163,7 +163,7 @@ st_bbox(data_sf4144)
 
 ## 2.3 Import Geospatial Data
 
-Myanmar Level-3 Administrative Boundary (also known as Local Government Area, LGA) polygon features GIS data was downloaded from [geoBoundaries](https://www.geoboundaries.org/countryDownloads.html).
+Myanmar Level-2 Administrative Boundary (also known as Local Government Area, LGA) polygon features GIS data was downloaded from [geoBoundaries](https://www.geoboundaries.org/countryDownloads.html).
 
 ### Read geospatial layers
 
@@ -186,11 +186,6 @@ myan_bound <- myan_bound_adm2
 
 ```{r}
 glimpse(myan_bound)
-```
-
-```{r}
-write_rds(myan_bound, 
-          "data/pt_myan.rds")
 ```
 
 ### Check Coordinate Reference System (CRS) of Myanmar boundary
@@ -403,6 +398,8 @@ mapping_rates <- inci_pts %>%
          total_fata, fata_density, starts_with("pct"))
 ```
 
+The code chunk below save the cleaned dataset in .rds format for R Shiny Application.
+
 ```{r}
 write_rds(mapping_rates, 
           "data/mapping_rates.rds")
@@ -410,7 +407,7 @@ write_rds(mapping_rates,
 
 # 3. Geospatial Exploratory Data Analysis
 
-The flowchart diagram below shows an overview of the four geospatial explorations.
+The flowchart diagram below shows an overview of the five geospatial explorations.
 
 ```{mermaid}
 %%| echo: false 
@@ -578,7 +575,7 @@ This segment will visualise spatial area density (concentration) within the diff
 
 -   The prototype proposes to include the following interactivity elements for users' geospatial data exploratory:
     -   Radio button selection on the density of *armed conflicts* or *fatalities*
-    -   Dropdown selection options on classification types and number of classes
+    -   Dropdown selection options by classification types and number of classes
 :::
 
 ### Visualising Spatial Density of Armed Conflicts
@@ -658,7 +655,7 @@ This segment will visualise spatial pattern or distribution across different geo
 
 -   The prototype proposes to include the following interactivity elements for users' geospatial data exploratory:
     -   Radio button selection on *total armed conflicts*, *total fatalities*, *Political Violence* or *Violence against Civilians*
-    -   Dropdown selection options on classification types and number of classes
+    -   Dropdown selection options by year, classification types and number of classes
 :::
 
 ### Visualising Spatial Distribution of Armed Conflicts
@@ -1647,9 +1644,8 @@ To visualise the spatial points (armed conflict events) based on their geographi
 ### Design Features
 
 -   The prototype proposes to include the following interactivity elements for users' geospatial data exploratory:
-    -   Radio button selection on *total armed conflicts* or *total fatalities*
-    -   Checkbox selection to filter/ select by *event_type*
-    -   Slider bar to select the *years*
+    -   Checkbox selection to filter/ select by *event_type* and *admin1*
+    -   Slider bar to select the *year* range
 -   Information such as event date, country, sub-national administrative region (1, 2, 3), event type, summary of incident, and number of fatalities of each armed conflict incident when users click on each points.
 :::
 
