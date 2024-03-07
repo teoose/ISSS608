@@ -1,6 +1,6 @@
 ---
 title: "Take-home Exercise 4 - Part 3"
-subtitle: "Decoding Chaos: Storyboard - Exploratory"
+subtitle: "Decoding Chaos: Storyboard for Exploratory tab"
 date: "2 March 2024"
 date-modified: "last-modified"
 author: "Teo Suan Ern"
