@@ -33,50 +33,19 @@ The **"Exploratory"** dashboard can be broadly classify into two key areas:
 
 -   *Data Exploratory Analysis* allows users to select different variables and perform initial exploration on the dataset to discover distribution, trends and network relationships of armed conflicts in Myanmar.
 
-The proposed layouts and UI features for "**Exploratory"** have been conceptualised into six sections (or `tabPanel()` in R Shiny Application terms).
+The proposed layouts and UI features for "**Exploratory"** have been conceptualised into six sections as follows:
 
-Code chunk below shows the six `tabPanel()` in which `ExploreSubTabs` will form one of the three `tabsetPanel()` in the entire project dashboard as part of UI.
+```{mermaid}
+%%| echo: false 
+flowchart TD    
 
-```{r}
-#| eval: false
-#| code-fold: true 
-#| code-summary: "Show code" 
-ExploreSubTabs <- tabsetPanel(
-  tabPanel("Overview", 
-           ExploreOverviewrow1
-  ),
-  tabPanel("Geospatial Exploration", 
-           ExploreGeospatialrow1
-  ),
-  tabPanel("Trends", 
-           ExploreTrendrow1,
-           ExploreTrendrow2
-  ),  
-  tabPanel("Distribution", 
-           ExploreDistributionrow1,
-           ExploreDistributionrow2,
-           ExploreDistributionrow3
-  ),
-  tabPanel("Network Relationship", 
-           ExploreNetworkrow1
-  ),
-  tabPanel("Incident Summary", 
-           ExploreSummaryrow1
-  )
-)
-```
-
-Code chunk below shows the R packages required to run the R Shiny application.
-
-```{r}
-#| eval: false
-#| code-fold: true 
-#| code-summary: "Show code" 
-# load R packages
-pacman::p_load(shiny, shinydashboard, tidyverse, dplyr, leaflet, leaflet.extras, 
-               plotly, highcharter, fresh, shinycssloaders, ggthemes, sf, spdep,
-               tmap, mapview, leafsync, tm, ggforce, ggraph, igraph, 
-               wordcloud, tidytext, DT)
+A(Exploratory)   
+A --> B(1. Overview)   
+A --> C(2. Geospatial Exploration)   
+A --> D(3. Trends)   
+A --> E(4. Distributions)
+A --> F(5. Network Relationships)
+A --> G(6. Incident Summary)
 ```
 
 ## Section One - Overview
@@ -262,6 +231,8 @@ output6.2 <- DT::renderDataTable({}) # data table
 # 3. R Shiny Application (simplified code)
 
 The storyboard (in Section 2) facilitates the development of a prototype in R Shiny Application. Iterative prototyping will allow continuous improvement of the final dashboard for the project when combined with the other team members' work.
+
+The proposed layouts and UI features for "**Exploratory"** have been conceptualised into six sections (or `tabPanel()` in R Shiny Application terms), in which `ExploreSubTabs` will form one of the three `tabsetPanel()` in the entire project dashboard as part of UI.
 
 Code chunk below shows the simplified version of R Shiny Application for **Exploratory** prototype.
 
