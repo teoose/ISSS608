@@ -73,9 +73,10 @@ Code chunk below shows the R packages required to run the R Shiny application.
 #| code-fold: true 
 #| code-summary: "Show code" 
 # load R packages
-pacman::p_load(shiny, shinydashboard, tidyverse, dplyr, leaflet, leaflet.extras, plotly, 
-               highcharter, fresh, shinycssloaders, ggthemes, sf, spdep, tmap, mapview, 
-               leafsync, tm, ggforce, ggraph, igraph, wordcloud, tidytext, DT)
+pacman::p_load(shiny, shinydashboard, tidyverse, dplyr, leaflet, leaflet.extras, 
+               plotly, highcharter, fresh, shinycssloaders, ggthemes, sf, spdep,
+               tmap, mapview, leafsync, tm, ggforce, ggraph, igraph, 
+               wordcloud, tidytext, DT)
 ```
 
 ## Section One - Overview
@@ -101,7 +102,7 @@ ExploreOverviewrow1 <-  fluidRow(
 )
 
 # Server Components
-output <- renderLeaflet({}) # point spatial map
+output1 <- renderLeaflet({}) # point spatial map
 ```
 
 ## Section Two - Geospatial Exploration
@@ -130,8 +131,8 @@ ExploreGeospatialrow1 <-  fluidRow(
 )
 
 # Server Components
-output1 <- renderTmap({}) # statistical distribution map
-output2 <- renderTmap({}) # spatial distribution map
+output2.1 <- renderTmap({}) # statistical distribution map
+output2.2 <- renderTmap({}) # spatial distribution map
 ```
 
 ## Section Three - Trends
@@ -165,8 +166,8 @@ ExploreTrendrow2 <-  fluidRow(
 
 
 # Server Components
-output1 <- renderPlotly({}) # plot 1
-output2 <- renderPlotly({}) # plot 2
+output3.1 <- renderPlotly({}) # line chart
+output3.2 <- renderPlotly({}) # calendar heatmap
 ```
 
 ## Section Four - Distributions
@@ -195,8 +196,8 @@ ExploreDistributionrow2 <- fluidRow(
 
 
 # Server Components
-output1 <- renderPlotly({}) # plot 1
-output2 <- renderPlotly({}) # plot 2
+output4.1 <- renderPlotly({}) # distribution plot 1
+output4.2 <- renderPlotly({}) # distribution plot 2
 ```
 
 ## Section Five - Network Relationships
@@ -223,7 +224,7 @@ ExploreNetworkrow1 <-  fluidRow(
 
 
 # Server Components
-output <- renderPlot({}) # network graph
+output5 <- renderPlot({}) # network graph
 ```
 
 ## Section Six - Incident Summary
@@ -253,7 +254,172 @@ ExploreSummaryrow1 <-  fluidRow(
 
 
 # Server Components
-output <- renderPlot({}) # word cloud
+output6.1 <- renderPlot({}) # word cloud
 
-output <- DT::renderDataTable({}) # data table
+output6.2 <- DT::renderDataTable({}) # data table
+```
+
+# 3. R Shiny Application (simplified code)
+
+The storyboard (in Section 2) facilitates the development of a prototype in R Shiny Application. Iterative prototyping will allow continuous improvement of the final dashboard for the project when combined with the other team members' work.
+
+Code chunk below shows the simplified version of R Shiny Application for **Exploratory** prototype.
+
+```{r}
+#| eval: false
+
+#========================================================== 
+## load R packages
+#========================================================== 
+pacman::p_load(shiny, shinydashboard, tidyverse, dplyr, leaflet, leaflet.extras, 
+               plotly, highcharter, fresh, shinycssloaders, ggthemes, sf, spdep,
+               tmap, mapview, leafsync, tm, ggforce, ggraph, igraph, 
+               wordcloud, tidytext, DT)
+
+
+#========================================================== 
+## UI Components
+#========================================================== 
+# main header ---
+header <- dashboardHeader(title = "Decoding Chaos")
+
+
+# main sidebar ---
+sidebar <- dashboardSidebar()
+
+sidebarMenu(
+    menuItem("Exploratory", tabName = "Exploratory"),
+    menuItem("Spatial Point Pattern Analysis", tabName = "PointAnalysis"),
+    menuItem("Multivariate Clustering Analysis", tabName = "Clustering"),
+    menuItem("Visit ACLED data"))
+
+# main body ---
+body <- dashboardBody(
+    tabItems(
+      tabItem(tabName = "Exploratory",
+            ExploreSubTabs
+            ),
+      tabItem(tabName = "Spatial Point Pattern Analysis"
+              ),
+      tabItem(tabName = "Multivariate Clustering Analysis"
+              )
+      )
+    )
+
+# fluidRows ---
+ExploreOverviewrow1 <-  fluidRow(
+  leafletOutput(), # display point spatial map
+  selectizeInput(), # select event (allows multiple selection)
+  selectizeInput(), # select administrative region (allows multiple selection)
+  sliderInput() # select year range
+)
+
+ExploreGeospatialrow1 <-  fluidRow(
+  radioButtons(), # display radio button options
+  tmapOutput(), # display statistical distribution map
+  tmapOutput(), # display spatial distribution map
+  selectInput(), # dropdown box selection for year
+  radioButtons(), # display radio button options
+  selectInput(), # dropbox selection for classification types
+  selectInput() # dropbox selection for number of classes
+)
+
+ExploreTrendrow1 <-  fluidRow(
+  highchartOutput(), # display line chart
+  selectizeInput(), # select event (allows multiple selection)
+  selectizeInput(), # select administrative region (allows multiple selection)
+  sliderInput() # select year range
+)
+
+ExploreTrendrow2 <-  fluidRow(
+  plotlyOutput(), # display calendar heatmap
+  selectInput(), # dropdown box selection for year
+  radioButtons() # display radio button options
+)
+
+ExploreDistributionrow1 <-  fluidRow(
+  sliderInput() # select year range
+  )
+
+ExploreDistributionrow2 <- fluidRow(
+  plotlyOutput(), # display distribution plot 1
+  plotlyOutput() # display distribution plot 2
+  )
+
+ExploreNetworkrow1 <-  fluidRow(
+  plotOutput(), # display network graph
+  selectizeInput(), # select event (allows multiple selection)
+  selectizeInput(), # select administrative region (allows multiple selection)
+  selectInput() # select year
+)
+
+ExploreSummaryrow1 <-  fluidRow(
+  selectizeInput(), # select event (allows multiple selection)
+  selectizeInput(), # select administrative region (allows multiple selection)
+  selectInput(), # select year
+  plotOutput(), # display word cloud
+  DT::dataTableOutput() # display datatable
+  )
+
+# subtabs
+ExploreSubTabs <- tabsetPanel(
+  tabPanel("Overview", 
+           ExploreOverviewrow1
+  ),
+  tabPanel("Geospatial Exploration", 
+           ExploreGeospatialrow1
+  ),
+  tabPanel("Trends", 
+           ExploreTrendrow1,
+           ExploreTrendrow2
+  ),  
+  tabPanel("Distribution", 
+           ExploreDistributionrow1,
+           ExploreDistributionrow2,
+           ExploreDistributionrow3
+  ),
+  tabPanel("Network Relationship", 
+           ExploreNetworkrow1
+  ),
+  tabPanel("Incident Summary", 
+           ExploreSummaryrow1
+  )
+)
+
+
+#========================================================== 
+## UI dashboard
+#========================================================== 
+ui <- dashboardPage(title = 'Armed Conflicts in Myanmar (2010 to 2023)', 
+                    header, sidebar, body)  
+
+
+#========================================================== 
+## Server Components
+#========================================================== 
+server <- function(input, output) {
+
+  output1 <- renderLeaflet({}) # point spatial map
+  
+  output2.1 <- renderTmap({}) # statistical distribution map
+  output2.2 <- renderTmap({}) # spatial distribution map
+  
+  output3.1 <- renderPlotly({}) # line chart
+  output3.2 <- renderPlotly({}) # calendar heatmap
+  
+  output4.1 <- renderPlotly({}) # distribution plot 1
+  output4.2 <- renderPlotly({}) # distribution plot 2
+  
+  output5 <- renderPlot({}) # network graph 
+  
+  output6.1 <- renderPlot({}) # word cloud
+  output6.2 <- DT::renderDataTable({}) # data table
+
+}
+
+
+#========================================================== 
+## Run Shiny Application
+#========================================================== 
+shinyApp(ui = ui, server = server)
 ```
