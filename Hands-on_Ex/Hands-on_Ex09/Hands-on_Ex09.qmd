@@ -13,6 +13,8 @@ execute:
   editor: visual
 ---
 
+*Note: Last modified to rename hands-on exercise number.*
+
 # 1. Getting Started
 
 ## 1.1 Install and launch R packages
