@@ -1,5 +1,5 @@
 ---
-title: "Hands-on Exercise 8"
+title: "Hands-on Exercise 9"
 subtitle: "Modelling, Visualising and Analysing Network Data with R"
 date: "22 February 2024"
 date-modified: "last-modified"
