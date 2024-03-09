@@ -12,7 +12,7 @@ execute:
   message: false
 ---
 
-*Note: Last modified to include author’s details.*
+*Note: First modified to include author’s details. Last modified to rename hands-on exercise number.*
 
 # 1. Getting Started
 
