@@ -1755,5 +1755,278 @@
     "title": "Take-home Exercise 4 - Part 1",
     "section": "4.5 Network Analysis",
     "text": "4.5 Network Analysis\nThe dataset consists of variables actor1, actor2, assoc_actor1 and assoc_actor2. The variables are main groups that initiated the armed conflict events as well as associated groups involved alongside with main groups.\nThere are multiple actors (over 1,000 unique groups, with new groups formed and some groups renamed themselves over the years) that have created conflicts in Myanmar. The team hopes to make use of a network graph to schematically depict the nodes and connections amongst the different actors and their associations, and to identify the top actors with more than 300 interactions in each year.\n\nThe nodes of the network represent the groups (actors and associate actors).\nThe edges of the network represent whether the two nodes are interconnected or not.\n\n\n\n\n\n\n\nDesign Features\n\n\n\n\nThe prototype proposes to include the following interactivity elements for users’ data exploratory:\n\nSelection options to select by event_type and admin1\nDropdown filters by year. This allows quick visual summary of the network association of the actors in each year.\n\n\n\n\n\n\nShow code\n# select year\nyears &lt;- 2023\n\n# calculate frequency\nconflict_count &lt;- final %&gt;% \n  group_by(actor1) %&gt;% \n  filter (year == years) %&gt;%\n  summarise(frequency = n()) %&gt;%\n  arrange(desc(frequency)) \n\nconflict_count2 &lt;- final %&gt;% \n  group_by(actor2) %&gt;% \n  filter (year == years) %&gt;%\n  summarise(frequency = n()) %&gt;%\n  arrange(desc(frequency))\n\ncolnames(conflict_count) = c(\"actor\",\"Freq\")\ncolnames(conflict_count2) = c(\"actor\",\"Freq\")\n\n# combine both actor 1 & 2\nfinal_conflict_count = rbind(conflict_count,conflict_count2)\n\nfinal_conflict_count2 = final_conflict_count %&gt;%\n  group_by(actor) %&gt;%\n  summarise(FrequencyConflicts = sum(Freq)) %&gt;%\n  arrange(desc(FrequencyConflicts))\n\n# trim actor/ assoc_actor\nfinal$actor1 = trimws(str_replace(final$actor1, \"[Õ]\", \"\"))\nfinal$actor2  = trimws(str_replace(final$actor2, \"[Õ]\", \"\"))\nfinal$assoc_actor_1 = trimws(str_replace(final$assoc_actor_1, \"[Õ]\", \"\"))\nfinal$assoc_actor_2 = trimws(str_replace(final$assoc_actor_2, \"[Õ]\", \"\"))\n\nassoc1 &lt;- final %&gt;%\n  filter(!is.na(actor1)) %&gt;%\n  filter(!is.na(assoc_actor_1)) %&gt;%\n  filter(!(actor1 == \"\")) %&gt;%\n  filter(!(assoc_actor_1 == \"\")) %&gt;%\n  select(actor1,assoc_actor_1)\n\nassoc2 &lt;- final %&gt;%\n  filter(!is.na(actor2)) %&gt;%\n  filter(!is.na(assoc_actor_2)) %&gt;%\n  filter(!(actor2 == \"\")) %&gt;%\n  filter(!(assoc_actor_2 == \"\")) %&gt;%\n  select(actor2,assoc_actor_2)\n\ncolnames(assoc1) = c(\"actor\",\"assoc_actor\") \ncolnames(assoc2) = c(\"actor\",\"assoc_actor\") \n\n# combine both assoc 1 & 2\ncombined1 = rbind(assoc1,assoc2)\n\ncombined2 &lt;- combined1 %&gt;%\n  group_by(actor,assoc_actor) %&gt;%\n  tally(sort = TRUE) \n\n\nfinal_conflict_count3 = trimws(final_conflict_count2$actor)\n\ncombined3 &lt;- combined2 %&gt;%\n  filter(actor %in% final_conflict_count3)\n\n\n\n\nShow code\n# network graph\nviz_actors_12 &lt;- function(actors_12) {\n  set.seed(1234)\n  a &lt;- grid::arrow(type = \"closed\", length = unit(.15, \"inches\"))\n  \n  actors_12 %&gt;%\n    graph_from_data_frame() %&gt;%\n    ggraph(layout = \"fr\") +\n    geom_edge_link(aes(edge_alpha = n, edge_width = n), edge_colour = \"lightcoral\") +\n    geom_node_point(size = 5) +\n    geom_node_text(aes(label = name), repel = TRUE,\n                   point.padding = unit(0.5, \"lines\")) +\n    theme_void()\n}\n\n\ncombined3 %&gt;%\n  filter(n &gt;= 300) %&gt;%\n  viz_actors_12"
+  },
+  {
+    "objectID": "In-class_Ex/In-class_Ex08/In-class_Ex08.html",
+    "href": "In-class_Ex/In-class_Ex08/In-class_Ex08.html",
+    "title": "In-class Exercise 8",
+    "section": "",
+    "text": "Back to top"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex09/Hands-on_Ex09.html",
+    "href": "Hands-on_Ex/Hands-on_Ex09/Hands-on_Ex09.html",
+    "title": "Hands-on Exercise 9",
+    "section": "",
+    "text": "For the purpose of this exercise, the following R packages will be used.\n\n\nShow code\npacman::p_load(igraph, tidygraph, ggraph, \n               visNetwork, lubridate, clock,\n               tidyverse, graphlayouts,\n               patchwork)\n\n\n\n\n\nThe data sets used in this hands-on exercise is from an oil exploration and extraction company. There are two data sets. One contains the nodes data and the other contains the edges (also know as link) data.\n\n\nGAStech-email_edges.csv which consists of two weeks of 9063 emails correspondances between 55 employees.\n\n\n\nGAStech_email_nodes.csv which consist of the names, department and title of the 55 employees.\n\n\n\nUse read_csv() of readr package to import GAStech_email_node.csv and GAStech_email_edges-v2.csv into RStudio environment.\n\n\nShow code\nGAStech_nodes &lt;- read_csv(\"data/GAStech_email_node.csv\")\nGAStech_edges &lt;- read_csv(\"data/GAStech_email_edge-v2.csv\")\n\n\n\n\n\nUse glimpse() of dplyr to examine the structure of the data frame.\n\n\nShow code\nglimpse(GAStech_edges)\n\n\nRows: 9,063\nColumns: 8\n$ source      &lt;dbl&gt; 43, 43, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 26, 26, 26…\n$ target      &lt;dbl&gt; 41, 40, 51, 52, 53, 45, 44, 46, 48, 49, 47, 54, 27, 28, 29…\n$ SentDate    &lt;chr&gt; \"6/1/2014\", \"6/1/2014\", \"6/1/2014\", \"6/1/2014\", \"6/1/2014\"…\n$ SentTime    &lt;time&gt; 08:39:00, 08:39:00, 08:58:00, 08:58:00, 08:58:00, 08:58:0…\n$ Subject     &lt;chr&gt; \"GT-SeismicProcessorPro Bug Report\", \"GT-SeismicProcessorP…\n$ MainSubject &lt;chr&gt; \"Work related\", \"Work related\", \"Work related\", \"Work rela…\n$ sourceLabel &lt;chr&gt; \"Sven.Flecha\", \"Sven.Flecha\", \"Kanon.Herrero\", \"Kanon.Herr…\n$ targetLabel &lt;chr&gt; \"Isak.Baza\", \"Lucas.Alcazar\", \"Felix.Resumir\", \"Hideki.Coc…\n\n\n\n\n\n\n\n\nWarning\n\n\n\nThe output report of GAStech_edges above reveals an error that the SentDate is treated as “Character” data type instead of date data type. It is important to change the data type of SentDate field back to “Date” data type before continuing.\n\n\n\n\n\nThe code chunk below will be used to perform the changes.\n\n\nShow code\nGAStech_edges &lt;- GAStech_edges %&gt;%\n  mutate(SendDate = dmy(SentDate)) %&gt;%\n  mutate(Weekday = wday(SentDate,\n                        label = TRUE,\n                        abbr = FALSE))\n\n\n\n\n\n\n\n\nLearning Points\n\n\n\n\nboth dmy() and wday() are functions of lubridate package, which is an R package that makes it easier to work with dates and times.\ndmy() transforms the SentDate to Date data type.\nwday() returns the day of the week as a decimal number or an ordered factor if label is TRUE. The argument abbr is FALSE keep the daya spells in full, i.e. Monday. The function will create a new column in the data.frame i.e. Weekday and the output of wday() will save in this newly created field.\nthe values in the Weekday field are in ordinal scale.\n\n\n\n\n\n\nTable below shows the data structure of the reformatted GAStech_edges data frame\n\n\nShow code\nglimpse(GAStech_edges)\n\n\nRows: 9,063\nColumns: 10\n$ source      &lt;dbl&gt; 43, 43, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 26, 26, 26…\n$ target      &lt;dbl&gt; 41, 40, 51, 52, 53, 45, 44, 46, 48, 49, 47, 54, 27, 28, 29…\n$ SentDate    &lt;chr&gt; \"6/1/2014\", \"6/1/2014\", \"6/1/2014\", \"6/1/2014\", \"6/1/2014\"…\n$ SentTime    &lt;time&gt; 08:39:00, 08:39:00, 08:58:00, 08:58:00, 08:58:00, 08:58:0…\n$ Subject     &lt;chr&gt; \"GT-SeismicProcessorPro Bug Report\", \"GT-SeismicProcessorP…\n$ MainSubject &lt;chr&gt; \"Work related\", \"Work related\", \"Work related\", \"Work rela…\n$ sourceLabel &lt;chr&gt; \"Sven.Flecha\", \"Sven.Flecha\", \"Kanon.Herrero\", \"Kanon.Herr…\n$ targetLabel &lt;chr&gt; \"Isak.Baza\", \"Lucas.Alcazar\", \"Felix.Resumir\", \"Hideki.Coc…\n$ SendDate    &lt;date&gt; 2014-01-06, 2014-01-06, 2014-01-06, 2014-01-06, 2014-01-0…\n$ Weekday     &lt;ord&gt; Friday, Friday, Friday, Friday, Friday, Friday, Friday, Fr…\n\n\n\n\n\n GAStech_edges data.frame reveals that it consists of individual e-mail flow records.\nThe code chunk below aggregates the individual by date, senders, receivers, main subject and day of the week.\n\n\nShow code\nGAStech_edges_aggregated &lt;- GAStech_edges %&gt;%\n  filter(MainSubject == \"Work related\") %&gt;%\n  group_by(source, target, Weekday) %&gt;%\n    summarise(Weight = n()) %&gt;%\n  filter(source!=target) %&gt;%\n  filter(Weight &gt; 1) %&gt;%\n  ungroup()\n\n\n\n\n\n\n\n\nLearning Points\n\n\n\n\nFour functions from dplyr package are used: filter(), group(), summarise(), and ungroup().\nThe output data.frame named GAStech_edges_aggregated.\nA new field called Weight has been added in GAStech_edges_aggregated.\n\n\n\n\n\n\nTable below shows the data structure of the reformatted GAStech_edges_aggregated data frame.\n\n\nShow code\nglimpse(GAStech_edges_aggregated)\n\n\nRows: 1,372\nColumns: 4\n$ source  &lt;dbl&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,…\n$ target  &lt;dbl&gt; 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 6,…\n$ Weekday &lt;ord&gt; Sunday, Monday, Tuesday, Wednesday, Friday, Sunday, Monday, Tu…\n$ Weight  &lt;int&gt; 5, 2, 3, 4, 6, 5, 2, 3, 4, 6, 5, 2, 3, 4, 6, 5, 2, 3, 4, 6, 5,…"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex09/Hands-on_Ex09.html#install-and-launch-r-packages",
+    "href": "Hands-on_Ex/Hands-on_Ex09/Hands-on_Ex09.html#install-and-launch-r-packages",
+    "title": "Hands-on Exercise 9",
+    "section": "",
+    "text": "For the purpose of this exercise, the following R packages will be used.\n\n\nShow code\npacman::p_load(igraph, tidygraph, ggraph, \n               visNetwork, lubridate, clock,\n               tidyverse, graphlayouts,\n               patchwork)"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex09/Hands-on_Ex09.html#the-data",
+    "href": "Hands-on_Ex/Hands-on_Ex09/Hands-on_Ex09.html#the-data",
+    "title": "Hands-on Exercise 9",
+    "section": "",
+    "text": "The data sets used in this hands-on exercise is from an oil exploration and extraction company. There are two data sets. One contains the nodes data and the other contains the edges (also know as link) data.\n\n\nGAStech-email_edges.csv which consists of two weeks of 9063 emails correspondances between 55 employees.\n\n\n\nGAStech_email_nodes.csv which consist of the names, department and title of the 55 employees.\n\n\n\nUse read_csv() of readr package to import GAStech_email_node.csv and GAStech_email_edges-v2.csv into RStudio environment.\n\n\nShow code\nGAStech_nodes &lt;- read_csv(\"data/GAStech_email_node.csv\")\nGAStech_edges &lt;- read_csv(\"data/GAStech_email_edge-v2.csv\")\n\n\n\n\n\nUse glimpse() of dplyr to examine the structure of the data frame.\n\n\nShow code\nglimpse(GAStech_edges)\n\n\nRows: 9,063\nColumns: 8\n$ source      &lt;dbl&gt; 43, 43, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 26, 26, 26…\n$ target      &lt;dbl&gt; 41, 40, 51, 52, 53, 45, 44, 46, 48, 49, 47, 54, 27, 28, 29…\n$ SentDate    &lt;chr&gt; \"6/1/2014\", \"6/1/2014\", \"6/1/2014\", \"6/1/2014\", \"6/1/2014\"…\n$ SentTime    &lt;time&gt; 08:39:00, 08:39:00, 08:58:00, 08:58:00, 08:58:00, 08:58:0…\n$ Subject     &lt;chr&gt; \"GT-SeismicProcessorPro Bug Report\", \"GT-SeismicProcessorP…\n$ MainSubject &lt;chr&gt; \"Work related\", \"Work related\", \"Work related\", \"Work rela…\n$ sourceLabel &lt;chr&gt; \"Sven.Flecha\", \"Sven.Flecha\", \"Kanon.Herrero\", \"Kanon.Herr…\n$ targetLabel &lt;chr&gt; \"Isak.Baza\", \"Lucas.Alcazar\", \"Felix.Resumir\", \"Hideki.Coc…\n\n\n\n\n\n\n\n\nWarning\n\n\n\nThe output report of GAStech_edges above reveals an error that the SentDate is treated as “Character” data type instead of date data type. It is important to change the data type of SentDate field back to “Date” data type before continuing.\n\n\n\n\n\nThe code chunk below will be used to perform the changes.\n\n\nShow code\nGAStech_edges &lt;- GAStech_edges %&gt;%\n  mutate(SendDate = dmy(SentDate)) %&gt;%\n  mutate(Weekday = wday(SentDate,\n                        label = TRUE,\n                        abbr = FALSE))\n\n\n\n\n\n\n\n\nLearning Points\n\n\n\n\nboth dmy() and wday() are functions of lubridate package, which is an R package that makes it easier to work with dates and times.\ndmy() transforms the SentDate to Date data type.\nwday() returns the day of the week as a decimal number or an ordered factor if label is TRUE. The argument abbr is FALSE keep the daya spells in full, i.e. Monday. The function will create a new column in the data.frame i.e. Weekday and the output of wday() will save in this newly created field.\nthe values in the Weekday field are in ordinal scale.\n\n\n\n\n\n\nTable below shows the data structure of the reformatted GAStech_edges data frame\n\n\nShow code\nglimpse(GAStech_edges)\n\n\nRows: 9,063\nColumns: 10\n$ source      &lt;dbl&gt; 43, 43, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 26, 26, 26…\n$ target      &lt;dbl&gt; 41, 40, 51, 52, 53, 45, 44, 46, 48, 49, 47, 54, 27, 28, 29…\n$ SentDate    &lt;chr&gt; \"6/1/2014\", \"6/1/2014\", \"6/1/2014\", \"6/1/2014\", \"6/1/2014\"…\n$ SentTime    &lt;time&gt; 08:39:00, 08:39:00, 08:58:00, 08:58:00, 08:58:00, 08:58:0…\n$ Subject     &lt;chr&gt; \"GT-SeismicProcessorPro Bug Report\", \"GT-SeismicProcessorP…\n$ MainSubject &lt;chr&gt; \"Work related\", \"Work related\", \"Work related\", \"Work rela…\n$ sourceLabel &lt;chr&gt; \"Sven.Flecha\", \"Sven.Flecha\", \"Kanon.Herrero\", \"Kanon.Herr…\n$ targetLabel &lt;chr&gt; \"Isak.Baza\", \"Lucas.Alcazar\", \"Felix.Resumir\", \"Hideki.Coc…\n$ SendDate    &lt;date&gt; 2014-01-06, 2014-01-06, 2014-01-06, 2014-01-06, 2014-01-0…\n$ Weekday     &lt;ord&gt; Friday, Friday, Friday, Friday, Friday, Friday, Friday, Fr…\n\n\n\n\n\n GAStech_edges data.frame reveals that it consists of individual e-mail flow records.\nThe code chunk below aggregates the individual by date, senders, receivers, main subject and day of the week.\n\n\nShow code\nGAStech_edges_aggregated &lt;- GAStech_edges %&gt;%\n  filter(MainSubject == \"Work related\") %&gt;%\n  group_by(source, target, Weekday) %&gt;%\n    summarise(Weight = n()) %&gt;%\n  filter(source!=target) %&gt;%\n  filter(Weight &gt; 1) %&gt;%\n  ungroup()\n\n\n\n\n\n\n\n\nLearning Points\n\n\n\n\nFour functions from dplyr package are used: filter(), group(), summarise(), and ungroup().\nThe output data.frame named GAStech_edges_aggregated.\nA new field called Weight has been added in GAStech_edges_aggregated.\n\n\n\n\n\n\nTable below shows the data structure of the reformatted GAStech_edges_aggregated data frame.\n\n\nShow code\nglimpse(GAStech_edges_aggregated)\n\n\nRows: 1,372\nColumns: 4\n$ source  &lt;dbl&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,…\n$ target  &lt;dbl&gt; 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 6,…\n$ Weekday &lt;ord&gt; Sunday, Monday, Tuesday, Wednesday, Friday, Sunday, Monday, Tu…\n$ Weight  &lt;int&gt; 5, 2, 3, 4, 6, 5, 2, 3, 4, 6, 5, 2, 3, 4, 6, 5, 2, 3, 4, 6, 5,…"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex09/Hands-on_Ex09.html#the-tbl_graph-object",
+    "href": "Hands-on_Ex/Hands-on_Ex09/Hands-on_Ex09.html#the-tbl_graph-object",
+    "title": "Hands-on Exercise 9",
+    "section": "2.1 The tbl_graph object",
+    "text": "2.1 The tbl_graph object\nTwo functions of tidygraph package can be used to create network objects, they are:\n\ntbl_graph() creates a tbl_graph network object from nodes and edges data.\nas_tbl_graph() converts network data and objects to a tbl_graph network. Below are network data and objects supported by as_tbl_graph()\n\na node data.frame and an edge data.frame,\ndata.frame, list, matrix from base,\nigraph from igraph,\nnetwork from network,\ndendrogram and hclust from stats,\nNode from data.tree,\nphylo and evonet from ape, and\ngraphNEL, graphAM, graphBAM from graph (in Bioconductor)."
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex09/Hands-on_Ex09.html#the-dplyr-verbs-in-tidygraph",
+    "href": "Hands-on_Ex/Hands-on_Ex09/Hands-on_Ex09.html#the-dplyr-verbs-in-tidygraph",
+    "title": "Hands-on Exercise 9",
+    "section": "2.2 The dplyr verbs in tidygraph",
+    "text": "2.2 The dplyr verbs in tidygraph\n\n2.2.1 Use tbl_graph() to build tidygraph data model\nUse tbl_graph() of tinygraph package to build an tidygraph’s network graph data.frame.\n\n\nShow code\nGAStech_graph &lt;- tbl_graph(nodes = GAStech_nodes,\n                           edges = GAStech_edges_aggregated, \n                           directed = TRUE)\n\n\n\n\n2.2.2 Review output tidygraph’s graph object\n\nGAStech_graph\n\n# A tbl_graph: 54 nodes and 1372 edges\n#\n# A directed multigraph with 1 component\n#\n# Node Data: 54 × 4 (active)\n      id label               Department     Title                               \n   &lt;dbl&gt; &lt;chr&gt;               &lt;chr&gt;          &lt;chr&gt;                               \n 1     1 Mat.Bramar          Administration Assistant to CEO                    \n 2     2 Anda.Ribera         Administration Assistant to CFO                    \n 3     3 Rachel.Pantanal     Administration Assistant to CIO                    \n 4     4 Linda.Lagos         Administration Assistant to COO                    \n 5     5 Ruscella.Mies.Haber Administration Assistant to Engineering Group Mana…\n 6     6 Carla.Forluniau     Administration Assistant to IT Group Manager       \n 7     7 Cornelia.Lais       Administration Assistant to Security Group Manager \n 8    44 Kanon.Herrero       Security       Badging Office                      \n 9    45 Varja.Lagos         Security       Badging Office                      \n10    46 Stenig.Fusil        Security       Building Control                    \n# ℹ 44 more rows\n#\n# Edge Data: 1,372 × 4\n   from    to Weekday Weight\n  &lt;int&gt; &lt;int&gt; &lt;ord&gt;    &lt;int&gt;\n1     1     2 Sunday       5\n2     1     2 Monday       2\n3     1     2 Tuesday      3\n# ℹ 1,369 more rows\n\n\n\n\n\n\n\n\nLearning Points\n\n\n\n\nThe output above reveals that GAStech_graph is a tbl_graph object with 54 nodes and 4541 edges.\nThe command also prints the first six rows of “Node Data” and the first three of “Edge Data”.\nIt states that the Node Data is active. The notion of an active tibble within a tbl_graph object makes it possible to manipulate the data in one tibble at a time.\n\n\n\n\n\n\n\n\n\nTips\n\n\n\n\nactivate() verb from tidygraph serves as a switch between tibbles for nodes and edges. All dplyr verbs applied to tbl_graph object are applied to the active tibble.\n.N() function is used to gain access to the node data while manipulating the edge data. Similarly .E() will give you the edge data and .G() will give you the tbl_graph object itself.\n\n\n\n\n\n2.2.3 Change active object\nThe nodes tibble data frame is activated by default, however, this can be changed to active data frame with the activate() function. Rearrange the rows in the edges tibble to list those with the highest “weight” first, followed by using activate() and then arrange().\nUse code chunk below to perform the above steps.\n\n\nShow code\nGAStech_graph %&gt;%\n  activate(edges) %&gt;%\n  arrange(desc(Weight))\n\n\n# A tbl_graph: 54 nodes and 1372 edges\n#\n# A directed multigraph with 1 component\n#\n# Edge Data: 1,372 × 4 (active)\n    from    to Weekday   Weight\n   &lt;int&gt; &lt;int&gt; &lt;ord&gt;      &lt;int&gt;\n 1    40    41 Saturday      13\n 2    41    43 Monday        11\n 3    35    31 Tuesday       10\n 4    40    41 Monday        10\n 5    40    43 Monday        10\n 6    36    32 Sunday         9\n 7    40    43 Saturday       9\n 8    41    40 Monday         9\n 9    19    15 Wednesday      8\n10    35    38 Tuesday        8\n# ℹ 1,362 more rows\n#\n# Node Data: 54 × 4\n     id label           Department     Title           \n  &lt;dbl&gt; &lt;chr&gt;           &lt;chr&gt;          &lt;chr&gt;           \n1     1 Mat.Bramar      Administration Assistant to CEO\n2     2 Anda.Ribera     Administration Assistant to CFO\n3     3 Rachel.Pantanal Administration Assistant to CIO\n# ℹ 51 more rows"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex09/Hands-on_Ex09.html#changing-the-default-network-graph-theme",
+    "href": "Hands-on_Ex/Hands-on_Ex09/Hands-on_Ex09.html#changing-the-default-network-graph-theme",
+    "title": "Hands-on Exercise 9",
+    "section": "3.1 Changing the default network graph theme",
+    "text": "3.1 Changing the default network graph theme\nUse  theme_graph() to remove the x and y axes.\n\n\nShow code\ng &lt;- ggraph(GAStech_graph) + \n  geom_edge_link(aes()) +\n  geom_node_point(aes())\n\ng + theme_graph()\n\n\n\n\n\n\n\n\n\n\n\nLearning Points\n\n\n\n\nggraph introduces a special ggplot theme that provides better defaults for network graphs than the normal ggplot defaults. theme_graph(), besides removing axes, grids, and border, changes the font to Arial Narrow (this can be overridden).\nThe ggraph theme can be set for a series of plots with the set_graph_style() command run before the graphs are plotted or by using theme_graph() in the individual plots."
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex09/Hands-on_Ex09.html#changing-the-colour-of-the-plot",
+    "href": "Hands-on_Ex/Hands-on_Ex09/Hands-on_Ex09.html#changing-the-colour-of-the-plot",
+    "title": "Hands-on Exercise 9",
+    "section": "3.2 Changing the colour of the plot",
+    "text": "3.2 Changing the colour of the plot\nUse  theme_graph() as well to change the color of the plot.\n\n\nShow code\ng &lt;- ggraph(GAStech_graph) + \n  geom_edge_link(aes(colour = 'grey50')) +\n  geom_node_point(aes(colour = 'grey40'))\n\ng + theme_graph(background = 'grey10',\n                text_colour = 'white')"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex09/Hands-on_Ex09.html#working-with-ggraphs-layouts",
+    "href": "Hands-on_Ex/Hands-on_Ex09/Hands-on_Ex09.html#working-with-ggraphs-layouts",
+    "title": "Hands-on Exercise 9",
+    "section": "3.4 Working with ggraph’s layouts",
+    "text": "3.4 Working with ggraph’s layouts\nggraph support many layout for standard used, they are: star, circle, nicely (default), dh, gem, graphopt, grid, mds, sphere, randomly, fr, kk, drl and lgl. Figures below and on the right show layouts supported by ggraph().\nUse layout argument to define the layout to be used.\n\n\nShow code\n(g1 | g2 | g3) / (g4 | g5 | g6) / (g7 | g8 | g9) / (g10 | g11 | g12) /\n  (g13 | g14 | plot_spacer()) +\n  plot_annotation(tag_levels = 'A') +\n  plot_layout(widths = c(3,3,3),\n              heights = c(3,3,3,3,3))"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex09/Hands-on_Ex09.html#modifying-network-nodes",
+    "href": "Hands-on_Ex/Hands-on_Ex09/Hands-on_Ex09.html#modifying-network-nodes",
+    "title": "Hands-on Exercise 9",
+    "section": "3.5 Modifying network nodes",
+    "text": "3.5 Modifying network nodes\nCode chunk below colour each node by referring to their respective departments.\n\n\nShow code\ng &lt;- ggraph(GAStech_graph, \n            layout = \"nicely\") + \n  geom_edge_link(aes()) +\n  geom_node_point(aes(colour = Department, \n                      size = 1))\n\ng + theme_graph()\n\n\n\n\n\n\n\n\n\n\n\nLearning Point\n\n\n\n\ngeom_node_point is equivalent in functionality to geo_point of ggplot2. It allows for simple plotting of nodes in different shapes, colours and sizes. In the codes chnuks above colour and size are used."
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex09/Hands-on_Ex09.html#modifying-edges",
+    "href": "Hands-on_Ex/Hands-on_Ex09/Hands-on_Ex09.html#modifying-edges",
+    "title": "Hands-on Exercise 9",
+    "section": "3.6 Modifying edges",
+    "text": "3.6 Modifying edges\nCode chunk below adjust the thickness of the edges which will be mapped with the Weight variable.\n\n\nShow code\ng &lt;- ggraph(GAStech_graph, \n            layout = \"nicely\") +\n  geom_edge_link(aes(width=Weight), \n                 alpha=0.2) +\n  scale_edge_width(range = c(0.1, 5)) +\n  geom_node_point(aes(colour = Department), \n                  size = 3)\n\ng + theme_graph()\n\n\n\n\n\n\n\n\n\n\n\nLearning Points\n\n\n\n\ngeom_edge_link draws edges in the simplest way - as straight lines between the start and end nodes. The example above uses argument width to map the width of the line in proportional to the Weight attribute and argument alpha is used to introduce opacity on the line."
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex09/Hands-on_Ex09.html#working-with-facet_edges",
+    "href": "Hands-on_Ex/Hands-on_Ex09/Hands-on_Ex09.html#working-with-facet_edges",
+    "title": "Hands-on Exercise 9",
+    "section": "4.1 Working with facet_edges()",
+    "text": "4.1 Working with facet_edges()\nCode chunk below uses facet_edges().\n\n\nShow code\nset_graph_style()\n\ng &lt;- ggraph(GAStech_graph, \n            layout = \"nicely\") + \n  geom_edge_link(aes(width=Weight), \n                 alpha=0.2) +\n  scale_edge_width(range = c(0.1, 5)) +\n  geom_node_point(aes(colour = Department), \n                  size = 2)\n\ng + facet_edges(~Weekday)\n\n\n\n\n\nCode chunk below uses facet_edges(), and uses theme() to change the position of the legend.\n\n\nShow code\nset_graph_style()\n\ng &lt;- ggraph(GAStech_graph, \n            layout = \"nicely\") + \n  geom_edge_link(aes(width=Weight), \n                 alpha=0.2) +\n  scale_edge_width(range = c(0.1, 5)) +\n  geom_node_point(aes(colour = Department), \n                  size = 2) +\n  theme(legend.position = 'bottom')\n  \ng + facet_edges(~Weekday)\n\n\n\n\n\nCode chunk below uses th_foreground() to add frame to each graph.\n\n\nShow code\nset_graph_style() \n\ng &lt;- ggraph(GAStech_graph, \n            layout = \"nicely\") + \n  geom_edge_link(aes(width=Weight), \n                 alpha=0.2) +\n  scale_edge_width(range = c(0.1, 5)) +\n  geom_node_point(aes(colour = Department), \n                  size = 2)\n  \ng + facet_edges(~Weekday) +\n  th_foreground(foreground = \"grey80\",  \n                border = TRUE) +\n  theme(legend.position = 'bottom')"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex09/Hands-on_Ex09.html#working-with-facet_nodes",
+    "href": "Hands-on_Ex/Hands-on_Ex09/Hands-on_Ex09.html#working-with-facet_nodes",
+    "title": "Hands-on Exercise 9",
+    "section": "4.2 Working with facet_nodes()",
+    "text": "4.2 Working with facet_nodes()\nCode chunk below uses facet_nodes().\n\n\nShow code\nset_graph_style()\n\ng &lt;- ggraph(GAStech_graph, \n            layout = \"nicely\") + \n  geom_edge_link(aes(width=Weight), \n                 alpha=0.2) +\n  scale_edge_width(range = c(0.1, 5)) +\n  geom_node_point(aes(colour = Department), \n                  size = 2)\n  \ng + facet_nodes(~Department)+\n  th_foreground(foreground = \"grey80\",  \n                border = TRUE) +\n  theme(legend.position = 'bottom')"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex09/Hands-on_Ex09.html#visualising-network-metrics",
+    "href": "Hands-on_Ex/Hands-on_Ex09/Hands-on_Ex09.html#visualising-network-metrics",
+    "title": "Hands-on Exercise 9",
+    "section": "4.3 Visualising network metrics",
+    "text": "4.3 Visualising network metrics\n\n\n\n\n\n\nNote\n\n\n\nIt is important to note that from ggraph v2.0 onward tidygraph algorithms such as centrality measures can be accessed directly in ggraph calls. This means that it is no longer necessary to precompute and store derived node and edge centrality measures on the graph in order to use them in a plot.\n\n\n\n\nShow code\ng &lt;- GAStech_graph %&gt;%\n  ggraph(layout = \"fr\") + \n  geom_edge_link(aes(width=Weight), \n                 alpha=0.2) +\n  scale_edge_width(range = c(0.1, 5)) +\n  geom_node_point(aes(colour = Department, \n                      size = centrality_betweenness()))\ng + theme_graph()"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex09/Hands-on_Ex09.html#visualising-community",
+    "href": "Hands-on_Ex/Hands-on_Ex09/Hands-on_Ex09.html#visualising-community",
+    "title": "Hands-on Exercise 9",
+    "section": "4.4 Visualising community",
+    "text": "4.4 Visualising community\ntidygraph package inherits many of the community detection algorithms imbedded into igraph, including\n\n Edge-betweenness (group_edge_betweenness)\n Leading eigenvector (group_leading_eigen)\n Fast-greedy (group_fast_greedy)\n Louvain (group_louvain), Walktrap (group_walktrap)\n Label propagation (group_label_prop)\n InfoMAP (group_infomap)\n Spinglass (group_spinglass)\n Optimal (group_optimal)\n\nSome community algorithms are designed to take into account direction or weight, while others ignore it.\n\nEdge-betweenness (group_edge_betweenness)Leading eigenvector (group_leading_eigen)Fast-greedy (group_fast_greedy)Walktrap (group_walktrap)Label propagation (group_label_prop)InfoMAP (group_infomap)Spinglass (group_spinglass)\n\n\n\n\nShow code\ngc1 &lt;- GAStech_graph %&gt;%\n  mutate(community = as.factor(group_edge_betweenness(weights = Weight, directed = TRUE))) %&gt;%\n  ggraph(layout = \"fr\") + \n  geom_edge_link(aes(width=Weight), \n                 alpha=0.2) +\n  scale_edge_width(range = c(0.1, 5)) +\n  geom_node_point(aes(colour = community))  \n\ngc1 + theme_graph()\n\n\n\n\n\n\n\n\n\nShow code\ngc2 &lt;- GAStech_graph %&gt;%\n  mutate(community = as.factor(group_leading_eigen(weights = Weight, steps = -1, label = NULL, \n                                                   options = arpack_defaults(), n_groups = NULL))) %&gt;%\n  ggraph(layout = \"fr\") + \n  geom_edge_link(aes(width=Weight), \n                 alpha=0.2) +\n  scale_edge_width(range = c(0.1, 5)) +\n  geom_node_point(aes(colour = community))  \n\ngc2 + theme_graph()\n\n\n\n\n\n\n\n\n\nShow code\ngc3 &lt;- GAStech_graph %&gt;%\n  mutate(community = as.factor(group_edge_betweenness(weights = Weight, directed = TRUE, n_groups = NULL))) %&gt;%\n  ggraph(layout = \"fr\") + \n  geom_edge_link(aes(width=Weight), \n                 alpha=0.2) +\n  scale_edge_width(range = c(0.1, 5)) +\n  geom_node_point(aes(colour = community))  \n\ngc3 + theme_graph()\n\n\n\n\n\n\n\n\n\nShow code\ngc4 &lt;- GAStech_graph %&gt;%\n  mutate(community = as.factor(group_walktrap(weights = Weight, steps = 4, n_groups = NULL))) %&gt;%\n  ggraph(layout = \"fr\") + \n  geom_edge_link(aes(width=Weight), \n                 alpha=0.2) +\n  scale_edge_width(range = c(0.1, 5)) +\n  geom_node_point(aes(colour = community))  \n\ngc4 + theme_graph()\n\n\n\n\n\n\n\n\n\nShow code\ngc5 &lt;- GAStech_graph %&gt;%\n  mutate(community = as.factor(group_label_prop(weights = Weight, label = NULL, fixed = NULL))) %&gt;%\n  ggraph(layout = \"fr\") + \n  geom_edge_link(aes(width=Weight), \n                 alpha=0.2) +\n  scale_edge_width(range = c(0.1, 5)) +\n  geom_node_point(aes(colour = community))  \n\ngc5 + theme_graph()\n\n\n\n\n\n\n\n\n\nShow code\ngc6 &lt;- GAStech_graph %&gt;%\n  mutate(community = as.factor(group_infomap(weights = NULL, node_weights = NULL, trials = 10))) %&gt;%\n  ggraph(layout = \"fr\") + \n  geom_edge_link(aes(width=Weight), \n                 alpha=0.2) +\n  scale_edge_width(range = c(0.1, 5)) +\n  geom_node_point(aes(colour = community))  \n\ngc6 + theme_graph()\n\n\n\n\n\n\n\n\n\nShow code\ngc7 &lt;- GAStech_graph %&gt;%\n  mutate(community = as.factor(group_spinglass(weights = Weight))) %&gt;%\n  ggraph(layout = \"fr\") + \n  geom_edge_link(aes(width=Weight), \n                 alpha=0.2) +\n  scale_edge_width(range = c(0.1, 5)) +\n  geom_node_point(aes(colour = community))  \n\ngc7 + theme_graph()"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex09/Hands-on_Ex09.html#data-preparation",
+    "href": "Hands-on_Ex/Hands-on_Ex09/Hands-on_Ex09.html#data-preparation",
+    "title": "Hands-on Exercise 9",
+    "section": "6.1 Data Preparation",
+    "text": "6.1 Data Preparation\nCode chunk below prepares dataset for interactive network graph.\n\n\nShow code\nGAStech_edges_aggregated &lt;- GAStech_edges %&gt;%\n  left_join(GAStech_nodes, by = c(\"sourceLabel\" = \"label\")) %&gt;%\n  rename(from = id) %&gt;%\n  left_join(GAStech_nodes, by = c(\"targetLabel\" = \"label\")) %&gt;%\n  rename(to = id) %&gt;%\n  filter(MainSubject == \"Work related\") %&gt;%\n  group_by(from, to) %&gt;%\n    summarise(weight = n()) %&gt;%\n  filter(from!=to) %&gt;%\n  filter(weight &gt; 1) %&gt;%\n  ungroup()"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex09/Hands-on_Ex09.html#plot-interactive-network-graph",
+    "href": "Hands-on_Ex/Hands-on_Ex09/Hands-on_Ex09.html#plot-interactive-network-graph",
+    "title": "Hands-on Exercise 9",
+    "section": "6.2 Plot Interactive Network Graph",
+    "text": "6.2 Plot Interactive Network Graph\nCode chunk below plots interactive network graph.\n\n\nShow code\nvisNetwork(GAStech_nodes, \n           GAStech_edges_aggregated)"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex09/Hands-on_Ex09.html#work-with-layout",
+    "href": "Hands-on_Ex/Hands-on_Ex09/Hands-on_Ex09.html#work-with-layout",
+    "title": "Hands-on Exercise 9",
+    "section": "6.2 Work with layout",
+    "text": "6.2 Work with layout\nCode chunk below uses Fruchterman and Reingold layout.\n\n\nShow code\nvisNetwork(GAStech_nodes,\n           GAStech_edges_aggregated) %&gt;%\n  visIgraphLayout(layout = \"layout_with_fr\")"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex09/Hands-on_Ex09.html#work-with-visual-attributes---nodes",
+    "href": "Hands-on_Ex/Hands-on_Ex09/Hands-on_Ex09.html#work-with-visual-attributes---nodes",
+    "title": "Hands-on Exercise 9",
+    "section": "6.3 Work with visual attributes - nodes",
+    "text": "6.3 Work with visual attributes - nodes\nvisNetwork() looks for a field called “group” in the nodes object and colour the nodes according to the values of the group field.\nThe code chunk below renames Department field to group.\n\n\nShow code\nGAStech_nodes &lt;- GAStech_nodes %&gt;%\n  rename(group = Department) \n\n\nRerun with the code chunk below, visNetwork shades the nodes by assigning unique colour to each category in the group field.\n\n\nShow code\nvisNetwork(GAStech_nodes,\n           GAStech_edges_aggregated) %&gt;%\n  visIgraphLayout(layout = \"layout_with_fr\") %&gt;%\n  visLegend() %&gt;%\n  visLayout(randomSeed = 123)"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex09/Hands-on_Ex09.html#work-with-visual-attributes---edges",
+    "href": "Hands-on_Ex/Hands-on_Ex09/Hands-on_Ex09.html#work-with-visual-attributes---edges",
+    "title": "Hands-on Exercise 9",
+    "section": "6.4 Work with visual attributes - edges",
+    "text": "6.4 Work with visual attributes - edges\nCode chunk below runs visEdges() which is used to symbolise the edges.\n\nThe argument arrows is used to define where to place the arrow.\nThe smooth argument is used to plot the edges using a smooth curve.\n\n\n\nShow code\nvisNetwork(GAStech_nodes,\n           GAStech_edges_aggregated) %&gt;%\n  visIgraphLayout(layout = \"layout_with_fr\") %&gt;%\n  visEdges(arrows = \"to\", \n           smooth = list(enabled = TRUE, \n                         type = \"curvedCW\")) %&gt;%\n  visLegend() %&gt;%\n  visLayout(randomSeed = 123)"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex09/Hands-on_Ex09.html#incorporate-interactivity",
+    "href": "Hands-on_Ex/Hands-on_Ex09/Hands-on_Ex09.html#incorporate-interactivity",
+    "title": "Hands-on Exercise 9",
+    "section": "6.5 Incorporate Interactivity",
+    "text": "6.5 Incorporate Interactivity\nCode chunk below uses visOptions() to incorporate interactivity features in the data visualisation.\n\nThe argument highlightNearest highlights nearest when clicking a node.\nThe argument nodesIdSelection adds an id node selection creating an HTML select element.\n\n\n\nShow code\nvisNetwork(GAStech_nodes,\n           GAStech_edges_aggregated) %&gt;%\n  visIgraphLayout(layout = \"layout_with_fr\") %&gt;%\n  visOptions(highlightNearest = TRUE,\n             nodesIdSelection = TRUE) %&gt;%\n  visLegend() %&gt;%\n  visLayout(randomSeed = 123)"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex08/Hands-on_Ex08-2.html",
+    "href": "Hands-on_Ex/Hands-on_Ex08/Hands-on_Ex08-2.html",
+    "title": "Hands-on Exercise 8-2",
+    "section": "",
+    "text": "Note: Last modified to include author’s details."
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex08/Hands-on_Ex08-2.html#install-and-launch-r-packages",
+    "href": "Hands-on_Ex/Hands-on_Ex08/Hands-on_Ex08-2.html#install-and-launch-r-packages",
+    "title": "Hands-on Exercise 8-2",
+    "section": "1.1 Install and launch R packages",
+    "text": "1.1 Install and launch R packages\nFor the purpose of this exercise, the following R packages will be used.\n\n\nShow code\npacman::p_load(sf, tmap, tidyverse)"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex08/Hands-on_Ex08-2.html#import-the-data",
+    "href": "Hands-on_Ex/Hands-on_Ex08/Hands-on_Ex08-2.html#import-the-data",
+    "title": "Hands-on Exercise 8-2",
+    "section": "1.2 Import the data",
+    "text": "1.2 Import the data\nSGPools_svy21 dataset is used for this hands-on exercise. The dataset is retrieved from Singapore SVY21 Projected Coordinates System. The XCOORD and YCOORD columns are the x-coordinates and y-coordinates of SingPools outlets and branches.\n\n\nShow code\nsgpools &lt;- read_csv(\"data/aspatial/SGPools_svy21.csv\")"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex08/Hands-on_Ex08-2.html#examine-data-structure",
+    "href": "Hands-on_Ex/Hands-on_Ex08/Hands-on_Ex08-2.html#examine-data-structure",
+    "title": "Hands-on Exercise 8-2",
+    "section": "1.3 Examine data structure",
+    "text": "1.3 Examine data structure\n\nlist(sgpools)\n\n[[1]]\n# A tibble: 306 × 7\n   NAME           ADDRESS POSTCODE XCOORD YCOORD `OUTLET TYPE` `Gp1Gp2 Winnings`\n   &lt;chr&gt;          &lt;chr&gt;      &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt; &lt;chr&gt;                     &lt;dbl&gt;\n 1 Livewire (Mar… 2 Bayf…    18972 30842. 29599. Branch                        5\n 2 Livewire (Res… 26 Sen…    98138 26704. 26526. Branch                       11\n 3 SportsBuzz (K… Lotus …   738078 20118. 44888. Branch                        0\n 4 SportsBuzz (P… 1 Sele…   188306 29777. 31382. Branch                       44\n 5 Prime Serango… Blk 54…   552542 32239. 39519. Branch                        0\n 6 Singapore Poo… 1A Woo…   731001 21012. 46987. Branch                        3\n 7 Singapore Poo… Blk 64…   370064 33990. 34356. Branch                       17\n 8 Singapore Poo… Blk 88…   370088 33847. 33976. Branch                       16\n 9 Singapore Poo… Blk 30…   540308 33910. 41275. Branch                       21\n10 Singapore Poo… Blk 20…   560202 29246. 38943. Branch                       25\n# ℹ 296 more rows"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex08/Hands-on_Ex08-2.html#data-preparation",
+    "href": "Hands-on_Ex/Hands-on_Ex08/Hands-on_Ex08-2.html#data-preparation",
+    "title": "Hands-on Exercise 8-2",
+    "section": "1.4 Data Preparation",
+    "text": "1.4 Data Preparation\n\nCreating a sf data frame from an aspatial dataframe\nThe code chunk below converts sgpools data frame into a simple feature data frame by using st_as_sf() of sf packages.\n\n\nShow code\nsgpools_sf &lt;- st_as_sf(sgpools, \n                       coords = c(\"XCOORD\", \"YCOORD\"),\n                       crs= 3414)\n\n\n\n\n\n\n\n\nLearning Points\n\n\n\n\nThe coords argument requires users to provide the column name of the x-coordinates first then followed by the column name of the y-coordinates.\nThe crs argument requilightcoral users to provide the coordinates system in epsg format. EPSG: 3414 is Singapore SVY21 Projected Coordinate System. You can search for other country’s epsg code by refering to epsg.io.\nNew variable geometry is created and added to the dataframe.\n\n\n\n\nlist(sgpools_sf)\n\n[[1]]\nSimple feature collection with 306 features and 5 fields\nGeometry type: POINT\nDimension:     XY\nBounding box:  xmin: 7844.194 ymin: 26525.7 xmax: 45176.57 ymax: 47987.13\nProjected CRS: SVY21 / Singapore TM\n# A tibble: 306 × 6\n   NAME                         ADDRESS POSTCODE `OUTLET TYPE` `Gp1Gp2 Winnings`\n * &lt;chr&gt;                        &lt;chr&gt;      &lt;dbl&gt; &lt;chr&gt;                     &lt;dbl&gt;\n 1 Livewire (Marina Bay Sands)  2 Bayf…    18972 Branch                        5\n 2 Livewire (Resorts World Sen… 26 Sen…    98138 Branch                       11\n 3 SportsBuzz (Kranji)          Lotus …   738078 Branch                        0\n 4 SportsBuzz (PoMo)            1 Sele…   188306 Branch                       44\n 5 Prime Serangoon North        Blk 54…   552542 Branch                        0\n 6 Singapore Pools Woodlands C… 1A Woo…   731001 Branch                        3\n 7 Singapore Pools 64 Circuit … Blk 64…   370064 Branch                       17\n 8 Singapore Pools 88 Circuit … Blk 88…   370088 Branch                       16\n 9 Singapore Pools Anchorvale … Blk 30…   540308 Branch                       21\n10 Singapore Pools Ang Mo Kio … Blk 20…   560202 Branch                       25\n# ℹ 296 more rows\n# ℹ 1 more variable: geometry &lt;POINT [m]&gt;\n\n\nThe output shows that sgppols_sf is in point feature class with epsg ID - 3414. The bounding box provides information of the extend of the geospatial data."
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex08/Hands-on_Ex08-2.html#plot-interactive-point-symbol-map",
+    "href": "Hands-on_Ex/Hands-on_Ex08/Hands-on_Ex08-2.html#plot-interactive-point-symbol-map",
+    "title": "Hands-on Exercise 8-2",
+    "section": "Plot Interactive Point Symbol Map",
+    "text": "Plot Interactive Point Symbol Map\n\n\nShow code\ntm_shape(sgpools_sf)+\ntm_bubbles(col = \"lightcoral\",\n           size = 1,\n           border.col = \"black\",\n           border.lwd = 1)"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex08/Hands-on_Ex08-2.html#make-the-map-proportional",
+    "href": "Hands-on_Ex/Hands-on_Ex08/Hands-on_Ex08-2.html#make-the-map-proportional",
+    "title": "Hands-on Exercise 8-2",
+    "section": "Make the Map Proportional",
+    "text": "Make the Map Proportional\nTo draw a proportional symbol map, we need to assign a numerical variable to the size visual attribute. The code chunks below show that the variable Gp1Gp2Winnings is assigned to size visual attribute.\n\n\nShow code\ntm_shape(sgpools_sf)+\ntm_bubbles(col = \"lightcoral\",\n           size = \"Gp1Gp2 Winnings\",\n           border.col = \"black\",\n           border.lwd = 1)"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex08/Hands-on_Ex08-2.html#adjust-the-map-with-different-colours",
+    "href": "Hands-on_Ex/Hands-on_Ex08/Hands-on_Ex08-2.html#adjust-the-map-with-different-colours",
+    "title": "Hands-on Exercise 8-2",
+    "section": "Adjust the Map with Different Colours",
+    "text": "Adjust the Map with Different Colours\nThe proportional symbol map can be further improved by using the colour visual attribute. In the code chunks below, OUTLET_TYPE variable is used as the colour attribute variable.\n\n\nShow code\ntm_shape(sgpools_sf)+\ntm_bubbles(col = \"OUTLET TYPE\", \n          size = \"Gp1Gp2 Winnings\",\n          border.col = \"black\",\n          border.lwd = 1)"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex08/Hands-on_Ex08-2.html#plot-twin-maps",
+    "href": "Hands-on_Ex/Hands-on_Ex08/Hands-on_Ex08-2.html#plot-twin-maps",
+    "title": "Hands-on Exercise 8-2",
+    "section": "Plot Twin Maps",
+    "text": "Plot Twin Maps\n\n\n\n\n\n\nDesign Feature of tmap\n\n\n\nWorks with faceted plots. The argument sync in tm_facets() can be used to produce multiple maps with synchronised zoom and pan settings.\n\n\n\n\nShow code\ntm_shape(sgpools_sf) +\n  tm_bubbles(col = \"OUTLET TYPE\", \n          size = \"Gp1Gp2 Winnings\",\n          border.col = \"black\",\n          border.lwd = 1) +\n  tm_facets(by= \"OUTLET TYPE\",\n            nrow = 1,\n            sync = TRUE)\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nSwitch tmap’s viewer back to plot mode by using the code chunk below.\n\ntmap_mode(\"plot\")"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex08/Hands-on_Ex08-3.html",
+    "href": "Hands-on_Ex/Hands-on_Ex08/Hands-on_Ex08-3.html",
+    "title": "Hands-on Exercise 8-3",
+    "section": "",
+    "text": "Note: Last modified to include author’s details."
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex08/Hands-on_Ex08-3.html#install-and-launch-r-packages",
+    "href": "Hands-on_Ex/Hands-on_Ex08/Hands-on_Ex08-3.html#install-and-launch-r-packages",
+    "title": "Hands-on Exercise 8-3",
+    "section": "1.1 Install and launch R packages",
+    "text": "1.1 Install and launch R packages\nFor the purpose of this exercise, the following R packages will be used.\n\n\nShow code\npacman::p_load(sf, tmap, tidyverse)"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex08/Hands-on_Ex08-3.html#import-the-data",
+    "href": "Hands-on_Ex/Hands-on_Ex08/Hands-on_Ex08-3.html#import-the-data",
+    "title": "Hands-on Exercise 8-3",
+    "section": "1.2 Import the data",
+    "text": "1.2 Import the data\nA prepared data set called NGA_wp.rds will be used. The data set is a polygon feature data.frame providing information on water point of Nigeria at the LGA level. You can find the data set in the rds sub-direct of the hands-on data folder.\nUse appropriate sf function import NGA_wp.rds into R environment.\n\n\nShow the code\nNGA_wp &lt;- read_rds(\"data/rds/NGA_wp.rds\")"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex08/Hands-on_Ex08-3.html#visualising-distribution-of-non-functional-water-point",
+    "href": "Hands-on_Ex/Hands-on_Ex08/Hands-on_Ex08-3.html#visualising-distribution-of-non-functional-water-point",
+    "title": "Hands-on Exercise 8-3",
+    "section": "2.1 Visualising distribution of non-functional water point",
+    "text": "2.1 Visualising distribution of non-functional water point\n\n\nShow the code\np1 &lt;- tm_shape(NGA_wp) +\n  tm_fill(\"wp_functional\",\n          n = 10,\n          style = \"equal\",\n          palette = \"Blues\") +\n  tm_borders(lwd = 0.1,\n             alpha = 1) +\n  tm_layout(main.title = \"Distribution of functional water point by LGAs\",\n            legend.outside = FALSE)\n\n\n\n\nShow the code\np2 &lt;- tm_shape(NGA_wp) +\n  tm_fill(\"total_wp\",\n          n = 10,\n          style = \"equal\",\n          palette = \"Blues\") +\n  tm_borders(lwd = 0.1,\n             alpha = 1) +\n  tm_layout(main.title = \"Distribution of total  water point by LGAs\",\n            legend.outside = FALSE)\n\n\n\ntmap_arrange(p2, p1, nrow = 1)"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex08/Hands-on_Ex08-3.html#deriving-proportion-of-functional-water-points-and-non-functional-water-points",
+    "href": "Hands-on_Ex/Hands-on_Ex08/Hands-on_Ex08-3.html#deriving-proportion-of-functional-water-points-and-non-functional-water-points",
+    "title": "Hands-on Exercise 8-3",
+    "section": "3.1 Deriving Proportion of Functional Water Points and Non-Functional Water Points",
+    "text": "3.1 Deriving Proportion of Functional Water Points and Non-Functional Water Points\nWe will tabulate the proportion of functional water points and the proportion of non-functional water points in each LGA. In the following code chunk, mutate() from dplyr package is used to derive two fields, namely pct_functional and pct_nonfunctional.\n\n\nNGA_wp &lt;- NGA_wp %&gt;%\n  mutate(pct_functional = wp_functional/total_wp) %&gt;%\n  mutate(pct_nonfunctional = wp_nonfunctional/total_wp)"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex08/Hands-on_Ex08-3.html#plotting-map-of-rate",
+    "href": "Hands-on_Ex/Hands-on_Ex08/Hands-on_Ex08-3.html#plotting-map-of-rate",
+    "title": "Hands-on Exercise 8-3",
+    "section": "3.2 Plotting map of rate",
+    "text": "3.2 Plotting map of rate\n\n\n\nShow the code\ntm_shape(NGA_wp) +\n  tm_fill(\"pct_functional\",\n          n = 10,\n          style = \"equal\",\n          palette = \"Blues\",\n          legend.hist = TRUE) +\n  tm_borders(lwd = 0.1,\n             alpha = 1) +\n  tm_layout(main.title = \"Rate map of functional water point by LGAs\",\n            legend.outside = TRUE)"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex08/Hands-on_Ex08-3.html#percentile-map",
+    "href": "Hands-on_Ex/Hands-on_Ex08/Hands-on_Ex08-3.html#percentile-map",
+    "title": "Hands-on Exercise 8-3",
+    "section": "4.1 Percentile Map",
+    "text": "4.1 Percentile Map\nThe percentile map is a special type of quantile map with six specific categories: 0-1%,1-10%, 10-50%,50-90%,90-99%, and 99-100%. The corresponding breakpoints can be derived by means of the base R quantile command, passing an explicit vector of cumulative probabilities as c(0,.01,.1,.5,.9,.99,1). Note that the begin and endpoint need to be included.\n\nData Preparation\nStep 1: Exclude records with NA by using the code chunk below.\n\n\nShow the code\nNGA_wp &lt;- NGA_wp %&gt;%\n  drop_na()\n\n\nStep 2: Creating customised classification and extracting values\n\n\nShow the code\npercent &lt;- c(0,.01,.1,.5,.9,.99,1)\nvar &lt;- NGA_wp[\"pct_functional\"] %&gt;%\n  st_set_geometry(NULL)\nquantile(var[,1], percent)\n\n\n       0%        1%       10%       50%       90%       99%      100% \n0.0000000 0.0000000 0.2169811 0.4791667 0.8611111 1.0000000 1.0000000 \n\n\n\n\n\n\n\n\nImportant\n\n\n\nWhen variables are extracted from an sf data.frame, the geometry is extracted as well. For mapping and spatial manipulation, this is the expected behavior, but many base R functions cannot deal with the geometry. Specifically, the quantile() gives an error. As a result st_set_geomtry(NULL) is used to drop geomtry field.\n\n\n\n\nCreating the get.var function\nStep1 : Write an R function as shown below to extract a variable (i.e. wp_nonfunctional) as a vector out of an sf data.frame.\n\narguments:\n\nvname: variable name (as character, in quotes)\ndf: name of sf data frame\n\nreturns:\n\nv: vector with values (without a column name)\n\n\n\n\nShow the code\nget.var &lt;- function(vname,df) {\n  v &lt;- df[vname] %&gt;% \n    st_set_geometry(NULL)\n  v &lt;- unname(v[,1])\n  return(v)\n}\n\n\n\n\nA percentile mapping function\nStep 2: Write a percentile mapping function by using the code chunk below.\n\n\nShow the code\npercentmap &lt;- function(vnam, df, legtitle=NA, mtitle=\"Percentile Map\"){\n  percent &lt;- c(0,.01,.1,.5,.9,.99,1)\n  var &lt;- get.var(vnam, df)\n  bperc &lt;- quantile(var, percent)\n  tm_shape(df) +\n  tm_polygons() +\n  tm_shape(df) +\n     tm_fill(vnam,\n             title=legtitle,\n             breaks=bperc,\n             palette=\"Blues\",\n          labels=c(\"&lt; 1%\", \"1% - 10%\", \"10% - 50%\", \"50% - 90%\", \"90% - 99%\", \"&gt; 99%\"))  +\n  tm_borders() +\n  tm_layout(main.title = mtitle, \n            title.position = c(\"right\",\"bottom\"))\n}\n\n\n\n\nTest drive the percentile mapping function\nStep 3: To run the function, type the code chunk as shown below.\n\n\nShow the code\npercentmap(\"total_wp\", NGA_wp)"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex08/Hands-on_Ex08-3.html#box-map",
+    "href": "Hands-on_Ex/Hands-on_Ex08/Hands-on_Ex08-3.html#box-map",
+    "title": "Hands-on Exercise 8-3",
+    "section": "4.2 Box map",
+    "text": "4.2 Box map\nA box map is an augmented quartile map, with an additional lower and upper category. When there are lower outliers, then the starting point for the breaks is the minimum value, and the second break is the lower fence.\nIn contrast, when there are no lower outliers, then the starting point for the breaks will be the lower fence, and the second break is the minimum value (there will be no observations that fall in the interval between the lower fence and the minimum value).\n\n\nShow the code\nggplot(data = NGA_wp,\n       aes(x = \"\",\n           y = wp_nonfunctional)) +\n  geom_boxplot()\n\n\n\n\n\n\nDisplaying summary statistics on a choropleth map by using the basic principles of boxplot.\nTo create a box map, a custom breaks specification will be used. However, there is a complication. The break points for the box map vary depending on whether lower or upper outliers are present.\n\n\nCreating the boxbreaks function\nThe code chunk below is an R function that creating break points for a box map.\n\narguments:\n\nv: vector with observations\nmult: multiplier for IQR (default 1.5)\n\nreturns:\n\nbb: vector with 7 break points compute quartile and fences\n\n\n\n\nShow the code\nboxbreaks &lt;- function(v,mult=1.5) {\n  qv &lt;- unname(quantile(v))\n  iqr &lt;- qv[4] - qv[2]\n  upfence &lt;- qv[4] + mult * iqr\n  lofence &lt;- qv[2] - mult * iqr\n  # initialize break points vector\n  bb &lt;- vector(mode=\"numeric\",length=7)\n  # logic for lower and upper fences\n  if (lofence &lt; qv[1]) {  # no lower outliers\n    bb[1] &lt;- lofence\n    bb[2] &lt;- floor(qv[1])\n  } else {\n    bb[2] &lt;- lofence\n    bb[1] &lt;- qv[1]\n  }\n  if (upfence &gt; qv[5]) { # no upper outliers\n    bb[7] &lt;- upfence\n    bb[6] &lt;- ceiling(qv[5])\n  } else {\n    bb[6] &lt;- upfence\n    bb[7] &lt;- qv[5]\n  }\n  bb[3:5] &lt;- qv[2:4]\n  return(bb)\n}\n\n\n\n\nCreating the get.var function\nThe code chunk below is an R function to extract a variable as a vector out of an sf data frame.\n\narguments:\n\nvname: variable name (as character, in quotes)\ndf: name of sf data frame\n\nreturns:\n\nv: vector with values (without a column name)\n\n\n\n\nShow the code\nget.var &lt;- function(vname,df) {\n  v &lt;- df[vname] %&gt;% st_set_geometry(NULL)\n  v &lt;- unname(v[,1])\n  return(v)\n}\n\n\n\n\nTest drive the newly created function\nTest the newly created function with the code chunk below.\n\n\nShow the code\nvar &lt;- get.var(\"wp_nonfunctional\", NGA_wp) \nboxbreaks(var)\n\n\n[1] -56.5   0.0  14.0  34.0  61.0 131.5 278.0\n\n\n\n\nBoxmap function\nThe code chunk below is an R function to create a box map. arguments:\n\nvnam: variable name (as character, in quotes)\ndf: simple features polygon layer\nlegtitle: legend title\nmtitle: map title\nmult: multiplier for IQR\nreturns: a tmap-element (plots a map)\n\n\n\nShow the code\nboxmap &lt;- function(vnam, df, \n                   legtitle=NA,\n                   mtitle=\"Box Map\",\n                   mult=1.5){\n  var &lt;- get.var(vnam,df)\n  bb &lt;- boxbreaks(var)\n  tm_shape(df) +\n    tm_polygons() +\n  tm_shape(df) +\n     tm_fill(vnam,title=legtitle,\n             breaks=bb,\n             palette=\"Blues\",\n          labels = c(\"lower outlier\", \n                     \"&lt; 25%\", \n                     \"25% - 50%\", \n                     \"50% - 75%\",\n                     \"&gt; 75%\", \n                     \"upper outlier\"))  +\n  tm_borders() +\n  tm_layout(main.title = mtitle, \n            title.position = c(\"left\",\n                               \"top\"))\n}\n\n\n\n\nShow the code\ntmap_mode(\"plot\")\nboxmap(\"wp_nonfunctional\", NGA_wp)"
+  },
+  {
+    "objectID": "In-class_Ex/In-class_Ex08/data/geospatial/MPSZ-2019.html",
+    "href": "In-class_Ex/In-class_Ex08/data/geospatial/MPSZ-2019.html",
+    "title": "TSE:ISSS608",
+    "section": "",
+    "text": "&lt;!DOCTYPE qgis PUBLIC ‘http://mrcc.com/qgis.dtd’ ‘SYSTEM’&gt;     dataset\n\n\n        0 0     false    \n\n\n\n Back to top"
   }
 ]
