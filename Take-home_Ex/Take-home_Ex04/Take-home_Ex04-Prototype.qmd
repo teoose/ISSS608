@@ -274,10 +274,12 @@ body <- dashboardBody(
       tabItem(tabName = "Exploratory",
             ExploreSubTabs
             ),
-      tabItem(tabName = "Spatial Point Pattern Analysis"
-              ),
-      tabItem(tabName = "Multivariate Clustering Analysis"
-              )
+    tabItem(tabName = "Cluster and Outlier Analysis"
+            ),
+    tabItem(tabName = "Hot/ Cold Zone Analysis"
+            ),
+    tabItem(tabName = "Confirmatory Analysis"
+            )
       )
     )
 

@@ -534,18 +534,14 @@ body <- dashboardBody(
             ExploreSubTabs
     ),
     # 2nd tab content ---
-    tabItem(tabName = "Spatial Point Pattern Analysis",
-            #/// replace with fluidRow Names  
-    ),
-    # 3rd tab content ---
     tabItem(tabName = "Cluster and Outlier Analysis"
             #/// replace with fluidRow Names
     ),
-    # 4th tab content ---
-    tabItem(tabName = "Hot and Cold Spot Analysis",
+    # 3rd tab content ---
+    tabItem(tabName = "Hot and Cold Zone Analysis",
             #/// replace with fluidRow Names  
     ),
-    # 5th tab content ---
+    # 4th tab content ---
     tabItem(tabName = "Confirmatory Analysis"
             #/// replace with fluidRow Names
     )
