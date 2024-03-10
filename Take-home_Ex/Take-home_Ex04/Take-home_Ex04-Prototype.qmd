@@ -246,10 +246,9 @@ Code chunk below shows the simplified version of R Shiny Application for **Explo
 #========================================================== 
 ## load R packages
 #========================================================== 
-pacman::p_load(shiny, shinydashboard, tidyverse, dplyr, leaflet, leaflet.extras, 
-               plotly, highcharter, fresh, shinycssloaders, ggthemes, sf, spdep,
-               tmap, mapview, leafsync, tm, ggforce, ggraph, igraph, 
-               wordcloud, tidytext, DT)
+pacman::p_load(shiny, shinydashboard, shinycssloaders, tidyverse, dplyr, 
+               leaflet, plotly, highcharter, ggthemes, fresh, sf, spdep, tmap, 
+               tm, ggforce, ggraph, igraph, wordcloud, tidytext, DT)
 
 
 #========================================================== 
@@ -265,7 +264,9 @@ sidebar <- dashboardSidebar()
 sidebarMenu(
     menuItem("Exploratory", tabName = "Exploratory"),
     menuItem("Spatial Point Pattern Analysis", tabName = "PointAnalysis"),
-    menuItem("Multivariate Clustering Analysis", tabName = "Clustering"),
+    menuItem("Clustering Analysis", tabName = "Clustering"),
+    menuItem("Hot/ Cold Spot Analysis", tabName = "HotCold"),
+    menuItem("Confirmatory Analysis", tabName = "Confirmatory"),
     menuItem("Visit ACLED data"))
 
 # main body ---
