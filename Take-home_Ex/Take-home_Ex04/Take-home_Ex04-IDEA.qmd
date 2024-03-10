@@ -25,7 +25,7 @@ The project team consists of three members, and each member will take one of the
 
 -   Exploratory Data Analysis (Initial & Geospatial)
 
--   Spatial Point Pattern Analysis/ Clustering Analysis/ Hot & Cold Spot Analysis
+-   Clustering & Outlier Analysis/ Hot & Cold Zone Analysis
 
 -   Confirmatory Data Analysis
 
