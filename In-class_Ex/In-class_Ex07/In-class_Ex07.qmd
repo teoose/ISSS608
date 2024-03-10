@@ -1,0 +1,529 @@
+---
+title: "In-class Exercise 7"
+subtitle: "Geospatial Mapping with Tableau & R"
+author: "Teo Suan Ern"
+date: "9 March 2024"
+date-modified: "last-modified"
+execute: 
+  eval: true
+  echo: true
+  freeze: true
+  warning: false
+  message: false
+  editor: visual
+---
+
+In-class exercise 7 comprised of two parts on geospatial mapping with Tableau and R.
+
+# \[I\] Plotting interactive maps in Tableau.
+
+1.  [Plotting Proportional Symbol Map](https://public.tableau.com/app/profile/suan.ern.teo/viz/In-classEx8-Geospatial/Sheet1?publish=yes){target="_blank"}
+
+2.  [Plotting Choropleth Map](https://public.tableau.com/app/profile/suan.ern.teo/viz/In-classEx8-ChoroplethMap/Sheet32?publish=yes){target="_blank"}
+
+3.  [Others: Plotting Treemap](https://public.tableau.com/app/profile/suan.ern.teo/viz/In-classEx8-Treemapv2/Sheet5?publish=yes){target="_blank"}
+
+4.  [Others: Plotting Treemap v2](https://public.tableau.com/app/profile/suan.ern.teo/viz/In-classEx8-Treemap/Sheet52?publish=yes){target="_blank"}
+
+# \[II\] Plotting isohyet map in R.
+
+# 1. Getting started
+
+This in-class exercise will plot isohyet map. It is a surface map of the same precipitation, suitable for e.g. rain/ snow. It will create grid (also known as raster) objects as the input and output of spatial interpolation.
+
+## 1.1 Install and launch R packages
+
+The key R packages installed are as follows:
+
+::: {.callout-warning icon="false" collapse="true"}
+### R packages installed
+
+-   ***terra*****:** a replacement of the raster package that is similar (but simpler and faster) interface than raster.
+
+-   ***gstat***: an R package used for spatial and spatio-temporal geostatistical modelling, prediction and simulation.
+
+-   ***automap*****:** an R package for performing automatic variogram modelling and kriging interpolation.
+:::
+
+```{r}
+pacman::p_load(sf, terra, gstat, automap,
+               tmap, viridis, tidyverse)
+```
+
+# 2. Importing data
+
+## 2.1 The data
+
+There are three dataset used in this in-class exercise:
+
+-   *RainfallStation.csv* provides location information of existing rainfall stations in Singapore. The data is downloaded from [Meteological Service Singapore](http://www.weather.gov.sg/home/){target="_blank"}.
+
+-   *DAILYDATA_202402.csv* provides weather data are rainfall stations for the month February, 2024. The data is also downloaded from [Meteological Service Singapore](http://www.weather.gov.sg/home/){target="_blank"}.
+
+-   *MPSZ-2019* contains planning subzone boundary of URA Master Plan 2019. It is downloaded from [data.gov.sg](data.gov.sg){target="_blank"} in its original data kml format.
+
+## 2.2 Import rainfall station data
+
+Code chunk below uses `read_csv()` of readr package to import *RainfallStation.csv*.
+
+```{r}
+rfstations <-
+  read_csv("data/aspatial/RainfallStation.csv")
+```
+
+## 2.3 Import rainfall record data
+
+Code chunk below uses `read_csv()` of readr package to import *DAILYDATA_202402.csv.*
+
+```{r}
+rfdata <-
+  read_csv("data/aspatial/DAILYDATA_202402.csv") %>%
+  select(c(1, 5)) %>%
+  group_by(Station) %>%
+  summarise(MONTHSUM = sum(`Daily Rainfall Total (mm)`)) %>%
+  ungroup()
+```
+
+## 2.4 Convert aspatial data into geospatial data
+
+Code chunk below uses `left_join()` to combine `rfdata` dataset and `rfstations` dataset.
+
+*Note: Station field is available in both data table of rfdata and rfstations, therefore, `by()` argument of `left_join()` is not required.*
+
+```{r}
+rfdata <-rfdata %>%
+  left_join(rfstations)
+```
+
+Code chunk below uses `st_as_sf()` to create geometry object based on longitude, latitude and crs 4326. It then pipe with `st_transform()` to transform to EPSG: 3414 (i.e. Singapore SVY21 Projected Coordinate).
+
+```{r}
+rfdata_sf <- st_as_sf(rfdata,
+                      coords = c("Longitude", "Latitude"),
+                      crs = 4326
+                      ) %>%
+  st_transform(crs = 3414)
+```
+
+::: {.callout-note icon="false"}
+### Learning Points
+
+-   `coords` argument is important to map the x-coordinates (*i.e. Longitude*) first, then follow by the y-coordinates (*i.e. Latitude*).
+
+-   `crs = 4326` indicates that the source data is in wgs84 coordinates system.
+
+-   `st_transform()` of **sf** package is then used to transform the source data from wgs84 to svy21 projected coordinates system.
+
+-   *svy21* is the official projected coordinates of Singapore. *3414* is the EPSG code of svy21.
+:::
+
+## 2.5 Import planning subzone boundary data
+
+Code chunk below uses `st_read()` of sf package is used to import MPSZ-2019 shapefile into R. The output is named *mpsz2019*. It is in polygon feature tibble data.frame format.
+
+*Note: Given that the source data is in wgs84 coordinate system, `st_transform()` is used to transform the output of sf data.frame into svy21 project coordinates system.*
+
+```{r}
+mpsz2019 <- st_read(dsn = "data/geospatial",
+                    layer = "MPSZ-2019"
+                    ) %>%
+  st_transform(crs = 3414)
+```
+
+# 3. Plot map using tmap()
+
+Code chunk below plots point spatial map using `tmap()` function, to show the locations of rainfall station in Singapore.
+
+```{r}
+tmap_options(check.and.fix = TRUE)
+tmap_mode("view")
+tm_shape(rfdata_sf) +
+  tm_dots(col = "red")
+```
+
+Code chunk below plots point spatial map using `tmap()` function, to create a quantitative dot map of rainfall distribution by rainfall station in Singapore.
+
+```{r}
+# function check & fix 'map'
+tmap_options(check.and.fix = TRUE)
+
+# convert to interactive map
+tmap_mode("view")
+
+# plot tmap
+tm_shape(mpsz2019) +
+  # tm_polygon >> provides fill and border
+  # tm_borders >> just border
+  tm_borders() +
+  tm_shape(rfdata_sf) +
+  tm_dots(col = "MONTHSUM")
+tmap_mode("plot")
+```
+
+# 4. Spatial Interpolation: gstat method
+
+Use **gstat** package to performing spatial interpolation with the following steps:
+
+1.  Create an object of class called *gstat*, using a function of the same name: `gstat`. A gstat object contains all necessary information to conduct spatial interpolation, namely:
+    -   The model definition
+    -   The calibration data
+2.  Based on its arguments, the `gstat` function will “understand” what type of interpolation model to use:
+    -   No variogram model → IDW
+    -   Variogram model, no covariates → Ordinary Kriging
+    -   Variogram model, with covariates → Universal Kriging
+
+Figure below shows the complete decision tree of `gstat`.
+
+[![Image Source: ISSS608](images/diagram.png)](https://isss608-vaa-demo.netlify.app/in-class_ex/in-class_ex07/in-class_ex07-isomap#over-view)
+
+### Data Preparation
+
+Code chunk below uses `terra::rast()` and `terra::xyFromCell()`to calculate center point.
+
+*Note: `xyFromCell()` gets coordinates of the center of raster cells for a row, column, or cell number of a SpatRaster. In other words, it gets row, column, or cell numbers from coordinates or from each other.*
+
+```{r}
+grid <- terra::rast(mpsz2019,
+                    nrows = 690,
+                    ncols = 1075)
+
+grid
+```
+
+```{r}
+xy <- terra::xyFromCell(grid, 
+                        1:ncell(grid))
+head(xy)
+```
+
+Code chunk below creates a data frame *coop* with prediction/simulation locations.
+
+```{r}
+coop <- st_as_sf(as.data.frame(xy), 
+                 coords = c("x", "y"),
+                 crs = st_crs(mpsz2019))
+coop <- st_filter(coop, mpsz2019)
+head(coop)
+```
+
+# 5. Inverse Distance Weighted (IDW)
+
+In the IDW interpolation method, the sample points are weighted during interpolation such that the influence of one point relative to another declines with distance from the unknown point of creation.
+
+## 5.1 gstat
+
+There are three parameters of gstat function:
+
+-   formula: The prediction “formula” specifying the dependent and the independent variables (co-variates)
+
+-   data: The calibration data
+
+-   model: The variogram model
+
+```{r}
+res <- gstat(formula = MONTHSUM ~ 1, 
+             locations = rfdata_sf, 
+             nmax = 3,
+             set = list(idp = 0))
+```
+
+Code chunk below uses `predict()` to interpolate (calculate predicted values):
+
+The predict function accepts:
+
+-   A raster—stars object, such as dem
+
+-   A model—gstat object, such as g
+
+The raster serves two purposes:
+
+-   Specify the locations for making predictions (in all methods), and
+
+-   Specify covariate values (in *Universal Kriging* method only).
+
+```{r}
+resp <- predict(res, coop)
+```
+
+```{r}
+resp$x <- st_coordinates(resp)[,1]
+resp$y <- st_coordinates(resp)[,2]
+resp$pred <- resp$var1.pred
+
+pred <- terra::rasterize(resp, grid, 
+                         field = "pred", 
+                         fun = "mean")
+```
+
+Code chunk below interpolates surface by using `tmap()` function.
+
+```{r}
+n5 <- tmap_options(check.and.fix = TRUE)
+tmap_mode("plot")
+tm_shape(pred) + 
+  tm_raster(alpha = 0.6, 
+            palette = "viridis")
+```
+
+With the purpose to understand how the final surface map will be affected by the different nmax values, different variation of spatial interpolation can be made by changing nmax argument.
+
+::: panel-tabset
+### nmax = 3
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show code"
+tmap_options(check.and.fix = TRUE)
+tmap_mode("plot")
+tm_shape(pred) + 
+  tm_raster(alpha = 0.6, 
+            palette = "viridis")
+```
+
+### nmax = 5
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show code"
+res5 <- gstat(formula = MONTHSUM ~ 1, 
+             locations = rfdata_sf, 
+             nmax = 5,
+             set = list(idp = 0))
+
+resp5 <- predict(res5, coop)
+
+resp5$x <- st_coordinates(resp5)[,1]
+resp5$y <- st_coordinates(resp5)[,2]
+resp5$pred <- resp5$var1.pred
+
+pred5 <- terra::rasterize(resp5, grid, 
+                         field = "pred", 
+                         fun = "mean")
+
+tmap_options(check.and.fix = TRUE)
+tmap_mode("plot")
+tm_shape(pred5) + 
+  tm_raster(alpha = 0.6, 
+            palette = "viridis")
+```
+
+### nmax = 10
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show code"
+res10 <- gstat(formula = MONTHSUM ~ 1, 
+             locations = rfdata_sf, 
+             nmax = 10,
+             set = list(idp = 0))
+
+resp10 <- predict(res10, coop)
+
+resp10$x <- st_coordinates(resp10)[,1]
+resp10$y <- st_coordinates(resp10)[,2]
+resp10$pred <- resp10$var1.pred
+
+pred10 <- terra::rasterize(resp10, grid, 
+                         field = "pred", 
+                         fun = "mean")
+
+tmap_options(check.and.fix = TRUE)
+tmap_mode("plot")
+tm_shape(pred10) + 
+  tm_raster(alpha = 0.6, 
+            palette = "viridis")
+```
+
+### nmax = 15
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show code"
+res15 <- gstat(formula = MONTHSUM ~ 1, 
+             locations = rfdata_sf, 
+             nmax = 15,
+             set = list(idp = 0))
+
+resp15 <- predict(res15, coop)
+
+resp15$x <- st_coordinates(resp15)[,1]
+resp15$y <- st_coordinates(resp15)[,2]
+resp15$pred <- resp10$var1.pred
+
+pred15 <- terra::rasterize(resp15, grid, 
+                         field = "pred", 
+                         fun = "mean")
+
+tmap_options(check.and.fix = TRUE)
+tmap_mode("plot")
+tm_shape(pred10) + 
+  tm_raster(alpha = 0.6, 
+            palette = "viridis")
+```
+:::
+
+::: {.callout-caution icon="false"}
+### Observations
+
+-   The variations in *nmax* value revealed the following:
+
+    -   For maps with nmax values of 3 and 5, though both maps have the same mean range/ interval values, however, there is visible difference in their mapping.
+
+    -   For maps with nmax values of 10 and 15, both maps have the same mean range/ interval values with no/ little visible in their mapping.
+:::
+
+::: {.callout-note icon="false"}
+### Learning Points
+
+A formula object is created using the \~ operator, which separates names of dependent variables (to the left of the \~ symbol) and independent variables (to the right of the \~ symbol). Writing 1 to the right of the \~ symbol, as in \~ 1, means that there are no independent variables38.
+:::
+
+# 6. Kriging
+
+Kriging is one of several methods that uses a limited set of sampled data points to estimate the value of a variable over a continuous spatial field. This method generates estimates of the uncertainty surrounding each interpolated value.
+
+Kriging differs from Inverse Distance Weighted (IDW) Interpolation as it uses spatial correlation between sampled points to interpolate the values in the spatial field. In other words, the interpolation is based on the spatial arrangement of the empirical observations, rather than on a presumed model of spatial distribution.
+
+This method requires **variogram** model or **semivariogram** model, with a two-step process:
+
+1.  Spatial covariance structure of the sampled points is determined by fitting a variogram; and
+
+2.  Weights derived from this covariance structure are used to interpolate values for unsampled points or blocks across the spatial field.
+
+## 6.1 gstats
+
+**Step 1:** Calculate and examine empirical variogram by using `variogram()` of **gstat** package.
+
+The function requires two arguments:
+
+-   **formula,** the dependent variable and the covariates (*same as in gstat in Section 5.1*)
+
+-   **data**, a point layer with the dependent variable and covariates as attributes
+
+Code chunk below shows Step 1 as described above.
+
+```{r}
+v <- variogram(MONTHSUM ~ 1, 
+               data = rfdata_sf)
+plot(v)
+```
+
+**Step 2:** Comparison of the above plot with the theoretical models below:
+
+[![Image Source: ISSS608](images/theoretical%20models.png)](https://isss608-vaa-demo.netlify.app/in-class_ex/in-class_ex07/in-class_ex07-isomap#spatial-interpolation-gstat-method)
+
+**Step 3:** Empirical variogram model will be fitted by using `fit.variogram()` of **gstat** package.
+
+Code chunk below shows Step 2 as described above.
+
+```{r}
+fv <- fit.variogram(object = v,
+                    model = vgm(
+                      psill = 0.5, 
+                      model = "Sph",
+                      range = 5000, 
+                      nugget = 0.1))
+fv
+```
+
+Code chunk below visualises how well the observed data fit the model by plotting *fv*.
+
+```{r}
+plot(v, fv)
+```
+
+Code chunk below performs spatial interpolation by using the newly derived model.
+
+```{r}
+k <- gstat(formula = MONTHSUM ~ 1, 
+           data = rfdata_sf, 
+           model = fv)
+k
+```
+
+Code chunk below uses `predict()` to estimate the unknown grids.
+
+```{r}
+resp <- predict(k, coop)
+```
+
+```{r}
+resp$x <- st_coordinates(resp)[,1]
+resp$y <- st_coordinates(resp)[,2]
+resp$pred <- resp$var1.pred
+resp$pred <- resp$pred
+resp
+```
+
+Code chunk below uses `rasterize()` of terra to create a raster surface data object.
+
+The output object *kpred* is in SpatRaster object class with a spatial resolution of 50m x 50m. It consists of 1075 columns and 690 rows and in SVY21 projected coordinates system.
+
+```{r}
+kpred <- terra::rasterize(resp, grid, 
+                         field = "pred")
+kpred
+```
+
+## 6.2 Mapping the interpolated rainfall raster
+
+Code chunk below uses `tmap()` function to map the interpolated rainfall raster (i.e. kpred)
+
+```{r}
+tmap_options(check.and.fix = TRUE)
+tmap_mode("plot")
+tm_shape(kpred) + 
+  tm_raster(alpha = 0.6, 
+            palette = "viridis",
+            title = "Total monthly rainfall (mm)") +
+  tm_layout(main.title = "Distribution of monthly rainfall, Feb 2024",
+            main.title.position = "center",
+            main.title.size = 1.2,
+            legend.height = 0.45, 
+            legend.width = 0.35,
+            frame = TRUE) +
+  tm_compass(type="8star", size = 2) +
+  tm_scale_bar() +
+  tm_grid(alpha =0.2)
+```
+
+## 6.3 Automatic variogram modelling
+
+Code chunk below uses `autofirVariogram()` of **automap** package can be used to perform varigram modelling.
+
+```{r}
+v_auto <- autofitVariogram(MONTHSUM ~ 1, 
+                           rfdata_sf)
+plot(v_auto)
+```
+
+```{r}
+v_auto
+```
+
+```{r}
+k <- gstat(formula = MONTHSUM ~ 1, 
+           model = v_auto$var_model,
+           data = rfdata_sf)
+k
+```
+
+```{r}
+resp <- predict(k, coop)
+```
+
+```{r}
+resp$x <- st_coordinates(resp)[,1]
+resp$y <- st_coordinates(resp)[,2]
+resp$pred <- resp$var1.pred
+resp$pred <- resp$pred
+
+kpred <- terra::rasterize(resp, grid, 
+                         field = "pred")
+```
+
+# References
+
+-   [ISSS608 AY2023-24 In-class Exercise 07](https://isss608-vaa-demo.netlify.app/in-class_ex/in-class_ex07/in-class_ex07-isomap#over-view){target="_blank"}
+
+-   [The Comprehensive R Archive Network](https://cran.r-project.org/web/packages/tmap/vignettes/tmap-getstarted.html){target="_blank"}
