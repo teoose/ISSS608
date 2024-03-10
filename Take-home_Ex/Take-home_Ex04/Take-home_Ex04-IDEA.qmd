@@ -25,9 +25,9 @@ The project team consists of three members, and each member will take one of the
 
 -   Exploratory Data Analysis (Initial & Geospatial)
 
--   Spatial Point Pattern Analysis
+-   Spatial Point Pattern Analysis/ Clustering Analysis/ Hot & Cold Spot Analysis
 
--   Multivariate Clustering Analysis
+-   Confirmatory Data Analysis
 
 ## 1.2 Project Objectives
 
@@ -57,10 +57,8 @@ The following code chunk is used to install and launch the R packages.
 #| code-fold: true 
 #| code-summary: "Show code" 
 pacman::p_load(tidyverse, kableExtra, knitr, highcharter, scales, 
-               ggthemes, RColorBrewer, lubridate, wordcloud, tidytext,
-               ggforce, ggraph, igraph, visNetwork, tm, plotly,
-               
-               tidygraph)
+               ggthemes, RColorBrewer, lubridate, wordcloud,
+               tidytext, ggforce, ggraph, igraph, tm, plotly, tidygraph)
 ```
 
 ::: {.callout-warning icon="false" collapse="true"}
@@ -91,8 +89,6 @@ pacman::p_load(tidyverse, kableExtra, knitr, highcharter, scales,
 -   *ggraph*: build network graph visualisation using appropriate functions
 
 -   *igraph*: an interface for analysis of graphs or networks.
-
--   *visNetwork*: an R package for interactive network visualisation.
 
 -   *highcharter*: a wrapper that contains 'highcharts' library for plotting of R objects.
 :::
@@ -305,6 +301,17 @@ str(final)
 
 ------------------------------------------------------------------------
 
+```{mermaid}
+%%| echo: false
+flowchart TD
+  A(Initial Exploratory Data Analysis)
+  A --> B(Descriptive Statistics)
+  A --> C(Distribution Analysis)
+  A --> D(Timeseries Analysis)
+  A --> E(Text Analysis)
+  A --> F(Network Analysis)
+```
+
 ## 4.1 Descriptive Statistics
 
 Before proceeding with data visualisation, it is essential to be able to navigate the dataset of 55,574 observations and 32 variables with ease. This segment will help users identify or navigate through the dataset observations instead of scrolling through each observation one-by-one. The interactive datatable is created using DT package.
@@ -353,6 +360,10 @@ The dataset consists of a variable called *admin1*, that is the largest sub-nati
 ::: {.callout-note icon="false"}
 ### Design Features
 
+```{r}
+
+```
+
 -   The prototype proposes to include the following interactivity elements for users' data exploratory:
     -   Slider bar to select the *year* range
 -   `forcats::fct_infreq` is used to assign frequency values to factor levels while visualising it over time period.
@@ -365,14 +376,17 @@ The dataset consists of a variable called *admin1*, that is the largest sub-nati
 #| code-summary: "Show code"
 
 # tooltip_box <- paste("<b>", final$date, "</b>", "\nFatalities : ", final$fatalities)
+dist <- final %>%
+  filter (fatalities >0)
 
-box1 <- ggplot(final, aes(x = forcats::fct_infreq(admin1), y = event_date, 
+box1 <- ggplot(dist, aes(x = forcats::fct_infreq(admin1), y = event_date, 
                           color = factor(admin1))) +
   
   geom_boxplot(width = .2, color = "#000000", fill = NA, size = .5, 
                outlier.shape = NA, position = position_nudge(.25)) +
   geom_sina(method = "density", alpha = .3) +
   coord_flip()+
+  theme_minimal() +
   theme(legend.position = "none", 
         plot.title.position = "plot") +
   labs(title = "Frequency of Conflict Has Increased Over Time in the Largest Sub-national Administrative Region in Myanmar", subtitle = "Year 2010 to Year 2023") +
@@ -390,12 +404,13 @@ The dataset consists of a variable called *event_type*, that recorded the nature
 ```{r}
 #| code-fold: true 
 #| code-summary: "Show code"
-box2 <- ggplot(final, aes(x = forcats::fct_infreq(event_type), y = event_date, 
+box2 <- ggplot(dist, aes(x = forcats::fct_infreq(event_type), y = event_date, 
                           color = factor(event_type), fill = factor(event_type))) +
   geom_sina(method = "density", alpha = .3) +
   geom_boxplot(width = .2, color = "#000000", fill = NA, size = .5, 
                outlier.shape = NA, position = position_nudge(.25)) +
-  coord_flip()+
+  coord_flip() +
+  theme_minimal() +
   theme(legend.position = "none", 
         plot.title.position = "plot") +
   labs(title = "Battles, Explosion & Violence against Civilian Have Been Happening in Myanmar Over Time\n With More Occurrence Happening From Year 2020 Onwards", subtitle = "Year 2010 to Year 2023") +
@@ -540,8 +555,7 @@ hc_plot1 <-  highchart() %>%
              color = "lightcoral", width = 1, dashStyle = "Dash",
              value = mean(year_fata$total_fata),
              label = list(text = paste("Average Monthly Fatalities:", round(mean(year_fata$total_fata))),
-             style = list(color = 'lightcoral', fontSize = 20))))) %>% 
-  hc_add_theme(hc_theme_flat())
+             style = list(color = 'lightcoral', fontSize = 20)))))
 hc_plot1
 ```
 
