@@ -48,6 +48,8 @@ A --> F(5. Network Relationships)
 A --> G(6. Incident Summary)
 ```
 
+For enhanced user experience, the prototype included 'filter' components (i.e. desired characteristics) and 'chart interpretation' boxes, and have aligned them mainly to the right side of the web pages. This was intentionally set in that way to separate the main sidebar. The 'chart interpretation' box provides brief explanation of how each chart can be interpreted.
+
 ## Section One - Overview
 
 ![Prototype: Exploratory - Overview sub-tab](images/prototype1.png)
@@ -78,7 +80,9 @@ output1 <- renderLeaflet({}) # point spatial map
 
 ![Prototype: Exploratory - Geospatial Exploration](images/prototype2.png)
 
-This tab displays two geospatial exploration maps (i.e. statistical distribution and spatial distribution). Each map allows users to select different display variables and perform spatial exploration to conceptualise armed conflict spaces in Myanmar. Figure below shows the UI interactive features in the **Geospatial Exploration** sub-tab.
+This tab displays two geospatial exploration maps (i.e. statistical distribution and spatial distribution). For statistical distribution map, it is a boxmap that displays the spatial representation that is similar to boxplot and histogram, which is useful to detect outliers and visualise distribution of variables. For spatial distribution map visualises spatial pattern or distribution across different geographical subnational administrative regions by plotting choropleth map.
+
+Each map has its own different filter options that serve their different purposes. Users would be able to select different display variables and perform spatial exploration to conceptualise armed conflict spaces in Myanmar accordingly. Figure below shows the UI interactive features in the **Geospatial Exploration** sub-tab.
 
 ![](images/prototype2-1.png)
 
@@ -108,7 +112,7 @@ output2.2 <- renderTmap({}) # spatial distribution map
 
 ![Prototype: Exploratory - Trends](images/prototype3.png)
 
-This tab allows user to perform time series analysis to identify trends, or cyclic patterns, spot anomalies, visualise distribution of armed conflict incidents/ fatalities and how it has changed over the years using either line chart or calendar heatmap. Figure below shows the UI interactive features in the **Trends** sub-tab.
+This tab allows user to perform time series analysis to identify trends, or cyclic patterns, spot anomalies, visualise distribution of armed conflict incidents/ fatalities and how it has changed over the years using either line chart or calendar heatmap. As the line chart shows month-on-year over a timeframe period, while calendar heatmap shows day-on-month at annual level, the two separate filter options for the charts are made available to users to serve different purposes. Figure below shows the UI interactive features in the **Trends** sub-tab.
 
 ![](images/prototype3-1.png)
 
