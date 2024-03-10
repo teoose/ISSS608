@@ -67,8 +67,8 @@ website:
           href: "In-class_Ex/In-class_Ex04/In-class_Ex04.html"
         - text: "[6] Time on the horizon"
           href: "In-class_Ex/In-class_Ex06/In-class_Ex06.html"
-        - text: "[8] Geospatial"
-          href: "In-class_Ex/In-class_Ex08/In-class_Ex08.html"
+        - text: "[7] Geospatial Mapping with Tableau & R"
+          href: "In-class_Ex/In-class_Ex07/In-class_Ex07.html"
       - text: "{{< fa laptop-code >}} Take-home Exercises"
         menu: 
         - text: "[1] Creating data visualisation beyond default"
