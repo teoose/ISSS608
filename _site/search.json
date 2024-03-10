@@ -600,5 +600,110 @@
     "title": "Visual Analytics and Application",
     "section": "",
     "text": "Welcome to my ISSS608 Visual Analytics and Applications webpage.\nThis course is taken as part of my Master of IT in Business (MITB) in Singapore Management University (SMU) and is taught by SMU Professor Dr. Kam.\nThe coursework prepared will use R programming as the main courseware and maintain using Quarto for the website.\n\n\n\n\n\n\n Back to top"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex05/Hands-on_Ex05-3.html",
+    "href": "Hands-on_Ex/Hands-on_Ex05/Hands-on_Ex05-3.html",
+    "title": "Hands-on Exercise 5 - Part 3",
+    "section": "",
+    "text": "Note: Last modified to include author’s details."
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex05/Hands-on_Ex05-3.html#install-and-launch-r-packages",
+    "href": "Hands-on_Ex/Hands-on_Ex05/Hands-on_Ex05-3.html#install-and-launch-r-packages",
+    "title": "Hands-on Exercise 5 - Part 3",
+    "section": "1.1 Install and launch R packages",
+    "text": "1.1 Install and launch R packages\nFor the purpose of this exercise, the following R packages will be used, they are:\n\ntidyverse, a family of R packages for data science process,\nseriation for arranging objects in a linear order set,\ndendextend provides a set of functions for visualising dendrogram objects and compare trees of hierarchical clusterings,\nheatmaply for creating interactive heatmaps, and\nreadxl for reading excel spreadsheets.\n\n\npacman::p_load(seriation, dendextend, heatmaply, tidyverse, readxl)"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex05/Hands-on_Ex05-3.html#import-the-data",
+    "href": "Hands-on_Ex/Hands-on_Ex05/Hands-on_Ex05-3.html#import-the-data",
+    "title": "Hands-on Exercise 5 - Part 3",
+    "section": "1.2 Import the data",
+    "text": "1.2 Import the data\nThis exercise used the World Happiness 2018 report dataset.\n\n\nShow code\nwh &lt;- read_csv(\"data/WHData-2018.csv\")"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex05/Hands-on_Ex05-3.html#preparation-of-the-data",
+    "href": "Hands-on_Ex/Hands-on_Ex05/Hands-on_Ex05-3.html#preparation-of-the-data",
+    "title": "Hands-on Exercise 5 - Part 3",
+    "section": "1.3 Preparation of the data",
+    "text": "1.3 Preparation of the data\nRows were replaced with country name instead of row number by using the code chunk below.\n\n\nShow code\nrow.names(wh) &lt;- wh$Country"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex05/Hands-on_Ex05-3.html#transform-data-frame-into-matrix",
+    "href": "Hands-on_Ex/Hands-on_Ex05/Hands-on_Ex05-3.html#transform-data-frame-into-matrix",
+    "title": "Hands-on Exercise 5 - Part 3",
+    "section": "1.4 Transform data frame into matrix",
+    "text": "1.4 Transform data frame into matrix\n\n\n\n\n\n\nNote\n\n\n\nData is usually loaded into a data frame. To make heatmap, data matrix is required.\nUse data.matrix() to tranform data frame into data matrix.\n\n\n\nwh1 &lt;- dplyr::select(wh, c(3, 7:12))\nwh_matrix &lt;- data.matrix(wh)"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex05/Hands-on_Ex05-3.html#overview-of-the-data",
+    "href": "Hands-on_Ex/Hands-on_Ex05/Hands-on_Ex05-3.html#overview-of-the-data",
+    "title": "Hands-on Exercise 5 - Part 3",
+    "section": "1.5 Overview of the data",
+    "text": "1.5 Overview of the data\n\n\nShow code\nsummary(wh)\n\n\n   Country             Region          Happiness score  Whisker-high  \n Length:156         Length:156         Min.   :2.905   Min.   :3.074  \n Class :character   Class :character   1st Qu.:4.454   1st Qu.:4.590  \n Mode  :character   Mode  :character   Median :5.378   Median :5.478  \n                                       Mean   :5.376   Mean   :5.479  \n                                       3rd Qu.:6.168   3rd Qu.:6.260  \n                                       Max.   :7.632   Max.   :7.695  \n  Whisker-low       Dystopia     GDP per capita   Social support \n Min.   :2.735   Min.   :0.292   Min.   :0.0000   Min.   :0.000  \n 1st Qu.:4.345   1st Qu.:1.654   1st Qu.:0.6162   1st Qu.:1.077  \n Median :5.285   Median :1.909   Median :0.9495   Median :1.262  \n Mean   :5.273   Mean   :1.923   Mean   :0.8874   Mean   :1.217  \n 3rd Qu.:6.051   3rd Qu.:2.270   3rd Qu.:1.1978   3rd Qu.:1.463  \n Max.   :7.569   Max.   :2.961   Max.   :1.6490   Max.   :1.644  \n Healthy life expectancy Freedom to make life choices   Generosity    \n Min.   :0.0000          Min.   :0.0000               Min.   :0.0000  \n 1st Qu.:0.4223          1st Qu.:0.3583               1st Qu.:0.1095  \n Median :0.6440          Median :0.4940               Median :0.1740  \n Mean   :0.5980          Mean   :0.4570               Mean   :0.1816  \n 3rd Qu.:0.7772          3rd Qu.:0.5800               3rd Qu.:0.2422  \n Max.   :1.0300          Max.   :0.7240               Max.   :0.5980  \n Perceptions of corruption\n Min.   :0.0000           \n 1st Qu.:0.0510           \n Median :0.0820           \n Mean   :0.1125           \n 3rd Qu.:0.1390           \n Max.   :0.4570"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex05/Hands-on_Ex05-3.html#heatmap-of-r-stats",
+    "href": "Hands-on_Ex/Hands-on_Ex05/Hands-on_Ex05-3.html#heatmap-of-r-stats",
+    "title": "Hands-on Exercise 5 - Part 3",
+    "section": "2.1 heatmap() of R Stats",
+    "text": "2.1 heatmap() of R Stats\nUse heatmap() of Base Stats to plot static heatmap.\n\n\nShow code\nwh_heatmap &lt;- heatmap(wh_matrix,\n                      Rowv=NA, Colv=NA)\n\n\n\n\n\n\n\n\n\n\n\nNote\n\n\n\n\nBy default, heatmap() plots a cluster heatmap.\nThe arguments Rowv=NA and Colv=NA are used to switch off the option of plotting the row and column dendrograms.\nThe arguments cexRow and cexCol are used to define the font size used for y-axis and x-axis labels respectively.\nThe argument margins is used to ensure that the entire x-axis labels are displayed completely.\nThe argument scale can be used to normalise matrix (e.g. column-wise).\n\n\n\n\n\nShow code\nwh_heatmap &lt;- heatmap(wh_matrix,\n                      #define font size for y-axis and x-axis labels\n                      cexRow = 0.6, \n                      cexCol = 0.8,\n                      #margins ensure entire x-axis labels are displayed completely\n                      margins = c(10, 4)\n)"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex05/Hands-on_Ex05-3.html#data-transformation",
+    "href": "Hands-on_Ex/Hands-on_Ex05/Hands-on_Ex05-3.html#data-transformation",
+    "title": "Hands-on Exercise 5 - Part 3",
+    "section": "3.1 Data Transformation",
+    "text": "3.1 Data Transformation\nTo ensure that all variables have comparable values, given that variables in the data set includes different types of measurement; data transformation is used before clustering.\nThree main data transformation methods are supported by heatmaply(), namely: scale, normalise and percentilse.\n\nScaling methodNormalizing methodPercentizing method\n\n\nFor variables with normal distribution:\n\nScaling (i.e. subtract the mean and divide by the standard deviation) would bring them all close to the standard normal distribution.\nEach value would reflect the distance from the mean in units of standard deviation.\nThe scale argument in heatmaply() supports column and row scaling.\n\n\n\nShow code\nheatmaply(wh_matrix[, -c(1, 2, 4, 5)],\n          scale = \"column\")\n\n\n\n\n\n\n\n\nFor variables with possibly different (and non-normal) distribution:\n\nNormalize function can be used to bring data to the 0 to 1 scale by subtracting the minimum and dividing by the maximum of all observations.\nThis preserves the shape of each variable’s distribution while making them easily comparable on the same “scale”.\n\nNote: Normalise method is performed on input data set (ie. wh_matrix), which is different from Scaling method.\n\n\nShow code\nheatmaply(normalize(wh_matrix[, -c(1, 2, 4, 5)]))\n\n\n\n\n\n\n\n\n\nSimilar to ranking the variables, but instead of keeping the rank values, divide them by the maximal rank.\nThis is done by using the ecdf of the variables on their own values, bringing each value to its empirical percentile.\nThe benefit of the percentize function is that each value has a relatively clear interpretation, it is the percent of observations that got that value or below it.\n\nNote: Percentize method is performed on input data set (ie. wh_matrix), which is similar to from Normalize method.\n\n\nShow code\nheatmaply(percentize(wh_matrix[, -c(1, 2, 4, 5)]))"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex05/Hands-on_Ex05-3.html#clustering-alogrithm",
+    "href": "Hands-on_Ex/Hands-on_Ex05/Hands-on_Ex05-3.html#clustering-alogrithm",
+    "title": "Hands-on Exercise 5 - Part 3",
+    "section": "3.2 Clustering alogrithm",
+    "text": "3.2 Clustering alogrithm\nheatmaply supports a variety of hierarchical clustering algorithm. The main arguments provided are:\n\ndistfun: function used to compute the distance (dissimilarity) between both rows and columns. Defaults to dist. The options “pearson”, “spearman” and “kendall” can be used to use correlation-based clustering, which uses as.dist(1 - cor(t(x))) as the distance metric (using the specified correlation method).\nhclustfun: function used to compute the hierarchical clustering when Rowv or Colv are not dendrograms. Defaults to hclust.\ndist_method default is NULL, which results in “euclidean” to be used. It can accept alternative character strings indicating the method to be passed to distfun. By default distfun is “dist”” hence this can be one of “euclidean”, “maximum”, “manhattan”, “canberra”, “binary” or “minkowski”.\nhclust_method default is NULL, which results in “complete” method to be used. It can accept alternative character strings indicating the method to be passed to hclustfun. By default hclustfun is hclust hence this can be one of “ward.D”, “ward.D2”, “single”, “complete”, “average” (= UPGMA), “mcquitty” (= WPGMA), “median” (= WPGMC) or “centroid” (= UPGMC).\n\n\nManual approach vs Statistical approach\n\nManual approachStatistic approach\n\n\nIn the code chunk below, the heatmap is plotted by using hierachical clustering algorithm with “Euclidean distance” and “ward.D” method.\n\n\nShow code\nheatmaply(normalize(wh_matrix[, -c(1, 2, 4, 5)]),\n          dist_method = \"euclidean\",\n          hclust_method = \"ward.D\")\n\n\n\n\n\n\n\n\nUse dend_expend() and find_k() functions of dendextend package to determine the best clustering method and number of cluster.\n\nUse dend_expend() will be used to determine the recommended clustering method to be used.\n\n\n\nShow code\nwh_d &lt;- dist(normalize(wh_matrix[, -c(1, 2, 4, 5)]), method = \"euclidean\")\ndend_expend(wh_d)[[3]]\n\n\n  dist_methods hclust_methods     optim\n1      unknown         ward.D 0.6137851\n2      unknown        ward.D2 0.6289186\n3      unknown         single 0.4774362\n4      unknown       complete 0.6434009\n5      unknown        average 0.6701688\n6      unknown       mcquitty 0.5020102\n7      unknown         median 0.5901833\n8      unknown       centroid 0.6338734\n\n\nThe output table shows that “average” method should be used because it gave the high optimum value.\n\nUse find_k() is used to determine the optimal number of cluster.\n\n\nwh_clust &lt;- hclust(wh_d, method = \"average\")\nnum_k &lt;- find_k(wh_clust)\nplot(num_k)\n\n\n\n\nFigure above shows that k=3 would be good.\n\nPrepare statistical analysis results.\n\n\n\nShow code\nheatmaply(normalize(wh_matrix[, -c(1, 2, 4, 5)]),\n          dist_method = \"euclidean\",\n          hclust_method = \"average\",\n          k_row = 3)"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex05/Hands-on_Ex05-3.html#seriation",
+    "href": "Hands-on_Ex/Hands-on_Ex05/Hands-on_Ex05-3.html#seriation",
+    "title": "Hands-on Exercise 5 - Part 3",
+    "section": "3.3 Seriation",
+    "text": "3.3 Seriation\n\n\n\n\n\n\nProblem with hierarchical clustering\n\n\n\n\nDoes not place rows in a definite order, it merely constrains the space of possible ordering.\n\n\n\nheatmaply uses the seriation package to find an optimal ordering of rows and columns. Optimal means to optimise the Hamiltonian path length that is restricted by the dendrogram structure. It rotates the branches so that the sum of distances between each adjacent leaf (label) will be minimised.\nSeriation algorithm: Optimal Leaf Ordering (OLO). This algorithm starts with the output of an agglomerative clustering algorithm and produces a unique ordering, one that flips the various branches of the dendrogram around so as to minimise the sum of dissimilarities between adjacent leaves.\n\n“OLO” (Optimal leaf ordering) - default - optimises the above criterion (in O(n^4)).\n“GW” (Gruvaeus and Wainer) aims for the same goal but uses a potentially faster heuristic.\n“mean” gives the output (default from heatmap functions) in other packages such as gplots::heatmap.2.\n“none” gives us the dendrograms without any rotation that is based on the data matrix.\n\n\n[Default] “OLO” (Optimal leaf ordering)“GW” (Gruvaeus and Wainer)“mean”“none”\n\n\n\n\nShow code\nheatmaply(normalize(wh_matrix[, -c(1, 2, 4, 5)]),\n          seriate = \"OLO\")\n\n\n\n\n\n\n\n\n\n\nShow code\nheatmaply(normalize(wh_matrix[, -c(1, 2, 4, 5)]),\n          seriate = \"GW\")\n\n\n\n\n\n\n\n\n\n\nShow code\nheatmaply(normalize(wh_matrix[, -c(1, 2, 4, 5)]),\n          seriate = \"mean\")\n\n\n\n\n\n\n\n\n\n\nShow code\nheatmaply(normalize(wh_matrix[, -c(1, 2, 4, 5)]),\n          seriate = \"none\")"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex05/Hands-on_Ex05-3.html#colour-palettes",
+    "href": "Hands-on_Ex/Hands-on_Ex05/Hands-on_Ex05-3.html#colour-palettes",
+    "title": "Hands-on Exercise 5 - Part 3",
+    "section": "3.4 Colour Palettes",
+    "text": "3.4 Colour Palettes\nThere are 3 types of palettes:\n\nSequential palettes: Suitable for ordered data that progress from low to high.\nNote: Default colour palette uses by heatmaply is viridis. Click here to find out more on the different colour palettes.\nDiverging palettes: Place equal emphasis on mid-range critical values and extremes at both ends of the data range.\nQualitative palettes: Most suitable to representing nominal or categorical data, with no implied magnitude differences between legend classes, and hues are used to create the primary visual differences between classes.\n\n\n[Default] viridisBluesRdPu\n\n\n\n\nShow code\nheatmaply(normalize(wh_matrix[, -c(1, 2, 4, 5)]),\n          Colv=NA,\n          seriate = \"none\",\n          k_row = 5,\n          margins = c(NA,200,60,NA),\n          fontsize_row = 4,\n          fontsize_col = 5,\n          main=\"World Happiness Score and Variables by Country, 2018 \\nDataTransformation using Normalise Method\",\n          xlab = \"World Happiness Indicators\",\n          ylab = \"World Countries\"\n          )\n\n\n\n\n\n\n\n\n\n\nShow code\nheatmaply(normalize(wh_matrix[, -c(1, 2, 4, 5)]),\n          Colv=NA,\n          seriate = \"none\",\n          colors = Blues,\n          k_row = 5,\n          margins = c(NA,200,60,NA),\n          fontsize_row = 4,\n          fontsize_col = 5,\n          main=\"World Happiness Score and Variables by Country, 2018 \\nDataTransformation using Normalise Method\",\n          xlab = \"World Happiness Indicators\",\n          ylab = \"World Countries\"\n          )\n\n\n\n\n\n\n\n\n\n\nShow code\nheatmaply(normalize(wh_matrix[, -c(1, 2, 4, 5)]),\n          Colv=NA,\n          seriate = \"none\",\n          colors = RdPu,\n          k_row = 5,\n          margins = c(NA,200,60,NA),\n          fontsize_row = 4,\n          fontsize_col = 5,\n          main=\"World Happiness Score and Variables by Country, 2018 \\nDataTransformation using Normalise Method\",\n          xlab = \"World Happiness Indicators\",\n          ylab = \"World Countries\"\n          )\n\n\n\n\n\n\n\n\n\nIn summary, the code chunk above used the following arguments:\n\ncolors is used to change the colour palette to ‘Blue’ and ‘Red to Purple’\nk_row is used to produce ‘5 groups’.\nmargins is used to change the top margin to ‘60’ and row margin to ‘200’.\nfontsizw_row and fontsize_col are used to change the font size for row and column labels to ‘4’.\nmain is used to write the main title of the plot.\nxlab and ylab are used to write the x-axis and y-axis labels respectively."
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex05/Hands-on_Ex05-4.html",
+    "href": "Hands-on_Ex/Hands-on_Ex05/Hands-on_Ex05-4.html",
+    "title": "Hands-on Exercise 5 - Part 4",
+    "section": "",
+    "text": "Note: Last modified to include author’s details."
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex05/Hands-on_Ex05-4.html#install-and-launch-r-packages",
+    "href": "Hands-on_Ex/Hands-on_Ex05/Hands-on_Ex05-4.html#install-and-launch-r-packages",
+    "title": "Hands-on Exercise 5 - Part 4",
+    "section": "1.1 Install and launch R packages",
+    "text": "1.1 Install and launch R packages\nFor the purpose of this exercise, the following R packages will be used.\n\npacman::p_load(GGally, parallelPlot, tidyverse, RColorBrewer)"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex05/Hands-on_Ex05-4.html#import-the-data",
+    "href": "Hands-on_Ex/Hands-on_Ex05/Hands-on_Ex05-4.html#import-the-data",
+    "title": "Hands-on Exercise 5 - Part 4",
+    "section": "1.2 Import the data",
+    "text": "1.2 Import the data\nThis exercise used the World Happiness 2018 report dataset.\n\n\nShow code\nwh &lt;- read_csv(\"data/WHData-2018.csv\")"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex05/Hands-on_Ex05-4.html#overview-of-the-data",
+    "href": "Hands-on_Ex/Hands-on_Ex05/Hands-on_Ex05-4.html#overview-of-the-data",
+    "title": "Hands-on Exercise 5 - Part 4",
+    "section": "1.3 Overview of the data",
+    "text": "1.3 Overview of the data\n\n\nShow code\nsummary(wh)\n\n\n   Country             Region          Happiness score  Whisker-high  \n Length:156         Length:156         Min.   :2.905   Min.   :3.074  \n Class :character   Class :character   1st Qu.:4.454   1st Qu.:4.590  \n Mode  :character   Mode  :character   Median :5.378   Median :5.478  \n                                       Mean   :5.376   Mean   :5.479  \n                                       3rd Qu.:6.168   3rd Qu.:6.260  \n                                       Max.   :7.632   Max.   :7.695  \n  Whisker-low       Dystopia     GDP per capita   Social support \n Min.   :2.735   Min.   :0.292   Min.   :0.0000   Min.   :0.000  \n 1st Qu.:4.345   1st Qu.:1.654   1st Qu.:0.6162   1st Qu.:1.077  \n Median :5.285   Median :1.909   Median :0.9495   Median :1.262  \n Mean   :5.273   Mean   :1.923   Mean   :0.8874   Mean   :1.217  \n 3rd Qu.:6.051   3rd Qu.:2.270   3rd Qu.:1.1978   3rd Qu.:1.463  \n Max.   :7.569   Max.   :2.961   Max.   :1.6490   Max.   :1.644  \n Healthy life expectancy Freedom to make life choices   Generosity    \n Min.   :0.0000          Min.   :0.0000               Min.   :0.0000  \n 1st Qu.:0.4223          1st Qu.:0.3583               1st Qu.:0.1095  \n Median :0.6440          Median :0.4940               Median :0.1740  \n Mean   :0.5980          Mean   :0.4570               Mean   :0.1816  \n 3rd Qu.:0.7772          3rd Qu.:0.5800               3rd Qu.:0.2422  \n Max.   :1.0300          Max.   :0.7240               Max.   :0.5980  \n Perceptions of corruption\n Min.   :0.0000           \n 1st Qu.:0.0510           \n Median :0.0820           \n Mean   :0.1125           \n 3rd Qu.:0.1390           \n Max.   :0.4570"
   }
 ]
