@@ -236,7 +236,7 @@ output6.2 <- DT::renderDataTable({}) # data table
 
 The storyboard (in Section 2) facilitates the development of a prototype in R Shiny Application. Iterative prototyping will allow continuous improvement of the final dashboard for the project when combined with the other team members' work.
 
-The proposed layouts and UI features for "**Exploratory"** have been conceptualised into six sections (or `tabPanel()` in R Shiny Application terms), in which `ExploreSubTabs` will form one of the three `tabsetPanel()` in the entire project dashboard as part of UI.
+The proposed layouts and UI features for "**Exploratory"** have been conceptualised into six sections (or `tabPanel()` in R Shiny Application terms), in which `ExploreSubTabs` will form one of the `tabsetPanel()` in the entire project dashboard as part of UI.
 
 Code chunk below shows the simplified version of R Shiny Application for **Exploratory** prototype.
 
@@ -263,9 +263,8 @@ sidebar <- dashboardSidebar()
 
 sidebarMenu(
     menuItem("Exploratory", tabName = "Exploratory"),
-    menuItem("Spatial Point Pattern Analysis", tabName = "PointAnalysis"),
-    menuItem("Clustering Analysis", tabName = "Clustering"),
-    menuItem("Hot/ Cold Spot Analysis", tabName = "HotCold"),
+    menuItem("Clustering & Outlier Analysis", tabName = "Clustering"),
+    menuItem("Hot/ Cold Zone Analysis", tabName = "HotCold"),
     menuItem("Confirmatory Analysis", tabName = "Confirmatory"),
     menuItem("Visit ACLED data"))
 
