@@ -474,5 +474,40 @@
     "title": "Hands-on Exercise 4 - Part 4",
     "section": "3.4 Interactive Funnel Plot: plotly + ggplot2",
     "text": "3.4 Interactive Funnel Plot: plotly + ggplot2\nFunnel plot created using ggplot2 functions can be made interactive with ggplotly() of plotly r package.\n\n\nShow code\nfp_ggplotly &lt;- ggplotly(p,\n  tooltip = c(\"label\", \n              \"x\", \n              \"y\"))\nfp_ggplotly"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex05/Hands-on_Ex05-1.html",
+    "href": "Hands-on_Ex/Hands-on_Ex05/Hands-on_Ex05-1.html",
+    "title": "Visual Creating Ternary Plot with R",
+    "section": "",
+    "text": "Note: Last modified to include author’s details."
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex05/Hands-on_Ex05-1.html#install-and-launch-r-packages",
+    "href": "Hands-on_Ex/Hands-on_Ex05/Hands-on_Ex05-1.html#install-and-launch-r-packages",
+    "title": "Visual Creating Ternary Plot with R",
+    "section": "1.1 Install and launch R packages",
+    "text": "1.1 Install and launch R packages\nFor the purpose of this exercise, the following R packages will be used, they are:\n\nggtern, a ggplot extension specially designed to plot ternary diagrams. The package will be used to plot static ternary plots.\nPlotly R, an R package for creating interactive web-based graphs via plotly’s JavaScript graphing library, plotly.js . The plotly R libary contains the ggplotly function, which will convert ggplot2 figures into a Plotly object.\n\n\npacman::p_load(plotly, ggtern, tidyverse)"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex05/Hands-on_Ex05-1.html#import-the-data",
+    "href": "Hands-on_Ex/Hands-on_Ex05/Hands-on_Ex05-1.html#import-the-data",
+    "title": "Visual Creating Ternary Plot with R",
+    "section": "1.2 Import the data",
+    "text": "1.2 Import the data\nThis exercise uses the dataset respopagsex2000to2018_tidy.csv from Singapore Residents by Planning AreaSubzone, Age Group, Sex and Type of Dwelling, June 2000-2018.\n\n\nShow code\npop_data &lt;- read_csv(\"data/respopagsex2000to2018_tidy.csv\")"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex05/Hands-on_Ex05-1.html#overview-of-the-data",
+    "href": "Hands-on_Ex/Hands-on_Ex05/Hands-on_Ex05-1.html#overview-of-the-data",
+    "title": "Visual Creating Ternary Plot with R",
+    "section": "1.3 Overview of the data",
+    "text": "1.3 Overview of the data\n\n\nShow code\nsummary(pop_data)\n\n\n      PA                 SZ                 AG                 Year     \n Length:108126      Length:108126      Length:108126      Min.   :2000  \n Class :character   Class :character   Class :character   1st Qu.:2004  \n Mode  :character   Mode  :character   Mode  :character   Median :2009  \n                                                          Mean   :2009  \n                                                          3rd Qu.:2014  \n                                                          Max.   :2018  \n   Population     \n Min.   :    0.0  \n 1st Qu.:    0.0  \n Median :  140.0  \n Mean   :  644.1  \n 3rd Qu.:  800.0  \n Max.   :14560.0"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex05/Hands-on_Ex05-1.html#preparing-the-data",
+    "href": "Hands-on_Ex/Hands-on_Ex05/Hands-on_Ex05-1.html#preparing-the-data",
+    "title": "Visual Creating Ternary Plot with R",
+    "section": "1.4 Preparing the data",
+    "text": "1.4 Preparing the data\n\n\nShow code\n# Deriving the young, economy active and old measures\nagpop_mutated &lt;- pop_data %&gt;%\n  mutate(`Year` = as.character(Year))%&gt;%\n  spread(AG, Population) %&gt;%\n  mutate(YOUNG = rowSums(.[4:8]))%&gt;%\n  mutate(ACTIVE = rowSums(.[9:16]))  %&gt;%\n  mutate(OLD = rowSums(.[17:21])) %&gt;%\n  mutate(TOTAL = rowSums(.[22:24])) %&gt;%\n  filter(Year == 2018)%&gt;%\n  filter(TOTAL &gt; 0)"
   }
 ]
