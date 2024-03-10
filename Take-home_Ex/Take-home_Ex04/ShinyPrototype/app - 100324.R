@@ -55,9 +55,8 @@ sidebar <- dashboardSidebar(
   sidebarMenu(
     width = 100,
     menuItem("Exploratory", tabName = "Exploratory", icon = icon("globe")),
-    menuItem("Spatial Point Pattern Analysis", tabName = "PointAnalysis", icon = icon("location-dot")),
-    menuItem("Clustering Analysis", tabName = "Clustering", icon = icon("circle-nodes")),
-    menuItem("Hot/ Cold Spot Analysis", tabName = "HotCold", icon = icon("magnifying-glass-chart")),
+    menuItem("Clustering & Outlier Analysis", tabName = "Clustering", icon = icon("circle-nodes")),
+    menuItem("Hot/ Cold Zone Analysis", tabName = "HotCold", icon = icon("magnifying-glass-chart")),
     menuItem("Confirmatory Analysis", tabName = "Confirmatory", icon = icon("clipboard-check")),
     menuItem("Visit ACLED data", icon = icon("send",lib='glyphicon'), 
              href = "https://acleddata.com/data-export-tool/")))
