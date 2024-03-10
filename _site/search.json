@@ -418,5 +418,61 @@
     "title": "Hands-on Exercise 4 - Part 3",
     "section": "4.1 Getting Started",
     "text": "4.1 Getting Started\n\nStep 1: InstallationStep 2: Launch app in R\n\n\nInstall ungeviz package\n\ndevtools::install_github(\"wilkelab/ungeviz\")\n\n\n\n\nlibrary(ungeviz)\n\n\nggplot(data = exam, \n       (aes(x = factor(RACE), y = MATHS))) +\n  geom_point(position = position_jitter(\n    height = 0.3, width = 0.05), \n    size = 0.4, color = \"#0072B2\", alpha = 1/2) +\n  geom_hpline(data = sampler(25, group = RACE), height = 0.6, color = \"#D55E00\") +\n  theme_bw() + \n  # `.draw` is a generated column indicating the sample draw\n  transition_states(.draw, 1, 3)"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex04/Hands-on_Ex04-4.html",
+    "href": "Hands-on_Ex/Hands-on_Ex04/Hands-on_Ex04-4.html",
+    "title": "Hands-on Exercise 4 - Part 4",
+    "section": "",
+    "text": "Note: Last modified to include author’s details."
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex04/Hands-on_Ex04-4.html#install-and-launch-r-packages",
+    "href": "Hands-on_Ex/Hands-on_Ex04/Hands-on_Ex04-4.html#install-and-launch-r-packages",
+    "title": "Hands-on Exercise 4 - Part 4",
+    "section": "1.1 Install and launch R packages",
+    "text": "1.1 Install and launch R packages\nFor the purpose of this exercise, the following R packages will be used, they are:\n\ntidyverse, a family of R packages for data science process,\nreadr for importing csv into R.\nFunnelPlotR for creating funnel plot.\nggplot2 for creating funnel plot manually.\nknitr for building static html table.\nplotly for creating interactive funnel plot.\n\n\npacman::p_load(tidyverse, FunnelPlotR, plotly, knitr)"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex04/Hands-on_Ex04-4.html#importing-the-data",
+    "href": "Hands-on_Ex/Hands-on_Ex04/Hands-on_Ex04-4.html#importing-the-data",
+    "title": "Hands-on Exercise 4 - Part 4",
+    "section": "1.2 Importing the data",
+    "text": "1.2 Importing the data\nCOVID-19_DKI_Jakarta will be used\n\n\nShow code\ncovid19 &lt;- read_csv(\"data/COVID-19_DKI_Jakarta.csv\") %&gt;%\n  mutate_if(is.character, as.factor)"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex04/Hands-on_Ex04-4.html#overview-of-the-data",
+    "href": "Hands-on_Ex/Hands-on_Ex04/Hands-on_Ex04-4.html#overview-of-the-data",
+    "title": "Hands-on Exercise 4 - Part 4",
+    "section": "1.3 Overview of the data",
+    "text": "1.3 Overview of the data\n\n\nShow code\nsummary(covid19)\n\n\n Sub-district ID                     City              District  \n Min.   :3.101e+09   JAKARTA BARAT     :56   TAMBORA       : 11  \n 1st Qu.:3.172e+09   JAKARTA PUSAT     :44   KEBAYORAN BARU: 10  \n Median :3.173e+09   JAKARTA SELATAN   :65   CIPAYUNG      :  8  \n Mean   :3.172e+09   JAKARTA TIMUR     :65   JATINEGARA    :  8  \n 3rd Qu.:3.174e+09   JAKARTA UTARA     :31   KEMAYORAN     :  8  \n Max.   :3.175e+09   KAB.ADM.KEP.SERIBU: 6   SETIA BUDI    :  8  \n                                             (Other)       :214  \n       Sub-district    Positive      Recovered        Death       \n ANCOL       :  1   Min.   :  72   Min.   :  69   Min.   :  0.00  \n ANGKE       :  1   1st Qu.:1644   1st Qu.:1578   1st Qu.: 24.50  \n BALE KAMBANG:  1   Median :2420   Median :2329   Median : 39.00  \n BALI MESTER :  1   Mean   :2572   Mean   :2477   Mean   : 40.99  \n BAMBU APUS  :  1   3rd Qu.:3372   3rd Qu.:3242   3rd Qu.: 55.00  \n BANGKA      :  1   Max.   :6231   Max.   :5970   Max.   :158.00  \n (Other)     :261"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex04/Hands-on_Ex04-4.html#basic-derived-fields",
+    "href": "Hands-on_Ex/Hands-on_Ex04/Hands-on_Ex04-4.html#basic-derived-fields",
+    "title": "Hands-on Exercise 4 - Part 4",
+    "section": "3.1 Basic derived fields",
+    "text": "3.1 Basic derived fields\n\n\nShow code\ndf &lt;- covid19 %&gt;%\n  mutate(rate = Death / Positive) %&gt;%\n  mutate(rate.se = sqrt((rate*(1-rate)) / (Positive))) %&gt;%\n  filter(rate &gt; 0)\n\n\nfit.mean is computed by using the code chunk below.\n\nfit.mean &lt;- weighted.mean(df$rate, 1/df$rate.se^2)"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex04/Hands-on_Ex04-4.html#lower-upper-limits-95-99-ci",
+    "href": "Hands-on_Ex/Hands-on_Ex04/Hands-on_Ex04-4.html#lower-upper-limits-95-99-ci",
+    "title": "Hands-on Exercise 4 - Part 4",
+    "section": "3.2 Lower/ Upper Limits 95% & 99% CI",
+    "text": "3.2 Lower/ Upper Limits 95% & 99% CI\n\n\nShow code\nnumber.seq &lt;- seq(1, max(df$Positive), 1)\nnumber.ll95 &lt;- fit.mean - 1.96 * sqrt((fit.mean*(1-fit.mean)) / (number.seq)) \nnumber.ul95 &lt;- fit.mean + 1.96 * sqrt((fit.mean*(1-fit.mean)) / (number.seq)) \nnumber.ll999 &lt;- fit.mean - 3.29 * sqrt((fit.mean*(1-fit.mean)) / (number.seq)) \nnumber.ul999 &lt;- fit.mean + 3.29 * sqrt((fit.mean*(1-fit.mean)) / (number.seq)) \ndfCI &lt;- data.frame(number.ll95, number.ul95, number.ll999, \n                   number.ul999, number.seq, fit.mean)"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex04/Hands-on_Ex04-4.html#static-funnel-plot",
+    "href": "Hands-on_Ex/Hands-on_Ex04/Hands-on_Ex04-4.html#static-funnel-plot",
+    "title": "Hands-on Exercise 4 - Part 4",
+    "section": "3.3 Static funnel plot",
+    "text": "3.3 Static funnel plot\n\n\nShow code\np &lt;- ggplot(df, aes(x = Positive, y = rate)) +\n  geom_point(aes(label=`Sub-district`), \n             alpha=0.4) +\n  geom_line(data = dfCI, \n            aes(x = number.seq, \n                y = number.ll95), \n            size = 0.4, \n            colour = \"grey40\", \n            linetype = \"dashed\") +\n  geom_line(data = dfCI, \n            aes(x = number.seq, \n                y = number.ul95), \n            size = 0.4, \n            colour = \"grey40\", \n            linetype = \"dashed\") +\n  geom_line(data = dfCI, \n            aes(x = number.seq, \n                y = number.ll999), \n            size = 0.4, \n            colour = \"grey40\") +\n  geom_line(data = dfCI, \n            aes(x = number.seq, \n                y = number.ul999), \n            size = 0.4, \n            colour = \"grey40\") +\n  geom_hline(data = dfCI, \n             aes(yintercept = fit.mean), \n             size = 0.4, \n             colour = \"grey40\") +\n  coord_cartesian(ylim=c(0,0.05)) +\n  annotate(\"text\", x = 1, y = -0.13, label = \"95%\", size = 3, colour = \"grey40\") + \n  annotate(\"text\", x = 4.5, y = -0.18, label = \"99%\", size = 3, colour = \"grey40\") + \n  ggtitle(\"Cumulative Fatality Rate by Cumulative Number of COVID-19 Cases\") +\n  xlab(\"Cumulative Number of COVID-19 Cases\") + \n  ylab(\"Cumulative Fatality Rate\") +\n  theme_light() +\n  theme(plot.title = element_text(size=12),\n        legend.position = c(0.91,0.85), \n        legend.title = element_text(size=7),\n        legend.text = element_text(size=7),\n        legend.background = element_rect(colour = \"grey60\", linetype = \"dotted\"),\n        legend.key.height = unit(0.3, \"cm\"))\np"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex04/Hands-on_Ex04-4.html#interactive-funnel-plot-plotly-ggplot2",
+    "href": "Hands-on_Ex/Hands-on_Ex04/Hands-on_Ex04-4.html#interactive-funnel-plot-plotly-ggplot2",
+    "title": "Hands-on Exercise 4 - Part 4",
+    "section": "3.4 Interactive Funnel Plot: plotly + ggplot2",
+    "text": "3.4 Interactive Funnel Plot: plotly + ggplot2\nFunnel plot created using ggplot2 functions can be made interactive with ggplotly() of plotly r package.\n\n\nShow code\nfp_ggplotly &lt;- ggplotly(p,\n  tooltip = c(\"label\", \n              \"x\", \n              \"y\"))\nfp_ggplotly"
   }
 ]
