@@ -1160,5 +1160,124 @@
     "title": "Hands-on Exercise 8-1",
     "section": "2.8 Mappping Spatial Object Meeting a Selection Criterion",
     "text": "2.8 Mappping Spatial Object Meeting a Selection Criterion\nUse selection funtion to map spatial objects meeting the selection criterion instead of creating small multiple choropleth map.\n\n\nShow code\ntm_shape(mpsz_pop2020[mpsz_pop2020$REGION_N==\"CENTRAL REGION\", ])+\n  tm_fill(\"DEPENDENCY\", \n          style = \"quantile\", \n          palette = \"Blues\", \n          legend.hist = TRUE, \n          legend.is.portrait = TRUE,\n          legend.hist.z = 0.1) +\n  tm_layout(legend.outside = TRUE,\n            legend.height = 0.45, \n            legend.width = 5.0,\n            legend.position = c(\"right\", \"bottom\"),\n            frame = FALSE) +\n  tm_borders(alpha = 0.5)"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex08/Hands-on_Ex08-2.html",
+    "href": "Hands-on_Ex/Hands-on_Ex08/Hands-on_Ex08-2.html",
+    "title": "Hands-on Exercise 8-2",
+    "section": "",
+    "text": "Note: First modified to include author’s details. Last modified to rename hands-on exercise number."
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex08/Hands-on_Ex08-2.html#install-and-launch-r-packages",
+    "href": "Hands-on_Ex/Hands-on_Ex08/Hands-on_Ex08-2.html#install-and-launch-r-packages",
+    "title": "Hands-on Exercise 8-2",
+    "section": "1.1 Install and launch R packages",
+    "text": "1.1 Install and launch R packages\nFor the purpose of this exercise, the following R packages will be used.\n\n\nShow code\npacman::p_load(sf, tmap, tidyverse)"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex08/Hands-on_Ex08-2.html#import-the-data",
+    "href": "Hands-on_Ex/Hands-on_Ex08/Hands-on_Ex08-2.html#import-the-data",
+    "title": "Hands-on Exercise 8-2",
+    "section": "1.2 Import the data",
+    "text": "1.2 Import the data\nSGPools_svy21 dataset is used for this hands-on exercise. The dataset is retrieved from Singapore SVY21 Projected Coordinates System. The XCOORD and YCOORD columns are the x-coordinates and y-coordinates of SingPools outlets and branches.\n\n\nShow code\nsgpools &lt;- read_csv(\"data/aspatial/SGPools_svy21.csv\")"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex08/Hands-on_Ex08-2.html#examine-data-structure",
+    "href": "Hands-on_Ex/Hands-on_Ex08/Hands-on_Ex08-2.html#examine-data-structure",
+    "title": "Hands-on Exercise 8-2",
+    "section": "1.3 Examine data structure",
+    "text": "1.3 Examine data structure\n\nlist(sgpools)\n\n[[1]]\n# A tibble: 306 × 7\n   NAME           ADDRESS POSTCODE XCOORD YCOORD `OUTLET TYPE` `Gp1Gp2 Winnings`\n   &lt;chr&gt;          &lt;chr&gt;      &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt; &lt;chr&gt;                     &lt;dbl&gt;\n 1 Livewire (Mar… 2 Bayf…    18972 30842. 29599. Branch                        5\n 2 Livewire (Res… 26 Sen…    98138 26704. 26526. Branch                       11\n 3 SportsBuzz (K… Lotus …   738078 20118. 44888. Branch                        0\n 4 SportsBuzz (P… 1 Sele…   188306 29777. 31382. Branch                       44\n 5 Prime Serango… Blk 54…   552542 32239. 39519. Branch                        0\n 6 Singapore Poo… 1A Woo…   731001 21012. 46987. Branch                        3\n 7 Singapore Poo… Blk 64…   370064 33990. 34356. Branch                       17\n 8 Singapore Poo… Blk 88…   370088 33847. 33976. Branch                       16\n 9 Singapore Poo… Blk 30…   540308 33910. 41275. Branch                       21\n10 Singapore Poo… Blk 20…   560202 29246. 38943. Branch                       25\n# ℹ 296 more rows"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex08/Hands-on_Ex08-2.html#data-preparation",
+    "href": "Hands-on_Ex/Hands-on_Ex08/Hands-on_Ex08-2.html#data-preparation",
+    "title": "Hands-on Exercise 8-2",
+    "section": "1.4 Data Preparation",
+    "text": "1.4 Data Preparation\n\nCreating a sf data frame from an aspatial dataframe\nThe code chunk below converts sgpools data frame into a simple feature data frame by using st_as_sf() of sf packages.\n\n\nShow code\nsgpools_sf &lt;- st_as_sf(sgpools, \n                       coords = c(\"XCOORD\", \"YCOORD\"),\n                       crs= 3414)\n\n\n\n\n\n\n\n\nLearning Points\n\n\n\n\nThe coords argument requires users to provide the column name of the x-coordinates first then followed by the column name of the y-coordinates.\nThe crs argument requilightcoral users to provide the coordinates system in epsg format. EPSG: 3414 is Singapore SVY21 Projected Coordinate System. You can search for other country’s epsg code by refering to epsg.io.\nNew variable geometry is created and added to the dataframe.\n\n\n\n\nlist(sgpools_sf)\n\n[[1]]\nSimple feature collection with 306 features and 5 fields\nGeometry type: POINT\nDimension:     XY\nBounding box:  xmin: 7844.194 ymin: 26525.7 xmax: 45176.57 ymax: 47987.13\nProjected CRS: SVY21 / Singapore TM\n# A tibble: 306 × 6\n   NAME                         ADDRESS POSTCODE `OUTLET TYPE` `Gp1Gp2 Winnings`\n * &lt;chr&gt;                        &lt;chr&gt;      &lt;dbl&gt; &lt;chr&gt;                     &lt;dbl&gt;\n 1 Livewire (Marina Bay Sands)  2 Bayf…    18972 Branch                        5\n 2 Livewire (Resorts World Sen… 26 Sen…    98138 Branch                       11\n 3 SportsBuzz (Kranji)          Lotus …   738078 Branch                        0\n 4 SportsBuzz (PoMo)            1 Sele…   188306 Branch                       44\n 5 Prime Serangoon North        Blk 54…   552542 Branch                        0\n 6 Singapore Pools Woodlands C… 1A Woo…   731001 Branch                        3\n 7 Singapore Pools 64 Circuit … Blk 64…   370064 Branch                       17\n 8 Singapore Pools 88 Circuit … Blk 88…   370088 Branch                       16\n 9 Singapore Pools Anchorvale … Blk 30…   540308 Branch                       21\n10 Singapore Pools Ang Mo Kio … Blk 20…   560202 Branch                       25\n# ℹ 296 more rows\n# ℹ 1 more variable: geometry &lt;POINT [m]&gt;\n\n\nThe output shows that sgppols_sf is in point feature class with epsg ID - 3414. The bounding box provides information of the extend of the geospatial data."
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex08/Hands-on_Ex08-2.html#plot-interactive-point-symbol-map",
+    "href": "Hands-on_Ex/Hands-on_Ex08/Hands-on_Ex08-2.html#plot-interactive-point-symbol-map",
+    "title": "Hands-on Exercise 8-2",
+    "section": "Plot Interactive Point Symbol Map",
+    "text": "Plot Interactive Point Symbol Map\n\n\nShow code\ntm_shape(sgpools_sf)+\ntm_bubbles(col = \"lightcoral\",\n           size = 1,\n           border.col = \"black\",\n           border.lwd = 1)"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex08/Hands-on_Ex08-2.html#make-the-map-proportional",
+    "href": "Hands-on_Ex/Hands-on_Ex08/Hands-on_Ex08-2.html#make-the-map-proportional",
+    "title": "Hands-on Exercise 8-2",
+    "section": "Make the Map Proportional",
+    "text": "Make the Map Proportional\nTo draw a proportional symbol map, we need to assign a numerical variable to the size visual attribute. The code chunks below show that the variable Gp1Gp2Winnings is assigned to size visual attribute.\n\n\nShow code\ntm_shape(sgpools_sf)+\ntm_bubbles(col = \"lightcoral\",\n           size = \"Gp1Gp2 Winnings\",\n           border.col = \"black\",\n           border.lwd = 1)"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex08/Hands-on_Ex08-2.html#adjust-the-map-with-different-colours",
+    "href": "Hands-on_Ex/Hands-on_Ex08/Hands-on_Ex08-2.html#adjust-the-map-with-different-colours",
+    "title": "Hands-on Exercise 8-2",
+    "section": "Adjust the Map with Different Colours",
+    "text": "Adjust the Map with Different Colours\nThe proportional symbol map can be further improved by using the colour visual attribute. In the code chunks below, OUTLET_TYPE variable is used as the colour attribute variable.\n\n\nShow code\ntm_shape(sgpools_sf)+\ntm_bubbles(col = \"OUTLET TYPE\", \n          size = \"Gp1Gp2 Winnings\",\n          border.col = \"black\",\n          border.lwd = 1)"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex08/Hands-on_Ex08-2.html#plot-twin-maps",
+    "href": "Hands-on_Ex/Hands-on_Ex08/Hands-on_Ex08-2.html#plot-twin-maps",
+    "title": "Hands-on Exercise 8-2",
+    "section": "Plot Twin Maps",
+    "text": "Plot Twin Maps\n\n\n\n\n\n\nDesign Feature of tmap\n\n\n\nWorks with faceted plots. The argument sync in tm_facets() can be used to produce multiple maps with synchronised zoom and pan settings.\n\n\n\n\nShow code\ntm_shape(sgpools_sf) +\n  tm_bubbles(col = \"OUTLET TYPE\", \n          size = \"Gp1Gp2 Winnings\",\n          border.col = \"black\",\n          border.lwd = 1) +\n  tm_facets(by= \"OUTLET TYPE\",\n            nrow = 1,\n            sync = TRUE)\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nSwitch tmap’s viewer back to plot mode by using the code chunk below.\n\ntmap_mode(\"plot\")"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex08/Hands-on_Ex08-3.html",
+    "href": "Hands-on_Ex/Hands-on_Ex08/Hands-on_Ex08-3.html",
+    "title": "Hands-on Exercise 8-3",
+    "section": "",
+    "text": "Note: First modified to include author’s details. Last modified to rename hands-on exercise number."
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex08/Hands-on_Ex08-3.html#install-and-launch-r-packages",
+    "href": "Hands-on_Ex/Hands-on_Ex08/Hands-on_Ex08-3.html#install-and-launch-r-packages",
+    "title": "Hands-on Exercise 8-3",
+    "section": "1.1 Install and launch R packages",
+    "text": "1.1 Install and launch R packages\nFor the purpose of this exercise, the following R packages will be used.\n\n\nShow code\npacman::p_load(sf, tmap, tidyverse)"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex08/Hands-on_Ex08-3.html#import-the-data",
+    "href": "Hands-on_Ex/Hands-on_Ex08/Hands-on_Ex08-3.html#import-the-data",
+    "title": "Hands-on Exercise 8-3",
+    "section": "1.2 Import the data",
+    "text": "1.2 Import the data\nA prepared data set called NGA_wp.rds will be used. The data set is a polygon feature data.frame providing information on water point of Nigeria at the LGA level. You can find the data set in the rds sub-direct of the hands-on data folder.\nUse appropriate sf function import NGA_wp.rds into R environment.\n\n\nShow the code\nNGA_wp &lt;- read_rds(\"data/rds/NGA_wp.rds\")"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex08/Hands-on_Ex08-3.html#visualising-distribution-of-non-functional-water-point",
+    "href": "Hands-on_Ex/Hands-on_Ex08/Hands-on_Ex08-3.html#visualising-distribution-of-non-functional-water-point",
+    "title": "Hands-on Exercise 8-3",
+    "section": "2.1 Visualising distribution of non-functional water point",
+    "text": "2.1 Visualising distribution of non-functional water point\n\n\nShow the code\np1 &lt;- tm_shape(NGA_wp) +\n  tm_fill(\"wp_functional\",\n          n = 10,\n          style = \"equal\",\n          palette = \"Blues\") +\n  tm_borders(lwd = 0.1,\n             alpha = 1) +\n  tm_layout(main.title = \"Distribution of functional water point by LGAs\",\n            legend.outside = FALSE)\n\n\n\n\nShow the code\np2 &lt;- tm_shape(NGA_wp) +\n  tm_fill(\"total_wp\",\n          n = 10,\n          style = \"equal\",\n          palette = \"Blues\") +\n  tm_borders(lwd = 0.1,\n             alpha = 1) +\n  tm_layout(main.title = \"Distribution of total  water point by LGAs\",\n            legend.outside = FALSE)\n\n\n\ntmap_arrange(p2, p1, nrow = 1)"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex08/Hands-on_Ex08-3.html#deriving-proportion-of-functional-water-points-and-non-functional-water-points",
+    "href": "Hands-on_Ex/Hands-on_Ex08/Hands-on_Ex08-3.html#deriving-proportion-of-functional-water-points-and-non-functional-water-points",
+    "title": "Hands-on Exercise 8-3",
+    "section": "3.1 Deriving Proportion of Functional Water Points and Non-Functional Water Points",
+    "text": "3.1 Deriving Proportion of Functional Water Points and Non-Functional Water Points\nWe will tabulate the proportion of functional water points and the proportion of non-functional water points in each LGA. In the following code chunk, mutate() from dplyr package is used to derive two fields, namely pct_functional and pct_nonfunctional.\n\n\nNGA_wp &lt;- NGA_wp %&gt;%\n  mutate(pct_functional = wp_functional/total_wp) %&gt;%\n  mutate(pct_nonfunctional = wp_nonfunctional/total_wp)"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex08/Hands-on_Ex08-3.html#plotting-map-of-rate",
+    "href": "Hands-on_Ex/Hands-on_Ex08/Hands-on_Ex08-3.html#plotting-map-of-rate",
+    "title": "Hands-on Exercise 8-3",
+    "section": "3.2 Plotting map of rate",
+    "text": "3.2 Plotting map of rate\n\n\n\nShow the code\ntm_shape(NGA_wp) +\n  tm_fill(\"pct_functional\",\n          n = 10,\n          style = \"equal\",\n          palette = \"Blues\",\n          legend.hist = TRUE) +\n  tm_borders(lwd = 0.1,\n             alpha = 1) +\n  tm_layout(main.title = \"Rate map of functional water point by LGAs\",\n            legend.outside = TRUE)"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex08/Hands-on_Ex08-3.html#percentile-map",
+    "href": "Hands-on_Ex/Hands-on_Ex08/Hands-on_Ex08-3.html#percentile-map",
+    "title": "Hands-on Exercise 8-3",
+    "section": "4.1 Percentile Map",
+    "text": "4.1 Percentile Map\nThe percentile map is a special type of quantile map with six specific categories: 0-1%,1-10%, 10-50%,50-90%,90-99%, and 99-100%. The corresponding breakpoints can be derived by means of the base R quantile command, passing an explicit vector of cumulative probabilities as c(0,.01,.1,.5,.9,.99,1). Note that the begin and endpoint need to be included.\n\nData Preparation\nStep 1: Exclude records with NA by using the code chunk below.\n\n\nShow the code\nNGA_wp &lt;- NGA_wp %&gt;%\n  drop_na()\n\n\nStep 2: Creating customised classification and extracting values\n\n\nShow the code\npercent &lt;- c(0,.01,.1,.5,.9,.99,1)\nvar &lt;- NGA_wp[\"pct_functional\"] %&gt;%\n  st_set_geometry(NULL)\nquantile(var[,1], percent)\n\n\n       0%        1%       10%       50%       90%       99%      100% \n0.0000000 0.0000000 0.2169811 0.4791667 0.8611111 1.0000000 1.0000000 \n\n\n\n\n\n\n\n\nImportant\n\n\n\nWhen variables are extracted from an sf data.frame, the geometry is extracted as well. For mapping and spatial manipulation, this is the expected behavior, but many base R functions cannot deal with the geometry. Specifically, the quantile() gives an error. As a result st_set_geomtry(NULL) is used to drop geomtry field.\n\n\n\n\nCreating the get.var function\nStep1 : Write an R function as shown below to extract a variable (i.e. wp_nonfunctional) as a vector out of an sf data.frame.\n\narguments:\n\nvname: variable name (as character, in quotes)\ndf: name of sf data frame\n\nreturns:\n\nv: vector with values (without a column name)\n\n\n\n\nShow the code\nget.var &lt;- function(vname,df) {\n  v &lt;- df[vname] %&gt;% \n    st_set_geometry(NULL)\n  v &lt;- unname(v[,1])\n  return(v)\n}\n\n\n\n\nA percentile mapping function\nStep 2: Write a percentile mapping function by using the code chunk below.\n\n\nShow the code\npercentmap &lt;- function(vnam, df, legtitle=NA, mtitle=\"Percentile Map\"){\n  percent &lt;- c(0,.01,.1,.5,.9,.99,1)\n  var &lt;- get.var(vnam, df)\n  bperc &lt;- quantile(var, percent)\n  tm_shape(df) +\n  tm_polygons() +\n  tm_shape(df) +\n     tm_fill(vnam,\n             title=legtitle,\n             breaks=bperc,\n             palette=\"Blues\",\n          labels=c(\"&lt; 1%\", \"1% - 10%\", \"10% - 50%\", \"50% - 90%\", \"90% - 99%\", \"&gt; 99%\"))  +\n  tm_borders() +\n  tm_layout(main.title = mtitle, \n            title.position = c(\"right\",\"bottom\"))\n}\n\n\n\n\nTest drive the percentile mapping function\nStep 3: To run the function, type the code chunk as shown below.\n\n\nShow the code\npercentmap(\"total_wp\", NGA_wp)"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex08/Hands-on_Ex08-3.html#box-map",
+    "href": "Hands-on_Ex/Hands-on_Ex08/Hands-on_Ex08-3.html#box-map",
+    "title": "Hands-on Exercise 8-3",
+    "section": "4.2 Box map",
+    "text": "4.2 Box map\nA box map is an augmented quartile map, with an additional lower and upper category. When there are lower outliers, then the starting point for the breaks is the minimum value, and the second break is the lower fence.\nIn contrast, when there are no lower outliers, then the starting point for the breaks will be the lower fence, and the second break is the minimum value (there will be no observations that fall in the interval between the lower fence and the minimum value).\n\n\nShow the code\nggplot(data = NGA_wp,\n       aes(x = \"\",\n           y = wp_nonfunctional)) +\n  geom_boxplot()\n\n\n\n\n\n\nDisplaying summary statistics on a choropleth map by using the basic principles of boxplot.\nTo create a box map, a custom breaks specification will be used. However, there is a complication. The break points for the box map vary depending on whether lower or upper outliers are present.\n\n\nCreating the boxbreaks function\nThe code chunk below is an R function that creating break points for a box map.\n\narguments:\n\nv: vector with observations\nmult: multiplier for IQR (default 1.5)\n\nreturns:\n\nbb: vector with 7 break points compute quartile and fences\n\n\n\n\nShow the code\nboxbreaks &lt;- function(v,mult=1.5) {\n  qv &lt;- unname(quantile(v))\n  iqr &lt;- qv[4] - qv[2]\n  upfence &lt;- qv[4] + mult * iqr\n  lofence &lt;- qv[2] - mult * iqr\n  # initialize break points vector\n  bb &lt;- vector(mode=\"numeric\",length=7)\n  # logic for lower and upper fences\n  if (lofence &lt; qv[1]) {  # no lower outliers\n    bb[1] &lt;- lofence\n    bb[2] &lt;- floor(qv[1])\n  } else {\n    bb[2] &lt;- lofence\n    bb[1] &lt;- qv[1]\n  }\n  if (upfence &gt; qv[5]) { # no upper outliers\n    bb[7] &lt;- upfence\n    bb[6] &lt;- ceiling(qv[5])\n  } else {\n    bb[6] &lt;- upfence\n    bb[7] &lt;- qv[5]\n  }\n  bb[3:5] &lt;- qv[2:4]\n  return(bb)\n}\n\n\n\n\nCreating the get.var function\nThe code chunk below is an R function to extract a variable as a vector out of an sf data frame.\n\narguments:\n\nvname: variable name (as character, in quotes)\ndf: name of sf data frame\n\nreturns:\n\nv: vector with values (without a column name)\n\n\n\n\nShow the code\nget.var &lt;- function(vname,df) {\n  v &lt;- df[vname] %&gt;% st_set_geometry(NULL)\n  v &lt;- unname(v[,1])\n  return(v)\n}\n\n\n\n\nTest drive the newly created function\nTest the newly created function with the code chunk below.\n\n\nShow the code\nvar &lt;- get.var(\"wp_nonfunctional\", NGA_wp) \nboxbreaks(var)\n\n\n[1] -56.5   0.0  14.0  34.0  61.0 131.5 278.0\n\n\n\n\nBoxmap function\nThe code chunk below is an R function to create a box map. arguments:\n\nvnam: variable name (as character, in quotes)\ndf: simple features polygon layer\nlegtitle: legend title\nmtitle: map title\nmult: multiplier for IQR\nreturns: a tmap-element (plots a map)\n\n\n\nShow the code\nboxmap &lt;- function(vnam, df, \n                   legtitle=NA,\n                   mtitle=\"Box Map\",\n                   mult=1.5){\n  var &lt;- get.var(vnam,df)\n  bb &lt;- boxbreaks(var)\n  tm_shape(df) +\n    tm_polygons() +\n  tm_shape(df) +\n     tm_fill(vnam,title=legtitle,\n             breaks=bb,\n             palette=\"Blues\",\n          labels = c(\"lower outlier\", \n                     \"&lt; 25%\", \n                     \"25% - 50%\", \n                     \"50% - 75%\",\n                     \"&gt; 75%\", \n                     \"upper outlier\"))  +\n  tm_borders() +\n  tm_layout(main.title = mtitle, \n            title.position = c(\"left\",\n                               \"top\"))\n}\n\n\n\n\nShow the code\ntmap_mode(\"plot\")\nboxmap(\"wp_nonfunctional\", NGA_wp)"
   }
 ]
