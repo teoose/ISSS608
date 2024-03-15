@@ -77,7 +77,6 @@ The following code chunk is used to install and launch the R packages.
 #| code-summary: "Show code" 
 pacman::p_load(tidyverse, kableExtra, knitr,
                sf, spdep, tmap, leaflet,
-               leaflet.extras, mapview, leafsync,
                tm, plotly)
 ```
 
@@ -99,10 +98,6 @@ pacman::p_load(tidyverse, kableExtra, knitr,
 -   *tmap*: an R package that provides layer-based creation of thematic maps.
 
 -   *leaflet*: an R package that allows the creation and customisation of interactive maps.
-
--   *leaflet.extras*: an extension of *leaflet* package that provides additional functionality using various leaflet plugins.
-
--   *mapview*: an R package that creates interactive maps.
 :::
 
 ## 2.2 Import Aspatial Data

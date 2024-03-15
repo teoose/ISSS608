@@ -1,0 +1,725 @@
+---
+title: "Take-home Exercise 4 - Part 1"
+subtitle: "Decoding Chaos: Initial Data Exploratory Analysis (IDEA)"
+date: "27 February 2024"
+date-modified: "last-modified"
+author: "Teo Suan Ern"
+execute: 
+  eval: true
+  echo: true
+  freeze: true
+  warning: false
+  message: false
+  editor: visual
+---
+
+# 1. Overview
+
+------------------------------------------------------------------------
+
+## 1.1 Project Brief
+
+Take-home exercise 4 is a preliminary work of the final group project - Decoding Chaos. Armed conflicts due to political violence and coordinated attacks targeting innocent civilians, have been on the rise globally. This threatens the public at both physical and psychological levels. A good visual analysis of armed conflicts is essential to help (1) discover armed conflicts trends and (2) conceptualise armed conflict spaces.
+
+The project team consists of three members, and each member will take one of the main prototype modules as follows:
+
+-   Exploratory Data Analysis (Initial & Geospatial)
+
+-   Clustering & Outlier Analysis/ Hot & Cold Zone Analysis
+
+-   Confirmatory Data Analysis
+
+## 1.2 Project Objectives
+
+The project will be using open-source data from armed conflict events (Armed Conflict Location & Event Data Project (ACLED)). The objective of my assignment is to build a prototype - user interface (UI) design on **Exploratory Data Analysis (Initial & Geospatial)** that provides easy-to-use and insightful visualisation tools that can be suitable for Defence and Security sectors to develop effective counter measures and strategies.
+
+## 1.3 Exploratory Data Analysis
+
+This assignment is separated into three segments (web pages):
+
+1.  Initial Data Exploratory Analysis (IDEA) – Current Page.
+
+2.  Geospatial Data Exploratory Analysis (GDEA) – [Click here for GDEA page](https://isss608-ay2024-suanern.netlify.app/take-home_ex/take-home_ex04/take-home_ex04-GDEA.html){target="_blank"}.
+
+3.  Prototype: Exploratory – [Click here for Prototype: Exploratory page](https://isss608-ay2024-suanern.netlify.app/take-home_ex/take-home_ex04/take-home_ex04-Prototype.html){target="_blank"}.
+
+# 2. Initial Data Preparation
+
+------------------------------------------------------------------------
+
+## 2.1 Install and launch R packages
+
+The project uses `p_load()` of pacman package to check if the R packages are installed in the computer.
+
+The following code chunk is used to install and launch the R packages.
+
+```{r}
+#| code-fold: true 
+#| code-summary: "Show code" 
+pacman::p_load(tidyverse, kableExtra, knitr, highcharter, scales, 
+               ggthemes, RColorBrewer, lubridate, wordcloud,
+               tidytext, ggforce, ggraph, igraph, tm, plotly, tidygraph)
+```
+
+::: {.callout-warning icon="false" collapse="true"}
+### R packages installed
+
+-   *tidyverse*: a family of modern R packages specially designed to support data science, analysis and communication task including creating static statistical graphs.
+
+-   *knitr*: an report generation tool.
+
+-   *ggthemes*: an R package that provides extra themes, geoms and scales to ggplot2 package.
+
+-   *DT*: an R interface to the JavaScript library DataTables that create interactive table on html page.
+
+-   *plotly*: an R package for creating interactive charts.
+
+-   *scales*: an scale package used for controlling axis and legend labels.
+
+-   *lubridate*: an R package that facilitates to use of dates and time elements.
+
+-   *wordcloud*: a text mining package and word cloud generator.
+
+-   *tidytext*: an R package that provides functions and supports seamless conversions of text to and from tidy formats of datasets.
+
+-   *tm*: an R package that provides text mining applications.
+
+-   *ggforce*: an extension of ggplot2 to provide visual data analysis with newer stats and geoms.
+
+-   *ggraph*: build network graph visualisation using appropriate functions
+
+-   *igraph*: an interface for analysis of graphs or networks.
+
+-   *highcharter*: a wrapper that contains 'highcharts' library for plotting of R objects.
+:::
+
+## 2.2 Import Data
+
+The project will examine the dataset from [Armed Conflict Location & Event Data Project (ACLED)](https://acleddata.com/data-export-tool/){target="_blank"}, specifically Myanmar country, between Year 2010 and Year 2023.
+
+```{r}
+#| code-fold: true 
+#| code-summary: "Show code"
+
+data <- read.csv("data/1900-01-01-2024-02-26-Southeast_Asia-Myanmar.csv")
+```
+
+## 2.3 Overview of the data
+
+The dataset consists of 55,574 observations and 35 variables. Each row details the armed conflict event on the type, agents, location, date and other characteristics of conflict events (such as political violence, demonstration) in Myanmar.
+
+### Dataset Structure
+
+#### Use `str()` to check the structure of the data.
+
+```{r}
+str(data)
+```
+
+The output above reveals that event_date is in character format instead of date format.
+
+#### Use `colSums` to check for missing values
+
+The output below shows that there are four variables with missing values.
+
+```{r}
+#| code-fold: true 
+#| code-summary: "Show code" 
+# check missing values
+missing_values <- colSums(is.na(data)) 
+
+missing_values_only <- missing_values[missing_values > 0]
+
+missing_values_only %>% kable() 
+```
+
+#### Use `duplicate()` to check for duplicates:
+
+There are no duplicate entries in the dataset.
+
+```{r}
+data[duplicated(data),]
+```
+
+# 3. Data Wrangling
+
+------------------------------------------------------------------------
+
+The flowchart diagram below provides an overview of the key variables used in this project.
+
+```{mermaid}
+%%| echo: false
+flowchart TD
+  A(Key Variables Used \n event_id_cnty)
+  A --> B(Time Period)
+  A --> C(Characteristic of Incident)
+  A --> D(Location)
+  
+  B --> E(year)
+  B --> F(date)
+  B -.-> G(New Variables)
+  G -.-> H(day)
+  G -.-> I(week number)
+  G -.-> J(month)
+
+
+  C --> K(event_type)
+  C --> L(sub_event_type)
+  C --> M(actor1)
+  C --> N(actor2)
+  C --> O(fatalities)
+  C -.-> P(New Variables)
+  P -.-> Q(total incidents)
+  P -.-> R(total fatalities)
+  P -.-> S(political violence rate)
+  P -.-> T(violence against civilian rate)
+  
+  
+  D --> U(country)
+  D --> V(longitude)
+  D --> W(latitude)
+  D --> X(admin1)
+  D --> Y(admin2)
+  D --> Z(admin3)
+  D -.-> AA(New Variables)
+  AA -.-> AB(geometry points)
+  AA -.-> AC(shapeID)
+```
+
+## 3.1 Convert event_date format
+
+The code chunk below uses `dmy()` to convert the date format from character to date format:
+
+```{r}
+#| code-fold: true 
+#| code-summary: "Show code" 
+data$event_date <- dmy(data$event_date)
+```
+
+## 3.2 Create new variables
+
+The code chunk below creates the following new variables based on total armed conflict incidents and total fatalities (by *disorder_type* and *sub_event_type*):
+
+-   Annual percentage of political violence
+
+-   Annual percentage of violence against civilian
+
+```{r}
+#| code-fold: true 
+#| code-summary: "Show code" 
+data2 <- data %>%
+  group_by(year) %>%
+  mutate(
+    total_fata = sum(fatalities),
+    
+    total_inci = n(),
+    
+    ## incidents
+    # Political violence rates
+    political_rate = round(
+      sum(total_inci[event_type %in% c("Battles", "Protests", 
+                                       "Explosions/Remote violence", 
+                                       "Violence against civilians")]) /
+        sum(total_inci) * 100),
+    
+    # Violence against civilian rates
+    civilian_rate = round(
+      sum(total_inci[event_type == "Violence against civilians"]) / 
+        sum(total_inci) * 100),
+    
+    # Exchange of territory
+    non_state_exchange = round(
+      sum(total_inci[sub_event_type == "Non-state actor overtakes territory"]) /
+        sum(total_inci) * 100),
+      
+    govt_regain_exchange = round(
+      sum(total_inci[sub_event_type == "Government regains territory"]) / 
+        sum(total_inci) * 100),
+    
+    
+    ## fatalities
+    # Political violence rates
+    political_rate = round(
+      sum(total_fata[event_type %in% c("Battles", "Protests", 
+                                       "Explosions/Remote violence", 
+                                       "Violence against civilians")]) /
+        sum(total_fata) * 100, 2),
+    
+    # Violence against civilian rates
+    civilian_rate = round(
+      sum(total_fata[event_type == "Violence against civilians"]) / 
+        sum(total_fata) * 100, 2)
+    
+  ) %>%
+  ungroup()
+
+```
+
+## 3.3 Filter data columns
+
+The code chunk below selects/ excludes the variables intended to be used for this project. Cleaned dataset is named as final.
+
+```{r}
+#| code-fold: true 
+#| code-summary: "Show code" 
+final <- data2 %>%
+  select(-time_precision, -geo_precision, -source_scale, -timestamp, -tags,
+         -population_1km, -population_2km, -population_5km, -population_best)
+```
+
+The code chunk below save the cleaned dataset in .rds format for subsequent geospatial EDA and R Shiny Application.
+
+```{r}
+#| code-fold: true 
+#| code-summary: "Show code" 
+write_rds(final, 
+          "data/final.rds")
+```
+
+Use `str()` to check the structure of the final dataset.
+
+```{r}
+str(final)
+```
+
+# 4. Initial Exploratory Data Analysis
+
+------------------------------------------------------------------------
+
+```{mermaid}
+%%| echo: false
+flowchart TD
+  A(Initial Exploratory Data Analysis)
+  A --> B(Descriptive Statistics)
+  A --> C(Distribution Analysis)
+  A --> D(Timeseries Analysis)
+  A --> E(Text Analysis)
+  A --> F(Network Analysis)
+```
+
+## 4.1 Descriptive Statistics
+
+Before proceeding with data visualisation, it is essential to be able to navigate the dataset of 55,574 observations and 32 variables with ease. This segment will help users identify or navigate through the dataset observations instead of scrolling through each observation one-by-one. The interactive datatable is created using DT package.
+
+::: {.callout-note icon="false"}
+### Design Features - Interactive Data Table
+
+-   Display number of observations by selecting the dropdown (5, 10, 25, 50, 100 entries). This ensure that the observations will not span across the entire webpage.
+
+-   View other pages of observations with "previous" or "next" button.
+
+-   Search specific observations with the search bar for the occurrence of a string/ numerical value in any column of an observation
+
+-   Filter observations with the filter bar directly below column headers.
+
+-   Column visibility allows user to select the columns that they are interested to view and hide the rest.
+:::
+
+```{r}
+#| code-fold: true 
+#| code-summary: "Show code"
+
+DT::datatable(
+  final, 
+  class = "compact",
+  filter = "top", 
+  extensions = c("Buttons"),
+  options = list(
+    pageLength = 5,
+    columnDefs = list(
+      list(targets = c(1:7, 9, 11:23, 26:32), className = "dt-center"), 
+      list(targets = c(8, 10, 24, 25), visible = FALSE)),
+    buttons = list(
+      list(extend = c("colvis"), columns = c(1:30))),
+    dom = "Bpiltf"),
+  caption = "Table 1: Armed Conflicts in Myanmar (2010-2023)"
+)
+```
+
+## 4.2 Distribution Analysis
+
+### Distribution of armed conflicts over the years in Myanmar's Sub-national Administrative Region 1
+
+The dataset consists of a variable called *admin1*, that is the largest sub-national administrative region in which the armed conflict event took place. The team hopes to visualise the distribution of armed conflicts at administrative region-levels and determine if the events are spread out across the years, started/ ended in certain years or even highly concentrated in certain years. A jittered-cum-boxplot is used to show the frequency of the conflicts events and how it has changed over the years.
+
+::: {.callout-note icon="false"}
+### Design Features
+
+-   The prototype proposes to include the following interactivity elements for users' data exploratory:
+    -   Slider bar to select the *year* range
+    -   Radio button selection on *event_type* or *admin1*
+    -   Radio button selection on frequency method (for jitter points) based on either kernel density distribution or count distribution
+-   `forcats::fct_infreq` is used to assign frequency values to factor levels while visualising it over time period.
+-   `geom_boxplot()` with the use of `ggplotly` provides statistical information such as *minimum, maximum, mean, median, first-and-third-quantile* values when hover-over.
+-   `geom_sina()` is useful for plotting single variable in a multiclass dataset to show density distribution within each class.
+:::
+
+```{r}
+#| code-fold: true 
+#| code-summary: "Show code"
+
+# tooltip_box <- paste("<b>", final$date, "</b>", "\nFatalities : ", final$fatalities)
+dist <- final %>%
+  filter (fatalities >0)
+
+box1 <- ggplot(dist, aes(x = forcats::fct_infreq(admin1), y = event_date, 
+                          color = factor(admin1))) +
+  
+  geom_boxplot(width = .2, color = "#000000", fill = NA, size = .5, 
+               outlier.shape = NA, position = position_nudge(.25)) +
+  geom_sina(method = "density", alpha = .3) +
+  coord_flip()+
+  theme_minimal() +
+  theme(legend.position = "none", 
+        plot.title.position = "plot") +
+  labs(title = "Frequency of Conflict Has Increased Over Time in the Largest Sub-national Administrative Region in Myanmar", subtitle = "Year 2010 to Year 2023",
+       y = "Year (2010-2023)",
+       x = "Adminstrative Region 1", 
+       caption = "Data Source: ACLED (2023)")
+
+ggplotly(box1)
+```
+
+### Distribution of armed conflicts over the years in Myanmar based on Event Types
+
+The dataset consists of a variable called *event_type*, that recorded the nature of event of the armed conflict. The team hopes to visualise the distribution of all events and determine if the events are spread out across the years, started/ ended in certain years or even highly concentrated in certain years. A jittered-cum-boxplot is used to show the frequency of the conflicts events and how it has changed over the years.
+
+```{r}
+#| code-fold: true 
+#| code-summary: "Show code"
+box2 <- ggplot(dist, aes(x = forcats::fct_infreq(event_type), y = event_date, 
+                          color = factor(event_type), fill = factor(event_type))) +
+  geom_sina(method = "density", alpha = .3) +
+  geom_boxplot(width = .2, color = "#000000", fill = NA, size = .5, 
+               outlier.shape = NA, position = position_nudge(.25)) +
+  coord_flip() +
+  theme_minimal() +
+  theme(legend.position = "none", 
+        plot.title.position = "plot") +
+  labs(title = "Battles, Explosion & Violence against Civilian Have Been Happening in Myanmar Over Time\n With More Occurrence Happening From Year 2020 Onwards", subtitle = "Year 2010 to Year 2023",
+       y = "Year (2010-2023)",
+       x = "Event Types", 
+       caption = "Data Source: ACLED (2023)")
+
+ggplotly(box2)
+```
+
+## 4.3 Timeseries Analysis
+
+### Calendar visualisation of armed conflicts and fatalities
+
+The dataset consists of a variable called *event_date*, that recorded the date an armed conflict incident took place. The team hopes to make use of a calendar heatmap to visualise the number of incidents and fatalities that occurred on a daily basis to identify patterns or anomalies in Myanmar.
+
+::: {.callout-note icon="false"}
+### Design Features
+
+-   The prototype proposes to include the following interactivity elements for users' data exploratory:
+    -   Dropdown filters by *year*
+    -   Radio button selection on the *armed conflicts* or *fatalities*
+    -   Tooltip is customised to show the different information such that when users hover-over the different day of the calendar year. *Date, total fatalities and total number of incidents within the calendar day* will be displayed.
+:::
+
+The code chunk below derives new variables by using `weekdays()`, `mday()`, `months()` and `isoweek()`.
+
+```{r}
+#| code-fold: true 
+#| code-summary: "Show code"
+calendar <- final %>%
+  filter(fatalities > 0) %>%
+  group_by(year, event_date, admin1) %>%
+  mutate(
+    wkday = wday(event_date),
+    day = mday(event_date),
+    month = factor(months(event_date), levels = rev(month.name)),
+    week = isoweek(event_date),
+    year_month = format(zoo::as.yearmon(event_date), "%y-%m")
+  ) %>%
+  ungroup()
+
+# selected years
+# years <- c(2010:2023)
+years <- 2023
+
+cal_conflict <- calendar %>%
+  group_by(year, day, month) %>%
+  filter(year == years) %>%
+  summarise(total_fata = sum(fatalities),
+            total_inci = n()) %>%
+  ungroup()
+```
+
+```{r}
+#| code-fold: true 
+#| code-summary: "Show code"
+# tooltip
+tooltip_heat <- paste("<b>", cal_conflict$day, " ", cal_conflict$month, " ",
+                      cal_conflict$year, "</b>", 
+                      "\nFatalities : ", cal_conflict$total_fata,
+                      "\nIncidents : ", cal_conflict$total_inci)
+
+heat <- ggplot(cal_conflict, aes(x = day, y = month, fill = total_fata)) + 
+  geom_tile(color = "white", size = 1, aes(text = tooltip_heat)) + 
+  theme_tufte(base_family = "Helvetica") + 
+  coord_equal() +
+  scale_fill_gradient(name = "Total Fatalities", low = "#fff2f4", 
+                      high = "lightcoral") +
+  labs(x = "Days of Month", 
+       y = "", 
+       title = paste("Fatalities due to Armed Conflicts in Myanmar in ", years),
+       caption = "Data Source: ACLED (2023)") +
+  theme(axis.ticks = element_blank(),
+        axis.text.x = element_text(size = 7),
+        plot.title = element_text(hjust = 0.5),
+        legend.title = element_text(size = 8),
+        legend.text = element_text(size = 6),
+        legend.position = "top") +
+  scale_x_continuous(breaks = seq(min(cal_conflict$day), max(cal_conflict$day), 
+                                  by = 2),
+                     labels = seq(min(cal_conflict$day), max(cal_conflict$day), 
+                                  by = 2)) 
+```
+
+```{r}
+#| fig-width: 8
+#| code-fold: true 
+#| code-summary: "Show code"
+# Convert ggplot to plotly (to include custom tooltip)
+heat_plotly <- ggplotly(heat, tooltip = "text")
+
+heat_plotly
+
+```
+
+### Trend line of armed conflicts and fatalities in Myanmar
+
+The dataset consists of a variable called *fatalities*, that is the number of reported fatalities arising from the armed conflict event.
+
+The team hopes to make use of a line chart to visualise the trend in the number of incidents and fatalities in Myanmar.
+
+::: {.callout-note icon="false"}
+### Design Features
+
+-   The prototype proposes to include the following interactivity elements for users' data exploratory:
+    -   Tooltip is customised to with information such as year, count of armed conflicts and fatalities will be available when hover-over.
+:::
+
+```{r}
+#| code-fold: true 
+#| code-summary: "Show code"
+year_fata <- calendar %>%
+  filter(fatalities > 0) %>%
+  group_by(year_month) %>%
+  select(year, month, year_month, fatalities) %>%
+  summarise(total_fata = sum(fatalities),
+            total_inci = n()) %>%
+  ungroup()
+
+hc_plot1 <-  highchart() %>% 
+  hc_add_series(year_fata, hcaes(x = year_month, y = total_fata), type = "line", 
+                name = "Total Fatalities", color = "lightcoral") %>%
+    hc_add_series(year_fata, hcaes(x = year_month, y = total_inci), type = "line", 
+                name = "Total Incidents", color = "black") %>%
+  hc_tooltip(crosshairs = TRUE, borderWidth = 1.5, headerFormat = "", 
+             backgroundColor = "#FCFFC5",
+             borderWidth = 5,
+             pointFormat = "<b>20{point.year_month}</b> 
+                                 <br> Fatalities: <b>{point.total_fata}</b>
+                                 <br> Incidents: <b>{point.total_inci}</b>"
+             ) %>%
+  hc_title(text = "Armed Conflict Over The Years") %>% 
+  hc_subtitle(text = "2010 to 2023") %>%
+  hc_xAxis(title = list(text = "2010-2023"), labels = list(enabled = FALSE)) %>%
+  hc_yAxis(title = list(text = "Frequency"),
+           allowDecimals = FALSE,
+           plotLines = list(list(
+             color = "lightcoral", width = 1, dashStyle = "Dash",
+             value = mean(year_fata$total_fata),
+             label = list(text = paste("Average Monthly Fatalities:", round(mean(year_fata$total_fata))),
+             style = list(color = 'lightcoral', fontSize = 20)))))
+hc_plot1
+```
+
+## 4.4 Text Analysis
+
+### Visual display of incident summary over the years
+
+The dataset consists of a variable called *notes*, that recorded a short description of the event. Given the volume of incidents that happened on a daily basis, the team hopes to make use of generating a word cloud, to have a quick visual summary on the keywords recorded, and identify possible changes in the incidents that happened over the years in Myanmar.
+
+::: {.callout-note icon="false"}
+### Design Features
+
+-   The prototype proposes to include the following interactivity elements for users' data exploratory:
+    -   Selection options to select by *event_type* and *admin1*
+    -   Dropdown filters by year. This allows quick visual summary on the keywords used in all armed conflict incidents of each year.
+:::
+
+```{r}
+#| code-fold: true    
+#| code-summary: "Show code" 
+
+cloudtext1 <- final %>%
+    select(year, notes)
+
+cloudtext2 <- function(year) {
+  subset_data <- cloudtext1 %>%
+    filter(notes != "")
+  
+  docs <- Corpus(VectorSource(subset_data$notes))
+  docs <- tm_map(docs, removeNumbers)
+  docs <- tm_map(docs, removeWords, stopwords("english"))
+  docs <- tm_map(docs, removePunctuation)
+  docs <- tm_map(docs, stripWhitespace)
+  docs <- tm_map(docs, stemDocument)
+  
+  dtm <- TermDocumentMatrix(docs)
+  m <- as.matrix(dtm)
+  v <- sort(rowSums(m), decreasing = TRUE)
+  d <- data.frame(word = names(v), freq = v)
+  
+  wordcloud(d$word, d$freq, colors = brewer.pal(9, "Set3"), random.order = FALSE, rot.per = 0)
+  title(main = paste("Incident Summary -", year), font.main = 1, col.main = "black", cex.main = 1.5)
+}
+```
+
+```{r}
+#| code-fold: true    
+#| code-summary: "Show code" 
+
+# selected years
+# years <- c(2010:2023)
+
+years <- 2023
+# Word clouds for each year
+cloud_patch <- lapply(years, cloudtext2)
+```
+
+## 4.5 Network Analysis
+
+The dataset consists of variables *actor1*, *actor2*, *assoc_actor1* and *assoc_actor2*. The variables are main groups that initiated the armed conflict events as well as associated groups involved alongside with main groups.
+
+There are multiple actors (over 1,000 unique groups, with new groups formed and some groups renamed themselves over the years) that have created conflicts in Myanmar. The team hopes to make use of a network graph to schematically depict the nodes and connections amongst the different actors and their associations, and to identify the top actors based on their interactions in each year.
+
+-   The *nodes* of the network represent the groups (actors and associate actors).
+
+-   The *edges* of the network represent whether the two nodes are interconnected or not.
+
+::: {.callout-note icon="false"}
+### Design Features
+
+-   The prototype proposes to include the following interactivity elements for users' data exploratory:
+    -   Selection options to select by *event_type* and *admin1*
+    -   Dropdown filters by year. This allows quick visual summary of the network association of the actors in each year.
+    -   Slider bar to select frequency of actors' network association with each other.
+:::
+
+```{r}
+#| code-fold: true    
+#| code-summary: "Show code" 
+
+# select year
+years <- 2023
+
+# calculate frequency
+conflict_count <- final %>% 
+  group_by(actor1) %>% 
+  filter (year == years) %>%
+  summarise(frequency = n()) %>%
+  arrange(desc(frequency)) 
+
+conflict_count2 <- final %>% 
+  group_by(actor2) %>% 
+  filter (year == years) %>%
+  summarise(frequency = n()) %>%
+  arrange(desc(frequency))
+
+colnames(conflict_count) = c("actor","Freq")
+colnames(conflict_count2) = c("actor","Freq")
+
+# combine both actor 1 & 2
+final_conflict_count = rbind(conflict_count,conflict_count2)
+
+final_conflict_count2 = final_conflict_count %>%
+  group_by(actor) %>%
+  summarise(FrequencyConflicts = sum(Freq)) %>%
+  arrange(desc(FrequencyConflicts))
+
+# trim actor/ assoc_actor
+final$actor1 = trimws(str_replace(final$actor1, "[Õ]", ""))
+final$actor2  = trimws(str_replace(final$actor2, "[Õ]", ""))
+final$assoc_actor_1 = trimws(str_replace(final$assoc_actor_1, "[Õ]", ""))
+final$assoc_actor_2 = trimws(str_replace(final$assoc_actor_2, "[Õ]", ""))
+
+assoc1 <- final %>%
+  filter(!is.na(actor1)) %>%
+  filter(!is.na(assoc_actor_1)) %>%
+  filter(!(actor1 == "")) %>%
+  filter(!(assoc_actor_1 == "")) %>%
+  select(actor1,assoc_actor_1)
+
+assoc2 <- final %>%
+  filter(!is.na(actor2)) %>%
+  filter(!is.na(assoc_actor_2)) %>%
+  filter(!(actor2 == "")) %>%
+  filter(!(assoc_actor_2 == "")) %>%
+  select(actor2,assoc_actor_2)
+
+colnames(assoc1) = c("actor","assoc_actor") 
+colnames(assoc2) = c("actor","assoc_actor") 
+
+# combine both assoc 1 & 2
+combined1 = rbind(assoc1,assoc2)
+
+combined2 <- combined1 %>%
+  group_by(actor,assoc_actor) %>%
+  tally(sort = TRUE) 
+
+
+final_conflict_count3 = trimws(final_conflict_count2$actor)
+
+combined3 <- combined2 %>%
+  filter(actor %in% final_conflict_count3)
+```
+
+```{r}
+#| code-fold: true    
+#| code-summary: "Show code" 
+# network graph
+viz_actors_12 <- function(actors_12) {
+  set.seed(1234)
+  a <- grid::arrow(type = "closed", length = unit(.15, "inches"))
+  
+  actors_12 %>%
+    graph_from_data_frame() %>%
+    ggraph(layout = "fr") +
+    geom_edge_link(aes(edge_alpha = n, edge_width = n), edge_colour = "lightcoral") +
+    geom_node_point(size = 5) +
+    geom_node_text(aes(label = name), repel = TRUE,
+                   point.padding = unit(0.5, "lines")) +
+    theme_void()
+}
+
+
+combined3 %>%
+  filter(n >= 300) %>%
+  viz_actors_12
+```
+
+# 5. Geospatial Exploratory Data Analysis
+
+------------------------------------------------------------------------
+
+**Geospatial Exploratory Data Analysis** can be found via [link here](https://isss608-ay2024-suanern.netlify.app/take-home_ex/take-home_ex04/take-home_ex04-GDEA.html){target="_blank"}.
+
+This segment has been separated on a standalone web page due to Quarto rendering capacity.
+
+# 6. Prototype: Exploratory
+
+------------------------------------------------------------------------
+
+**Prototype: Exploratory** can be found via [link here](https://isss608-ay2024-suanern.netlify.app/take-home_ex/take-home_ex04/take-home_ex04-Prototype.html){target="_blank"}.
+
+This segment has been separated on a standalone web page due to Quarto rendering capacity.
+
+# Reference
+
+-   [ISSS608 AY2023-24 January Term (2024), Take-home Exercise 4](https://isss608-ay2023-24jan.netlify.app/take-home_ex/th_ex04){target="_blank"}

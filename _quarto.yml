@@ -78,15 +78,17 @@ website:
         - text: "[3] Be Weatherwise or Otherwise"
           href: "Take-home_Ex/Take-home_Ex03/Take-home_Ex03.html"
         - text: "[4.1] Decoding Chaos - Initial Exploratory Data Analysis"
-          href: "Take-home_Ex/Take-home_Ex04/Take-home_Ex04-IDEA.html"
+          href: "Take-home_Ex/Take-home_Ex04/Take-home_Ex04-IDEA-2.html"
         - text: "[4.2] Decoding Chaos - Geospatial Exploratory Data Analysis"
-          href: "Take-home_Ex/Take-home_Ex04/Take-home_Ex04-GDEA.html"
+          href: "Take-home_Ex/Take-home_Ex04/Take-home_Ex04-GDEA-2.html"
         - text: "[4.3] Decoding Chaos - Storyboard"
-          href: "Take-home_Ex/Take-home_Ex04/Take-home_Ex04-Prototype.html"
+          href: "Take-home_Ex/Take-home_Ex04/Take-home_Ex04-Prototype-2.html"
       - text: "{{< fa r >}} Shiny"
         menu: 
         - text: "R Shiny Basic"
           href: "https://isss608-vaa-suanern.shinyapps.io/prototype/"
+        - text: "Decoding Chaos Prototype (Exploratory tab)"
+          href: "https://isss608-vaa-suanern.shinyapps.io/ShinyExploratoryPrototype/"
   page-footer:
     right: 
       - text: "©2024! Designed by TSE!"
