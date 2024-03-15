@@ -25,7 +25,7 @@ This assignment is separated into three segments (web pages):
 
 # 2. Storyboard
 
-Storyboard aims to visually maps out user's experience. It is a tool for making strong visual connection between the insights uncovered based on research and user's interaction with the R Shiny dashboard application. The interactive components and UI design aims to facilitate data (and geospatial) exploration and analysis for users in the Defence and Security sectors to develop effective counter measures and strategies.
+Storyboard aims to visually maps out user's experience. It is a tool for making strong visual connection between the insights uncovered based on research and user's interaction with the R Shiny dashboard application. The interactive components and UI design aims to facilitate data (and geospatial) exploration and analysis for users to develop effective counter measures and strategies.
 
 The **"Exploratory"** dashboard can be broadly classify into two key areas:
 
@@ -53,11 +53,11 @@ For enhanced user experience, the prototype included 'filter' components (i.e. d
 
 ## Section One - Overview
 
-![Prototype: Exploratory - Overview sub-tab](images/prototype1.png)
+![Prototype: Exploratory - Overview sub-tab](images/prototype2_1.png)
 
 This tab serves as the "landing page" that displays the map of Myanmar and its spatial points of armed conflicts over the years (i.e. 2010 to 2023). Figure below shows the UI interactive features in the **Overview** sub-tab.
 
-![](images/prototype1-1.png)
+![](images/prototype2_1-1.png)
 
 Code chunk below shows the simplified version of UI and Server components in R Shiny application for **Overview** sub-tab.
 
@@ -79,11 +79,11 @@ output1 <- renderLeaflet({}) # point spatial map
 
 ## Section Two - Spatial Intensity
 
-![Prototype: Exploratory - Spatial Intensity sub-tab](images/prototype3.png)
+![Prototype: Exploratory - Spatial Intensity sub-tab](images/prototype2_2.png)
 
 This tab displays the spatial intensity map based on the intensity of fatalities at each armed conflict incident. Warm colours (e.g. red/ orange/ yellow) indicates higher intensity values while cool colours (e.g. blue/ green) indicates lower intensity values. Users would be able to make use of this map to adjust the intensity parameters (i.e. radius, blur and maximum point intensity) based on the filter options. Figure below shows the UI interactive features in the **Spatial Intensity** sub-tab.
 
-![](images/prototype3-1.png)
+![](images/prototype2_2-1.png)
 
 Code chunk below shows the simplified version of UI and Server components in R Shiny application for **Spatial Intensity** sub-tab.
 
@@ -108,13 +108,13 @@ output2 <- renderLeaflet({}) # point spatial intensity map
 
 ## Section Three - Geospatial Exploration
 
-![Prototype: Exploratory - Geospatial Exploration](images/prototype3.png)
+![Prototype: Exploratory - Geospatial Exploration](images/prototype2_3.png)
 
 This tab displays two geospatial exploration maps (i.e. statistical distribution and spatial distribution). For statistical distribution map, it is a boxmap that displays the spatial representation that is similar to boxplot and histogram, which is useful to detect outliers and visualise distribution of variables. For spatial distribution map visualises spatial pattern or distribution across different geographical subnational administrative regions by plotting choropleth map.
 
 Each map has its own different filter options that serve their different purposes. Users would be able to select different display variables and perform spatial exploration to conceptualise armed conflict spaces in Myanmar accordingly. Figure below shows the UI interactive features in the **Geospatial Exploration** sub-tab.
 
-![](images/prototype3-1.png)
+![](images/prototype2_3-1.png)
 
 Code chunk below shows the simplified version of UI and Server components in R Shiny application for **Geospatial Exploration** sub-tab.
 
@@ -140,11 +140,11 @@ output3.2 <- renderTmap({}) # spatial distribution map
 
 ## Section Four - Trends
 
-![Prototype: Exploratory - Trends](images/prototype4.png)
+![Prototype: Exploratory - Trends](images/prototype2_4.png)
 
 This tab allows user to perform time series analysis to identify trends, or cyclic patterns, spot anomalies, visualise distribution of armed conflict incidents/ fatalities and how it has changed over the years using either line chart or calendar heatmap. The line chart (top) shows armed conflict incidents and fatalities on a monthly basis, while calendar heatmap (bottom) shows daily armed conflict incidents and fatalities based on selected year. Calendar days of each month is arranged in rows. The colour squares in the calendar heatmap represent the corresponding cell value (i.e. darker shade denotes higher frequency count). Figure below shows the UI interactive features in the **Trends** sub-tab.
 
-![](images/prototype4-1.png)
+![](images/prototype2_4-1.png)
 
 Code chunk below shows the simplified version of UI and Server components in R Shiny application for **Trends** sub-tab.
 
@@ -172,11 +172,11 @@ output4.2 <- renderPlotly({}) # calendar heatmap
 
 ## Section Five - Distributions
 
-![Prototype: Exploratory - Distributions](images/prototype5.png)
+![Prototype: Exploratory - Distributions](images/prototype2_5.png)
 
 This tab provides user with data exploration tools to explore the distribution of armed conflict incidents using jittered-cum-boxplot that resulted in fatalities and the dispersion of such incidents across the years in Myanmar. Points that are clustered together show higher frequency during the selected time period. Figure below shows the UI interactive features in the **Distribution** sub-tab.
 
-![](images/prototype5-1.png)
+![](images/prototype2_5-1.png)
 
 Code chunk below shows the simplified version of UI and Server components in R Shiny application for **Distributions** sub-tab.
 
@@ -198,11 +198,11 @@ output5 <- renderPlotly({}) # distribution plot 1
 
 ## Section Six - Network Relationships
 
-![Prototype: Exploratory - Network Relationships](images/prototype6.png)
+![Prototype: Exploratory - Network Relationships](images/prototype2_6.png)
 
 This tab provides users with data exploration tools to explore on the network association amongst the actors (each year) involved in the armed conflict incidents in Myanmar, based on user's selected preference to determine the frequency of actors' network association with each other. Figure below shows the UI interactive features in the **Network Relationships** sub-tab.
 
-![](images/prototype6-1.png)
+![](images/prototype2_6-1.png)
 
 Code chunk below shows the simplified version of UI and Server components in R Shiny application for **Network Relationships** sub-tab.
 
@@ -215,7 +215,8 @@ ExploreNetworkrow1 <-  fluidRow(
   plotOutput(), # display network graph
   selectizeInput(), # select event (allows multiple selection)
   selectizeInput(), # select administrative region (allows multiple selection)
-  selectInput() # select year
+  selectInput(), # select year
+  sliderInput() # select frequency of actors' network
 )
 
 
@@ -225,13 +226,13 @@ output6 <- renderPlot({}) # network graph
 
 ## Section Seven - Incident Summary
 
-![Prototype: Exploratory - Incident Summary](images/prototype7.png)
+![Prototype: Exploratory - Incident Summary](images/prototype2_7.png)
 
 This tab visualises large volume of armed conflict incident summary notes that captures keywords recorded in a word cloud. This is useful to spot changes over time where users do not have to read through all incident summary notes. In addition, an interactive datatable (that is linked to the selection of the word cloud) is provided for users who prefer to explore the dataset.
 
 Figure below shows the UI interactive features in the **Incident Summary** sub-tab.
 
-![](images/prototype7-1.png)
+![](images/prototype2_7-1.png)
 
 Code chunk below shows the simplified version of UI and Server components in R Shiny application for **Incident Summary** sub-tab.
 
@@ -357,7 +358,8 @@ ExploreNetworkrow1 <-  fluidRow(
   plotOutput(), # display network graph
   selectizeInput(), # select event (allows multiple selection)
   selectizeInput(), # select administrative region (allows multiple selection)
-  selectInput() # select year
+  selectInput(), # select year
+  sliderInput() # select frequency of actors' network
 )
 
 ExploreSummaryrow1 <-  fluidRow(

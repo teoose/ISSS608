@@ -19,7 +19,7 @@ execute:
 
 ## 1.1 Project Brief
 
-Take-home exercise 4 is a preliminary work of the final group project - Decoding Chaos. Armed conflicts due to political violence and coordinated attacks targeting innocent civilians, have been on the rise globally. This threatens the public at both physical and psychological levels. A good visual analysis of armed conflicts is essential to help (1) discover armed conflicts trends and (2) conceptualise armed conflict spaces.
+Take-home exercise 4 is a preliminary work of the final group project - Decoding Chaos. Armed conflicts due to political violence and coordinated attacks targeting innocent civilians, have been on the rise globally. This threatens the public at both physical and psychological levels, and raised concerns among the Defense and Security sectors on the urgency to develop effective counter terrorism measures and strategies. A good visual analysis of armed conflicts is essential to help (1) discover armed conflicts trends and (2) conceptualise armed conflict spaces.
 
 The project team consists of three members, and each member will take one of the main prototype modules as follows:
 
@@ -31,7 +31,8 @@ The project team consists of three members, and each member will take one of the
 
 ## 1.2 Project Objectives
 
-The project will be using open-source data from armed conflict events (Armed Conflict Location & Event Data Project (ACLED)). The objective of my assignment is to build a prototype - user interface (UI) design on **Exploratory Data Analysis (Initial & Geospatial)** that provides easy-to-use and insightful visualisation tools that can be suitable for Defence and Security sectors to develop effective counter measures and strategies.
+The project will be using open-source data from armed conflict events (Armed Conflict Location & Event Data Project (ACLED)). The objective of my assignment is to build a prototype - user interface (UI) design on **Exploratory Data Analysis (Initial & Geospatial)** that provides easy-to-use and insightful visualisation tools.
+
 
 ## 1.3 Exploratory Data Analysis
 
