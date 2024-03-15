@@ -262,7 +262,7 @@ The storyboard (in Section 2) facilitates the development of a prototype in R Sh
 
 The proposed layouts and UI features for "**Exploratory"** have been conceptualised into seven sections (or `tabPanel()` in R Shiny Application terms), in which `ExploreSubTabs` will form one of the `tabsetPanel()` in the entire project dashboard as part of UI.
 
-Click here for the [R Shiny Application Prototype](https://isss608-vaa-suanern.shinyapps.io/ShinyExploratoryPrototype/){target="_blank"}
+Click on the [R Shiny Application Prototype](https://isss608-vaa-suanern.shinyapps.io/ShinyExploratoryPrototype/){target="_blank"} to explore its interactive features! Please note that this is not the final project dashboard, but a standalone working module which will be still be improvised.
 
 Code chunk below shows the simplified version of R Shiny Application for **Exploratory** prototype.
 
