@@ -19,8 +19,8 @@ execute:
 
 This assignment is separated into three segments (web pages):
 
-1.  Initial Data Exploratory Analysis (IDEA) – [Click here for IDEA page](https://isss608-ay2024-suanern.netlify.app/take-home_ex/take-home_ex04/take-home_ex04-IDEA.html){target="_blank"}.
-2.  Geospatial Data Exploratory Analysis (GDEA) – [Click here for GDEA page](https://isss608-ay2024-suanern.netlify.app/take-home_ex/take-home_ex04/take-home_ex04-GDEA.html){target="_blank"}.
+1.  Initial Data Exploratory Analysis (IDEA) – [Click here for IDEA page](https://isss608-ay2024-suanern.netlify.app/take-home_ex/take-home_ex04/take-home_ex04-IDEA-2.html){target="_blank"}.
+2.  Geospatial Data Exploratory Analysis (GDEA) – [Click here for GDEA page](https://isss608-ay2024-suanern.netlify.app/take-home_ex/take-home_ex04/take-home_ex04-GDEA-2.html){target="_blank"}.
 3.  Prototype: Exploratory – Current Page
 
 # 2. Storyboard
