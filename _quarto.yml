@@ -71,7 +71,7 @@ website:
           href: "In-class_Ex/In-class_Ex07/In-class_Ex07.html"
         - text: "[9] Modelling, Visualising and Analysing Network Data with R"
           href: "In-class_Ex/In-class_Ex09/In-class_Ex09.html"
-        - text: "{{< fa laptop-code >}} Take-home Exercises"
+      - text: "{{< fa laptop-code >}} Take-home Exercises"
         menu: 
         - text: "[1] Creating data visualisation beyond default"
           href: "Take-home_Ex/Take-home_Ex01/Take-home_Ex01.html"
