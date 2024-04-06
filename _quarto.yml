@@ -13,7 +13,7 @@ website:
       - icon: house-heart
         href: index.qmd      
       - icon: github
-        href: ""
+        href: "https://github.com/teoose/ISSS608"
       - icon: linkedin
         href: "https://www.linkedin.com/in/suanernteo"
     search: true
@@ -89,14 +89,16 @@ website:
         menu: 
         - text: "R Shiny Basic"
           href: "https://isss608-vaa-suanern.shinyapps.io/prototype/"
-        - text: "Decoding Chaos Prototype (Exploratory tab)"
+        - text: "Take-home Exercise 4 - Exploratory (tab) Prototype"
           href: "https://isss608-vaa-suanern.shinyapps.io/ShinyExploratoryPrototype/"
+        - text: "Group Project - Decoding Chaos Prototype"
+          href: "https://group5vaa.shinyapps.io/Decoding-Chaos/"
   page-footer:
     right: 
       - text: "©2024! Designed by TSE!"
     center:
       - icon: github
-        href: "https://www.linkedin.com/in/suanernteo"
+        href: "https://github.com/teoose/ISSS608"
       - icon: linkedin
         href: "https://www.linkedin.com/in/suanernteo"
 format:
